@@ -29,33 +29,22 @@ import 'parser.dart';
 import 'token.dart';
 
 class FunctionContext {
-  final String funcName;
-  final Token? token;
-  final String? breakOnTokenText;
-  final List<GreenNode> infixExistingArguments;
   const FunctionContext({
     required this.funcName,
     this.token,
     required this.breakOnTokenText,
     this.infixExistingArguments = const [],
   });
+  final String funcName;
+  final Token? token;
+  final String? breakOnTokenText;
+  final List<GreenNode> infixExistingArguments;
 }
 
-typedef FunctionHandler<T extends GreenNode> = T Function(
-    TexParser parser, FunctionContext context);
+typedef FunctionHandler<T extends GreenNode> =
+    T Function(TexParser parser, FunctionContext context);
 
 class FunctionSpec<T extends GreenNode> {
-  final int numArgs;
-  final int greediness;
-  final bool allowedInText;
-  final bool allowedInMath;
-  final int numOptionalArgs;
-  final bool infix;
-  final FunctionHandler<T> handler;
-
-  // Has no real usage during parsing. Serves as hint during encoding.
-  final List<Mode?>? argModes;
-
   const FunctionSpec({
     required this.numArgs,
     this.greediness = 1,
@@ -66,6 +55,16 @@ class FunctionSpec<T extends GreenNode> {
     required this.handler,
     this.argModes,
   });
+  final int numArgs;
+  final int greediness;
+  final bool allowedInText;
+  final bool allowedInMath;
+  final int numOptionalArgs;
+  final bool infix;
+  final FunctionHandler<T> handler;
+
+  // Has no real usage during parsing. Serves as hint during encoding.
+  final List<Mode?>? argModes;
 
   int get totalArgs => numArgs + numOptionalArgs;
 }
@@ -84,4 +83,3 @@ final Map<String, FunctionSpec> functions = <String, FunctionSpec>{}
   ..registerFunctions(katexBaseFunctionEntries)
   ..registerFunctions(katexExtFunctionEntries)
   ..registerFunctions(cursorEntries);
-

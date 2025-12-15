@@ -26,10 +26,7 @@ void main() {
     });
 
     test('symbol contanetation', () {
-      const testStrings = [
-        'i\\pi x',
-        'i\\pi\\xi',
-      ];
+      const testStrings = ['i\\pi x', 'i\\pi\\xi'];
       for (final testString in testStrings) {
         expect(recodeTex(testString), testString);
       }
@@ -37,8 +34,10 @@ void main() {
   });
   group('TexCommandEncoderResult', () {
     test('basic spec lookup', () {
-      final result =
-          TexCommandEncodeResult(command: '\\frac', args: <dynamic>[]);
+      final result = TexCommandEncodeResult(
+        command: '\\frac',
+        args: <dynamic>[],
+      );
       expect(result.numArgs, 2);
       expect(result.numOptionalArgs, 0);
       expect(result.argModes, [null, null]);
@@ -46,14 +45,17 @@ void main() {
 
     test('empty math param', () {
       final result = TexCommandEncodeResult(
-          command: '\\frac',
-          args: <dynamic>[EquationRowNode.empty(), EquationRowNode.empty()]);
+        command: '\\frac',
+        args: <dynamic>[EquationRowNode.empty(), EquationRowNode.empty()],
+      );
       expect(result.stringify(TexEncodeConf.mathConf), '\\frac{}{}');
     });
 
     test('single char math param', () {
-      final result =
-          TexCommandEncodeResult(command: '\\frac', args: <dynamic>['1', '2']);
+      final result = TexCommandEncodeResult(
+        command: '\\frac',
+        args: <dynamic>['1', '2'],
+      );
       expect(result.stringify(TexEncodeConf.mathConf), '\\frac{1}{2}');
     });
   });

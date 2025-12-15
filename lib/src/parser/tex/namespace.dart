@@ -25,17 +25,17 @@ import 'parse_error.dart';
 
 class Namespace<T> {
   Namespace(this.builtins, Map<String, T> current)
-      : current = Map.from(current);
+    : current = Map.from(current);
   final Map<String, T> current;
   final Map<String, T> builtins;
   final undefStack = <Map<String, T?>>[];
 
   T? get(String name) {
-    final currentRes = this.current[name];
+    final currentRes = current[name];
     if (currentRes != null) {
       return currentRes;
     }
-    return this.builtins[name];
+    return builtins[name];
   }
 
   void set(String name, T value, {bool global = false}) {
@@ -43,35 +43,37 @@ class Namespace<T> {
       for (final undef in undefStack) {
         undef.remove(name);
       }
-      if (this.undefStack.isNotEmpty) {
-        this.undefStack.last[name] = value;
+      if (undefStack.isNotEmpty) {
+        undefStack.last[name] = value;
       }
     } else {
-      if (this.undefStack.isNotEmpty) {
-        this.undefStack.last[name] = this.current[name];
+      if (undefStack.isNotEmpty) {
+        undefStack.last[name] = current[name];
       }
     }
-    this.current[name] = value;
+    current[name] = value;
   }
 
   bool has(String name) =>
-      this.current.containsKey(name) || this.builtins.containsKey(name);
+      current.containsKey(name) || builtins.containsKey(name);
 
   void beginGroup() {
-    this.undefStack.add({});
+    undefStack.add({});
   }
 
   void endGroup() {
-    if (this.undefStack.isEmpty) {
-      throw ParseException('Unbalanced namespace destruction: attempt '
-          'to pop global namespace; please report this as a bug');
+    if (undefStack.isEmpty) {
+      throw ParseException(
+        'Unbalanced namespace destruction: attempt '
+        'to pop global namespace; please report this as a bug',
+      );
     }
-    final undefs = this.undefStack.removeLast();
+    final undefs = undefStack.removeLast();
     undefs.forEach((key, value) {
       if (value == null) {
-        this.current.remove(key);
+        current.remove(key);
       } else {
-        this.current[key] = value;
+        current[key] = value;
       }
     });
   }

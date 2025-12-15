@@ -11,6 +11,8 @@ import '../syntax_tree.dart';
 ///
 /// Examples: `\underset`
 class OverNode extends SlotableNode<EquationRowNode> {
+  OverNode({required this.base, required this.above, this.stackRel = false});
+
   /// Base where the over node is applied upon.
   final EquationRowNode base;
 
@@ -20,16 +22,12 @@ class OverNode extends SlotableNode<EquationRowNode> {
   /// Special flag for `\stackrel`
   final bool stackRel;
 
-  OverNode({
-    required this.base,
-    required this.above,
-    this.stackRel = false,
-  });
-
   // KaTeX's corresponding code is in /src/functions/utils/assembleSubSup.js
   @override
   BuildResult buildWidget(
-      MathOptions options, List<BuildResult?> childBuildResults) {
+    MathOptions options,
+    List<BuildResult?> childBuildResults,
+  ) {
     final spacing = options.fontMetrics.bigOpSpacing5.cssEm.toLpUnder(options);
     return BuildResult(
       options: options,
@@ -40,10 +38,12 @@ class OverNode extends SlotableNode<EquationRowNode> {
           children: <Widget>[
             // TexBook Rule 13a
             MinDimension(
-              minDepth:
-                  options.fontMetrics.bigOpSpacing3.cssEm.toLpUnder(options),
-              bottomPadding:
-                  options.fontMetrics.bigOpSpacing1.cssEm.toLpUnder(options),
+              minDepth: options.fontMetrics.bigOpSpacing3.cssEm.toLpUnder(
+                options,
+              ),
+              bottomPadding: options.fontMetrics.bigOpSpacing1.cssEm.toLpUnder(
+                options,
+              ),
               child: childBuildResults[1]!.widget,
             ),
             childBuildResults[0]!.widget,
@@ -55,22 +55,18 @@ class OverNode extends SlotableNode<EquationRowNode> {
 
   @override
   List<MathOptions> computeChildOptions(MathOptions options) => [
-        options,
-        options.havingStyle(options.style.sup()),
-      ];
+    options,
+    options.havingStyle(options.style.sup()),
+  ];
 
   @override
   List<EquationRowNode> computeChildren() => [base, above];
 
   @override
-  AtomType get leftType => stackRel
-      ? AtomType.rel
-      : AtomType.ord; // TODO: they should align with binrelclass with base
+  AtomType get leftType => stackRel ? AtomType.rel : AtomType.ord; // TODO: they should align with binrelclass with base
 
   @override
-  AtomType get rightType => stackRel
-      ? AtomType.rel
-      : AtomType.ord; // TODO: they should align with binrelclass with base
+  AtomType get rightType => stackRel ? AtomType.rel : AtomType.ord; // TODO: they should align with binrelclass with base
 
   @override
   bool shouldRebuildWidget(MathOptions oldOptions, MathOptions newOptions) =>
@@ -85,17 +81,16 @@ class OverNode extends SlotableNode<EquationRowNode> {
     ..addAll({
       'base': base.toJson(),
       'above': above.toJson(),
-      if (stackRel != false) 'stackRel': stackRel,
+      if (stackRel) 'stackRel': stackRel,
     });
 
   OverNode copyWith({
     EquationRowNode? base,
     EquationRowNode? above,
     bool? stackRel,
-  }) =>
-      OverNode(
-        base: base ?? this.base,
-        above: above ?? this.above,
-        stackRel: stackRel ?? this.stackRel,
-      );
+  }) => OverNode(
+    base: base ?? this.base,
+    above: above ?? this.above,
+    stackRel: stackRel ?? this.stackRel,
+  );
 }

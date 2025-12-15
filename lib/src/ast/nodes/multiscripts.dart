@@ -12,6 +12,15 @@ import 'symbol.dart';
 /// - Latex:  _     ^
 /// - MathML: msub  msup  mmultiscripts
 class MultiscriptsNode extends SlotableNode<EquationRowNode?> {
+  MultiscriptsNode({
+    this.alignPostscripts = false,
+    required this.base,
+    this.sub,
+    this.sup,
+    this.presub,
+    this.presup,
+  });
+
   /// Whether to align the subscript to the superscript.
   ///
   /// Mimics MathML's mmultiscripts.
@@ -32,31 +41,24 @@ class MultiscriptsNode extends SlotableNode<EquationRowNode?> {
   /// Presuperscript.
   final EquationRowNode? presup;
 
-  MultiscriptsNode({
-    this.alignPostscripts = false,
-    required this.base,
-    this.sub,
-    this.sup,
-    this.presub,
-    this.presup,
-  });
-
   @override
   BuildResult buildWidget(
-          MathOptions options, List<BuildResult?> childBuildResults) =>
-      BuildResult(
-        options: options,
-        widget: Multiscripts(
-          alignPostscripts: alignPostscripts,
-          isBaseCharacterBox: base.flattenedChildList.length == 1 &&
-              base.flattenedChildList[0] is SymbolNode,
-          baseResult: childBuildResults[0]!,
-          subResult: childBuildResults[1],
-          supResult: childBuildResults[2],
-          presubResult: childBuildResults[3],
-          presupResult: childBuildResults[4],
-        ),
-      );
+    MathOptions options,
+    List<BuildResult?> childBuildResults,
+  ) => BuildResult(
+    options: options,
+    widget: Multiscripts(
+      alignPostscripts: alignPostscripts,
+      isBaseCharacterBox:
+          base.flattenedChildList.length == 1 &&
+          base.flattenedChildList[0] is SymbolNode,
+      baseResult: childBuildResults[0]!,
+      subResult: childBuildResults[1],
+      supResult: childBuildResults[2],
+      presubResult: childBuildResults[3],
+      presupResult: childBuildResults[4],
+    ),
+  );
 
   @override
   List<MathOptions> computeChildOptions(MathOptions options) {

@@ -24,16 +24,19 @@
 part of katex_base;
 
 const _phantomEntries = {
-  ['\\phantom', '\\hphantom', '\\vphantom']:
-      FunctionSpec(numArgs: 1, allowedInText: true, handler: _phantomHandler),
+  [r'\phantom', r'\hphantom', r'\vphantom']: FunctionSpec(
+    numArgs: 1,
+    allowedInText: true,
+    handler: _phantomHandler,
+  ),
 };
 
 GreenNode _phantomHandler(TexParser parser, FunctionContext context) {
   final body = parser.parseArgNode(mode: null, optional: false)!;
   return PhantomNode(
     phantomChild: body.wrapWithEquationRow(),
-    zeroHeight: context.funcName == '\\hphantom',
-    zeroDepth: context.funcName == '\\hphantom',
-    zeroWidth: context.funcName == '\\vphantom',
+    zeroHeight: context.funcName == r'\hphantom',
+    zeroDepth: context.funcName == r'\hphantom',
+    zeroWidth: context.funcName == r'\vphantom',
   );
 }

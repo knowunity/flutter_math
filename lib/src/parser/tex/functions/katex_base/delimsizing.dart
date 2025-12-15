@@ -25,127 +25,130 @@ part of katex_base;
 
 const _delimSizingEntries = {
   [
-    '\\bigl',
-    '\\Bigl',
-    '\\biggl',
-    '\\Biggl',
-    '\\bigr',
-    '\\Bigr',
-    '\\biggr',
-    '\\Biggr',
-    '\\bigm',
-    '\\Bigm',
-    '\\biggm',
-    '\\Biggm',
-    '\\big',
-    '\\Big',
-    '\\bigg',
-    '\\Bigg',
-  ]: FunctionSpec(numArgs: 1, handler: _delimSizeHandler),
-  ['\\right']: FunctionSpec(
+    r'\bigl',
+    r'\Bigl',
+    r'\biggl',
+    r'\Biggl',
+    r'\bigr',
+    r'\Bigr',
+    r'\biggr',
+    r'\Biggr',
+    r'\bigm',
+    r'\Bigm',
+    r'\biggm',
+    r'\Biggm',
+    r'\big',
+    r'\Big',
+    r'\bigg',
+    r'\Bigg',
+  ]: FunctionSpec(
+    numArgs: 1,
+    handler: _delimSizeHandler,
+  ),
+  [r'\right']: FunctionSpec(
     numArgs: 1,
     // greediness: 3,
     handler: _rightHandler,
   ),
-  ['\\left']: FunctionSpec(
+  [r'\left']: FunctionSpec(
     numArgs: 1,
     // greediness: 2,
     handler: _leftHandler,
   ),
-  ['\\middle']: FunctionSpec(numArgs: 1, handler: _middleHandler),
+  [r'\middle']: FunctionSpec(numArgs: 1, handler: _middleHandler),
 };
 
 const _delimiterTypes = {
-  '\\bigl': AtomType.open,
-  '\\Bigl': AtomType.open,
-  '\\biggl': AtomType.open,
-  '\\Biggl': AtomType.open,
-  '\\bigr': AtomType.close,
-  '\\Bigr': AtomType.close,
-  '\\biggr': AtomType.close,
-  '\\Biggr': AtomType.close,
-  '\\bigm': AtomType.rel,
-  '\\Bigm': AtomType.rel,
-  '\\biggm': AtomType.rel,
-  '\\Biggm': AtomType.rel,
-  '\\big': AtomType.ord,
-  '\\Big': AtomType.ord,
-  '\\bigg': AtomType.ord,
-  '\\Bigg': AtomType.ord,
+  r'\bigl': AtomType.open,
+  r'\Bigl': AtomType.open,
+  r'\biggl': AtomType.open,
+  r'\Biggl': AtomType.open,
+  r'\bigr': AtomType.close,
+  r'\Bigr': AtomType.close,
+  r'\biggr': AtomType.close,
+  r'\Biggr': AtomType.close,
+  r'\bigm': AtomType.rel,
+  r'\Bigm': AtomType.rel,
+  r'\biggm': AtomType.rel,
+  r'\Biggm': AtomType.rel,
+  r'\big': AtomType.ord,
+  r'\Big': AtomType.ord,
+  r'\bigg': AtomType.ord,
+  r'\Bigg': AtomType.ord,
 };
 
 const _delimiterSizes = {
-  '\\bigl': 1,
-  '\\Bigl': 2,
-  '\\biggl': 3,
-  '\\Biggl': 4,
-  '\\bigr': 1,
-  '\\Bigr': 2,
-  '\\biggr': 3,
-  '\\Biggr': 4,
-  '\\bigm': 1,
-  '\\Bigm': 2,
-  '\\biggm': 3,
-  '\\Biggm': 4,
-  '\\big': 1,
-  '\\Big': 2,
-  '\\bigg': 3,
-  '\\Bigg': 4,
+  r'\bigl': 1,
+  r'\Bigl': 2,
+  r'\biggl': 3,
+  r'\Biggl': 4,
+  r'\bigr': 1,
+  r'\Bigr': 2,
+  r'\biggr': 3,
+  r'\Biggr': 4,
+  r'\bigm': 1,
+  r'\Bigm': 2,
+  r'\biggm': 3,
+  r'\Biggm': 4,
+  r'\big': 1,
+  r'\Big': 2,
+  r'\bigg': 3,
+  r'\Bigg': 4,
 };
 
 const delimiterCommands = [
   '(',
-  '\\lparen',
+  r'\lparen',
   ')',
-  '\\rparen',
+  r'\rparen',
   '[',
-  '\\lbrack',
+  r'\lbrack',
   ']',
-  '\\rbrack',
-  '\\{',
-  '\\lbrace',
-  '\\}',
-  '\\rbrace',
-  '\\lfloor',
-  '\\rfloor',
+  r'\rbrack',
+  r'\{',
+  r'\lbrace',
+  r'\}',
+  r'\rbrace',
+  r'\lfloor',
+  r'\rfloor',
   '\u230a',
   '\u230b',
-  '\\lceil',
-  '\\rceil',
+  r'\lceil',
+  r'\rceil',
   '\u2308',
   '\u2309',
   '<',
   '>',
-  '\\langle',
+  r'\langle',
   '\u27e8',
-  '\\rangle',
+  r'\rangle',
   '\u27e9',
-  '\\lt',
-  '\\gt',
-  '\\lvert',
-  '\\rvert',
-  '\\lVert',
-  '\\rVert',
-  '\\lgroup',
-  '\\rgroup',
+  r'\lt',
+  r'\gt',
+  r'\lvert',
+  r'\rvert',
+  r'\lVert',
+  r'\rVert',
+  r'\lgroup',
+  r'\rgroup',
   '\u27ee',
   '\u27ef',
-  '\\lmoustache',
-  '\\rmoustache',
+  r'\lmoustache',
+  r'\rmoustache',
   '\u23b0',
   '\u23b1',
   '/',
-  '\\backslash',
+  r'\backslash',
   '|',
-  '\\vert',
-  '\\|',
-  '\\Vert',
-  '\\uparrow',
-  '\\Uparrow',
-  '\\downarrow',
-  '\\Downarrow',
-  '\\updownarrow',
-  '\\Updownarrow',
+  r'\vert',
+  r'\|',
+  r'\Vert',
+  r'\uparrow',
+  r'\Uparrow',
+  r'\downarrow',
+  r'\Downarrow',
+  r'\updownarrow',
+  r'\Updownarrow',
   '.',
 ];
 
@@ -155,9 +158,11 @@ final _delimiterSymbols = delimiterCommands
 
 String? _checkDelimiter(GreenNode delim, FunctionContext context) {
   if (delim is SymbolNode) {
-    if (_delimiterSymbols.any((symbol) =>
-        symbol.symbol == delim.symbol &&
-        symbol.variantForm == delim.variantForm)) {
+    if (_delimiterSymbols.any(
+      (symbol) =>
+          symbol.symbol == delim.symbol &&
+          symbol.variantForm == delim.variantForm,
+    )) {
       if (delim.symbol == '<' || delim.symbol == 'lt') {
         return '\u27e8';
       } else if (delim.symbol == '>' || delim.symbol == 'gt') {
@@ -170,7 +175,8 @@ String? _checkDelimiter(GreenNode delim, FunctionContext context) {
     } else {
       // TODO: this throw omitted the token location
       throw ParseException(
-          "Invalid delimiter '${delim.symbol}' after '${context.funcName}'");
+        "Invalid delimiter '${delim.symbol}' after '${context.funcName}'",
+      );
     }
   } else {
     throw ParseException("Invalid delimiter type '${delim.runtimeType}'");
@@ -182,19 +188,22 @@ GreenNode _delimSizeHandler(TexParser parser, FunctionContext context) {
   final delim = _checkDelimiter(delimArg, context);
   return delim == null
       ? SpaceNode(
-          height: Measurement.zero, width: Measurement.zero, mode: Mode.math)
+          height: Measurement.zero,
+          width: Measurement.zero,
+          mode: Mode.math,
+        )
       : SymbolNode(
           symbol: delim,
           overrideAtomType: _delimiterTypes[context.funcName],
           overrideFont: FontOptions(
-              fontFamily: 'Size${_delimiterSizes[context.funcName]}'),
+            fontFamily: 'Size${_delimiterSizes[context.funcName]}',
+          ),
         );
 }
 
 class _LeftRightRightNode extends TemporaryNode {
-  final String? delim;
-
   _LeftRightRightNode({this.delim});
+  final String? delim;
 }
 
 /// KaTeX's \color command will affect the right delimiter.
@@ -203,9 +212,7 @@ class _LeftRightRightNode extends TemporaryNode {
 /// better. KaTeX's solution is messy.
 GreenNode _rightHandler(TexParser parser, FunctionContext context) {
   final delimArg = parser.parseArgNode(mode: Mode.math, optional: false)!;
-  return _LeftRightRightNode(
-    delim: _checkDelimiter(delimArg, context),
-  );
+  return _LeftRightRightNode(delim: _checkDelimiter(delimArg, context));
 }
 
 GreenNode _leftHandler(TexParser parser, FunctionContext context) {
@@ -214,10 +221,10 @@ GreenNode _leftHandler(TexParser parser, FunctionContext context) {
   // Parse out the implicit body
   ++parser.leftrightDepth;
   // parseExpression stops before '\\right'
-  final body = parser.parseExpression(breakOnInfix: false);
+  final body = parser.parseExpression();
   --parser.leftrightDepth;
   // Check the next token
-  parser.expect('\\right', consume: false);
+  parser.expect(r'\right', consume: false);
   // Use parseArgNode instead of parseFunction like KaTeX
   final rightArg = parser.parseFunction(null, null, null);
   final right = assertNodeType<_LeftRightRightNode>(rightArg);
@@ -243,9 +250,8 @@ GreenNode _leftHandler(TexParser parser, FunctionContext context) {
 }
 
 class _MiddleNode extends TemporaryNode {
-  final String? delim;
-
   _MiddleNode({this.delim});
+  final String? delim;
 }
 
 /// Middle can only appear directly between \left and \right. Wrapping \middle
@@ -255,12 +261,12 @@ GreenNode _middleHandler(TexParser parser, FunctionContext context) {
   final delimArg = parser.parseArgNode(mode: Mode.math, optional: false)!;
   final delim = _checkDelimiter(delimArg, context);
   if (parser.leftrightDepth <= 0) {
-    throw ParseException('\\middle without preceding \\left');
+    throw ParseException(r'\middle without preceding \left');
   }
   final contexts = parser.argParsingContexts.toList(growable: false);
   final lastContext = contexts[contexts.length - 2];
-  if (lastContext.funcName != '\\left') {
-    throw ParseException('\\middle must be within \\left and \\right');
+  if (lastContext.funcName != r'\left') {
+    throw ParseException(r'\middle must be within \left and \right');
   }
 
   return _MiddleNode(delim: delim);

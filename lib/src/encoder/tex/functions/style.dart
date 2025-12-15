@@ -11,7 +11,7 @@ EncodeResult _optionsDiffEncode(OptionsDiff diff, List<dynamic> children) {
   if (diff.size != null) {
     final sizeCommand = _sizeCommands[diff.size];
     res = TexModeCommandEncodeResult(
-      command: sizeCommand ?? '\\tiny',
+      command: sizeCommand ?? r'\tiny',
       children: <dynamic>[res],
     );
     if (sizeCommand == null) {
@@ -52,10 +52,7 @@ EncodeResult _optionsDiffEncode(OptionsDiff diff, List<dynamic> children) {
         res,
       );
     } else {
-      res = TexCommandEncodeResult(
-        command: command,
-        args: <dynamic>[res],
-      );
+      res = TexCommandEncodeResult(command: command, args: <dynamic>[res]);
     }
   }
 
@@ -71,15 +68,12 @@ EncodeResult _optionsDiffEncode(OptionsDiff diff, List<dynamic> children) {
         res,
       );
     } else {
-      res = TexCommandEncodeResult(
-        command: command,
-        args: <dynamic>[res],
-      );
+      res = TexCommandEncodeResult(command: command, args: <dynamic>[res]);
     }
   }
   if (diff.color != null) {
     res = TexCommandEncodeResult(
-      command: '\\textcolor',
+      command: r'\textcolor',
       args: <dynamic>[
         '#${diff.color!.value.toRadixString(16).padLeft(6, '0')}',
         res,
@@ -90,22 +84,22 @@ EncodeResult _optionsDiffEncode(OptionsDiff diff, List<dynamic> children) {
 }
 
 const _styleCommands = {
-  MathStyle.display: '\\displaystyle',
-  MathStyle.text: '\\textstyle',
-  MathStyle.script: '\\scriptstyle',
-  MathStyle.scriptscript: '\\scriptscriptstyle'
+  MathStyle.display: r'\displaystyle',
+  MathStyle.text: r'\textstyle',
+  MathStyle.script: r'\scriptstyle',
+  MathStyle.scriptscript: r'\scriptscriptstyle',
 };
 
 const _sizeCommands = {
-  MathSize.tiny: '\\tiny',
-  MathSize.size2: '\\tiny',
-  MathSize.scriptsize: '\\scriptsize',
-  MathSize.footnotesize: '\\footnotesize',
-  MathSize.small: '\\small',
-  MathSize.normalsize: '\\normalsize',
-  MathSize.large: '\\large',
-  MathSize.Large: '\\Large',
-  MathSize.LARGE: '\\LARGE',
-  MathSize.huge: '\\huge',
-  MathSize.HUGE: '\\HUGE',
+  MathSize.tiny: r'\tiny',
+  MathSize.size2: r'\tiny',
+  MathSize.scriptsize: r'\scriptsize',
+  MathSize.footnotesize: r'\footnotesize',
+  MathSize.small: r'\small',
+  MathSize.normalsize: r'\normalsize',
+  MathSize.large: r'\large',
+  MathSize.Large: r'\Large',
+  MathSize.LARGE: r'\LARGE',
+  MathSize.huge: r'\huge',
+  MathSize.HUGE: r'\HUGE',
 };

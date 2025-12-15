@@ -3,7 +3,7 @@
 /// Please refer to README for usage.
 library flutter_math_fork;
 
-export 'src/ast/options.dart' show MathOptions, FontOptions;
+export 'src/ast/options.dart' show FontOptions, MathOptions;
 export 'src/ast/size.dart' show MathSize;
 export 'src/ast/style.dart' show MathStyle;
 export 'src/encoder/exception.dart';

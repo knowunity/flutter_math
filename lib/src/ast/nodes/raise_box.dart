@@ -7,27 +7,25 @@ import '../syntax_tree.dart';
 ///
 /// Example: `\raisebox`
 class RaiseBoxNode extends SlotableNode<EquationRowNode> {
+  RaiseBoxNode({required this.body, required this.dy});
+
   /// Child to raise.
   final EquationRowNode body;
 
   /// Vertical displacement.
   final Measurement dy;
 
-  RaiseBoxNode({
-    required this.body,
-    required this.dy,
-  });
-
   @override
   BuildResult buildWidget(
-          MathOptions options, List<BuildResult?> childBuildResults) =>
-      BuildResult(
-        options: options,
-        widget: ShiftBaseline(
-          offset: dy.toLpUnder(options),
-          child: childBuildResults[0]!.widget,
-        ),
-      );
+    MathOptions options,
+    List<BuildResult?> childBuildResults,
+  ) => BuildResult(
+    options: options,
+    widget: ShiftBaseline(
+      offset: dy.toLpUnder(options),
+      child: childBuildResults[0]!.widget,
+    ),
+  );
 
   @override
   List<MathOptions> computeChildOptions(MathOptions options) => [options];
@@ -50,18 +48,9 @@ class RaiseBoxNode extends SlotableNode<EquationRowNode> {
       copyWith(body: newChildren[0]);
 
   @override
-  Map<String, Object?> toJson() => super.toJson()
-    ..addAll({
-      'body': body.toJson(),
-      'dy': dy.toString(),
-    });
+  Map<String, Object?> toJson() =>
+      super.toJson()..addAll({'body': body.toJson(), 'dy': dy.toString()});
 
-  RaiseBoxNode copyWith({
-    EquationRowNode? body,
-    Measurement? dy,
-  }) =>
-      RaiseBoxNode(
-        body: body ?? this.body,
-        dy: dy ?? this.dy,
-      );
+  RaiseBoxNode copyWith({EquationRowNode? body, Measurement? dy}) =>
+      RaiseBoxNode(body: body ?? this.body, dy: dy ?? this.dy);
 }

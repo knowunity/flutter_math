@@ -25,22 +25,13 @@ import '../../widgets/exception.dart';
 import 'token.dart';
 
 class ParseException implements FlutterMathException {
-  /// Nullable
-  int? position;
-  String message;
-
-  String get messageWithType => 'Parser Error: $message';
-
-  /// Nullable
-  Token? token;
-
-  ParseException(String message, [this.token]) : message = '$message' {
+  ParseException(this.message, [this.token]) {
     final loc = token?.loc;
     if (loc != null && loc.start <= loc.end) {
       final input = loc.lexer.input;
 
       final start = loc.start;
-      this.position = start;
+      position = start;
       final end = loc.end;
       if (start == input.length) {
         message = '$message at end of input: ';
@@ -50,7 +41,7 @@ class ParseException implements FlutterMathException {
 
       final underlined = input
           .substring(start, end)
-          .replaceAllMapped(RegExp(r'[^]'), (match) => '${match[0]}\u0332');
+          .replaceAllMapped(RegExp('[^]'), (match) => '${match[0]}\u0332');
       if (start > 15) {
         message = '$message…${input.substring(start - 15, start)}$underlined';
       } else {
@@ -63,4 +54,15 @@ class ParseException implements FlutterMathException {
       }
     }
   }
+
+  /// Nullable
+  int? position;
+  @override
+  String message;
+
+  @override
+  String get messageWithType => 'Parser Error: $message';
+
+  /// Nullable
+  Token? token;
 }

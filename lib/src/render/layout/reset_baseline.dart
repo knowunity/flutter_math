@@ -2,12 +2,12 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 class ResetBaseline extends SingleChildRenderObjectWidget {
-  final double height;
   const ResetBaseline({
-    Key? key,
+    super.key,
     required this.height,
-    required Widget child,
-  }) : super(key: key, child: child);
+    required Widget super.child,
+  });
+  final double height;
 
   @override
   RenderResetBaseline createRenderObject(BuildContext context) =>
@@ -15,14 +15,15 @@ class ResetBaseline extends SingleChildRenderObjectWidget {
 
   @override
   void updateRenderObject(
-          BuildContext context, RenderResetBaseline renderObject) =>
-      renderObject..height = height;
+    BuildContext context,
+    RenderResetBaseline renderObject,
+  ) => renderObject..height = height;
 }
 
 class RenderResetBaseline extends RenderProxyBox {
   RenderResetBaseline({required double height, RenderBox? child})
-      : _height = height,
-        super(child);
+    : _height = height,
+      super(child);
 
   double get height => _height;
   double _height;

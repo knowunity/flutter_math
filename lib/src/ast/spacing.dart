@@ -61,23 +61,14 @@ const Map<AtomType, Map<AtomType, Measurement>> _spacings = {
 };
 
 const Map<AtomType, Map<AtomType, Measurement>> _tightSpacings = {
-  AtomType.ord: {
-    AtomType.op: thinspace,
-  },
-  AtomType.op: {
-    AtomType.ord: thinspace,
-    AtomType.op: thinspace,
-  },
+  AtomType.ord: {AtomType.op: thinspace},
+  AtomType.op: {AtomType.ord: thinspace, AtomType.op: thinspace},
   AtomType.bin: {},
   AtomType.rel: {},
   AtomType.open: {},
-  AtomType.close: {
-    AtomType.op: thinspace,
-  },
+  AtomType.close: {AtomType.op: thinspace},
   AtomType.punct: {},
-  AtomType.inner: {
-    AtomType.op: thinspace,
-  },
+  AtomType.inner: {AtomType.op: thinspace},
   AtomType.spacing: {},
 };
 

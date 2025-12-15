@@ -13,9 +13,6 @@ EncodeResult _stretchyOpEncoder(GreenNode node) {
         )
       : TexCommandEncodeResult(
           command: command,
-          args: <dynamic>[
-            arrowNode.above,
-            arrowNode.below,
-          ],
+          args: <dynamic>[arrowNode.above, arrowNode.below],
         );
 }

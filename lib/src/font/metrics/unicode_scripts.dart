@@ -1,10 +1,7 @@
 class Script {
+  const Script({required this.name, required this.blocks});
   final String name;
   final List<List<int>> blocks;
-  const Script({
-    required this.name,
-    required this.blocks,
-  });
 }
 
 const Map<String, List<List<int>>> scriptData = {
@@ -19,7 +16,7 @@ const Map<String, List<List<int>>> scriptData = {
   // A Cyrillic subset used to be supported as explicitly defined
   // symbols in symbols.js
   'cyrillic': [
-    [0x0400, 0x04ff]
+    [0x0400, 0x04ff],
   ],
 
   // The Brahmic scripts of South and Southeast Asia
@@ -38,11 +35,11 @@ const Map<String, List<List<int>>> scriptData = {
   // Tibetan (0F00–0FFF)
   // Myanmar (1000–109F)
   'brahmic': [
-    [0x0900, 0x109F]
+    [0x0900, 0x109F],
   ],
 
   'georgian': [
-    [0x10A0, 0x10ff]
+    [0x10A0, 0x10ff],
   ],
 
   // Chinese and Japanese.
@@ -56,12 +53,13 @@ const Map<String, List<List<int>>> scriptData = {
 
   // Korean
   'hangul': [
-    [0xAC00, 0xD7AF]
+    [0xAC00, 0xD7AF],
   ],
 };
 
-final allBlocks =
-    scriptData.entries.expand((entry) => entry.value).toList(growable: false);
+final allBlocks = scriptData.entries
+    .expand((entry) => entry.value)
+    .toList(growable: false);
 
 bool supportedCodepoint(int codepoint) =>
     allBlocks.any((block) => codepoint >= block[0] && codepoint <= block[1]);

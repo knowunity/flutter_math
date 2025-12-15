@@ -7,39 +7,38 @@ import '../syntax_tree.dart';
 ///
 /// Examples: `\sin`, `\lim`, `\operatorname`
 class FunctionNode extends SlotableNode<EquationRowNode> {
+  FunctionNode({required this.functionName, required this.argument});
+
   /// Name of the function.
   final EquationRowNode functionName;
 
   /// Argument of the function.
   final EquationRowNode argument;
 
-  FunctionNode({
-    required this.functionName,
-    required this.argument,
-  });
-
   @override
   BuildResult buildWidget(
-          MathOptions options, List<BuildResult?> childBuildResults) =>
-      BuildResult(
-        options: options,
-        widget: Line(children: [
-          LineElement(
-            trailingMargin:
-                getSpacingSize(AtomType.op, argument.leftType, options.style)
-                    .toLpUnder(options),
-            child: childBuildResults[0]!.widget,
-          ),
-          LineElement(
-            trailingMargin: 0.0,
-            child: childBuildResults[1]!.widget,
-          ),
-        ]),
-      );
+    MathOptions options,
+    List<BuildResult?> childBuildResults,
+  ) => BuildResult(
+    options: options,
+    widget: Line(
+      children: [
+        LineElement(
+          trailingMargin: getSpacingSize(
+            AtomType.op,
+            argument.leftType,
+            options.style,
+          ).toLpUnder(options),
+          child: childBuildResults[0]!.widget,
+        ),
+        LineElement(child: childBuildResults[1]!.widget),
+      ],
+    ),
+  );
 
   @override
   List<MathOptions> computeChildOptions(MathOptions options) =>
-      List.filled(2, options, growable: false);
+      List.filled(2, options);
 
   @override
   List<EquationRowNode> computeChildren() => [functionName, argument];
@@ -68,9 +67,8 @@ class FunctionNode extends SlotableNode<EquationRowNode> {
   FunctionNode copyWith({
     EquationRowNode? functionName,
     EquationRowNode? argument,
-  }) =>
-      FunctionNode(
-        functionName: functionName ?? this.functionName,
-        argument: argument ?? this.argument,
-      );
+  }) => FunctionNode(
+    functionName: functionName ?? this.functionName,
+    argument: argument ?? this.argument,
+  );
 }

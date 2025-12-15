@@ -24,7 +24,7 @@
 part of katex_base;
 
 const _crEntries = {
-  ['\\cr', '\\newline']: FunctionSpec(
+  [r'\cr', r'\newline']: FunctionSpec(
     numArgs: 0,
     numOptionalArgs: 1,
     allowedInText: true,
@@ -33,26 +33,23 @@ const _crEntries = {
 };
 
 class CrNode extends TemporaryNode {
+  CrNode({required this.newLine, required this.newRow, this.size});
   final bool newLine;
   final bool newRow;
   final Measurement? size;
-  CrNode({
-    required this.newLine,
-    required this.newRow,
-    this.size,
-  });
 }
 
 GreenNode _crHandler(TexParser parser, FunctionContext context) {
   final size = parser.parseArgSize(optional: true);
-  final newRow = context.funcName == '\\cr';
+  final newRow = context.funcName == r'\cr';
   var newLine = false;
   if (!newRow) {
     if (parser.settings.displayMode &&
         parser.settings.useStrictBehavior(
-            'newLineInDisplayMode',
-            'In LaTeX, \\\\ or \\newline '
-                'does nothing in display mode')) {
+          'newLineInDisplayMode',
+          r'In LaTeX, \\ or \newline '
+              'does nothing in display mode',
+        )) {
       newLine = false;
     } else {
       newLine = true;

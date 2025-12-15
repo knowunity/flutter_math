@@ -45,6 +45,18 @@ enum Strict {
 
 /// Settings for [TexParser]
 class TexParserSettings {
+  const TexParserSettings({
+    this.displayMode = false,
+    this.throwOnError = true,
+    this.macros = const {},
+    this.maxExpand = 1000,
+    Strict strict = Strict.warn,
+    this.strictFun,
+    this.globalGroup = false,
+    this.colorIsTextColor = false,
+  }) : strict = strictFun == null ? strict : Strict.function
+  //: assert(strict != Strict.function || strictFun != null) // This line causes analyzer error
+  ;
   final bool displayMode; // TODO
   final bool throwOnError; // TODO
 
@@ -68,19 +80,6 @@ class TexParserSettings {
   /// See https://katex.org/docs/options.html
   final bool colorIsTextColor;
 
-  const TexParserSettings({
-    this.displayMode = false,
-    this.throwOnError = true,
-    this.macros = const {},
-    this.maxExpand = 1000,
-    Strict strict = Strict.warn,
-    this.strictFun,
-    this.globalGroup = false,
-    this.colorIsTextColor = false,
-  }) : this.strict = strictFun == null ? strict : Strict.function
-  //: assert(strict != Strict.function || strictFun != null) // This line causes analyzer error
-  ;
-
   void reportNonstrict(String errorCode, String errorMsg, [Token? token]) {
     final strict = this.strict != Strict.function
         ? this.strict
@@ -90,16 +89,20 @@ class TexParserSettings {
         return;
       case Strict.error:
         throw ParseException(
-            "LaTeX-incompatible input and strict mode is set to 'error': "
-            '$errorMsg [$errorCode]',
-            token);
+          "LaTeX-incompatible input and strict mode is set to 'error': "
+          '$errorMsg [$errorCode]',
+          token,
+        );
       case Strict.warn:
-        warn("LaTeX-incompatible input and strict mode is set to 'warn': "
-            '$errorMsg [$errorCode]');
-        break;
-      default:
-        warn('LaTeX-incompatible input and strict mode is set to '
-            "unrecognized '$strict': $errorMsg [$errorCode]");
+        warn(
+          "LaTeX-incompatible input and strict mode is set to 'warn': "
+          '$errorMsg [$errorCode]',
+        );
+      case Strict.function:
+        warn(
+          'LaTeX-incompatible input and strict mode is set to '
+          "unrecognized '$strict': $errorMsg [$errorCode]",
+        );
     }
   }
 
@@ -118,12 +121,16 @@ class TexParserSettings {
       case Strict.error:
         return true;
       case Strict.warn:
-        warn("LaTeX-incompatible input and strict mode is set to 'warn': "
-            '$errorMsg [$errorCode]');
+        warn(
+          "LaTeX-incompatible input and strict mode is set to 'warn': "
+          '$errorMsg [$errorCode]',
+        );
         return false;
-      default:
-        warn('LaTeX-incompatible input and strict mode is set to '
-            "unrecognized '$strict': $errorMsg [$errorCode]");
+      case Strict.function:
+        warn(
+          'LaTeX-incompatible input and strict mode is set to '
+          "unrecognized '$strict': $errorMsg [$errorCode]",
+        );
         return false;
     }
   }

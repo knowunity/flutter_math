@@ -3,23 +3,22 @@ import 'dart:math' as math;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
-import '../utils/render_box_offset.dart';
 import '../utils/render_box_layout.dart';
+import '../utils/render_box_offset.dart';
 
 class MinDimension extends SingleChildRenderObjectWidget {
-  final double minHeight;
-  final double minDepth;
-  final double topPadding;
-  final double bottomPadding;
-
   const MinDimension({
-    Key? key,
+    super.key,
     this.minHeight = 0,
     this.minDepth = 0,
     this.topPadding = 0,
     this.bottomPadding = 0,
-    required Widget child,
-  }) : super(key: key, child: child);
+    required Widget super.child,
+  });
+  final double minHeight;
+  final double minDepth;
+  final double topPadding;
+  final double bottomPadding;
 
   @override
   RenderMinDimension createRenderObject(BuildContext context) =>
@@ -32,12 +31,13 @@ class MinDimension extends SingleChildRenderObjectWidget {
 
   @override
   void updateRenderObject(
-          BuildContext context, RenderMinDimension renderObject) =>
-      renderObject
-        ..minHeight = minHeight
-        ..minDepth = minDepth
-        ..topPadding = topPadding
-        ..bottomPadding = bottomPadding;
+    BuildContext context,
+    RenderMinDimension renderObject,
+  ) => renderObject
+    ..minHeight = minHeight
+    ..minDepth = minDepth
+    ..topPadding = topPadding
+    ..bottomPadding = bottomPadding;
 }
 
 class RenderMinDimension extends RenderShiftedBox {
@@ -47,11 +47,11 @@ class RenderMinDimension extends RenderShiftedBox {
     double minDepth = 0,
     double topPadding = 0,
     double bottomPadding = 0,
-  })  : _minHeight = minHeight,
-        _minDepth = minDepth,
-        _topPadding = topPadding,
-        _bottomPadding = bottomPadding,
-        super(child);
+  }) : _minHeight = minHeight,
+       _minDepth = minDepth,
+       _topPadding = topPadding,
+       _bottomPadding = bottomPadding,
+       super(child);
 
   double get minHeight => _minHeight;
   double _minHeight;
@@ -91,17 +91,17 @@ class RenderMinDimension extends RenderShiftedBox {
 
   @override
   double computeMinIntrinsicHeight(double width) => math.max(
-        minHeight + minDepth,
-        super.computeMinIntrinsicHeight(width) + topPadding + bottomPadding,
-      );
+    minHeight + minDepth,
+    super.computeMinIntrinsicHeight(width) + topPadding + bottomPadding,
+  );
 
   @override
   double computeMaxIntrinsicHeight(double width) => math.max(
-        minHeight + minDepth,
-        super.computeMaxIntrinsicHeight(width) + topPadding + bottomPadding,
-      );
+    minHeight + minDepth,
+    super.computeMaxIntrinsicHeight(width) + topPadding + bottomPadding,
+  );
 
-  var distanceToBaseline = 0.0;
+  double distanceToBaseline = 0;
 
   @override
   double computeDistanceToActualBaseline(TextBaseline baseline) =>
@@ -116,14 +116,12 @@ class RenderMinDimension extends RenderShiftedBox {
     size = _computeLayout(constraints, dry: false);
   }
 
-  Size _computeLayout(
-    BoxConstraints constraints, {
-    bool dry = true,
-  }) {
+  Size _computeLayout(BoxConstraints constraints, {bool dry = true}) {
     final child = this.child!;
     final childSize = child.getLayoutSize(constraints, dry: dry);
-    final childHeight =
-        dry ? 0 : child.getDistanceToBaseline(TextBaseline.alphabetic)!;
+    final childHeight = dry
+        ? 0
+        : child.getDistanceToBaseline(TextBaseline.alphabetic)!;
     final childDepth = childSize.height - childHeight;
     final width = childSize.width;
 

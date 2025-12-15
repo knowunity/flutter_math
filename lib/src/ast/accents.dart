@@ -1,7 +1,4 @@
 class AccentRenderConfig {
-  final String? overChar;
-  final String? overImageName;
-  final String? underImageName;
   // final bool alwaysShifty;
   const AccentRenderConfig({
     this.overChar,
@@ -9,6 +6,9 @@ class AccentRenderConfig {
     this.underImageName,
     // this.alwaysShifty = false,
   });
+  final String? overChar;
+  final String? overImageName;
+  final String? underImageName;
 }
 
 const accentRenderConfigs = {
@@ -85,13 +85,9 @@ const accentRenderConfigs = {
     underImageName: 'underleftrightarrow',
   ),
 
-  '\u23de': AccentRenderConfig(
-    overImageName: 'overbrace',
-  ),
+  '\u23de': AccentRenderConfig(overImageName: 'overbrace'),
 
-  '\u23df': AccentRenderConfig(
-    underImageName: 'underbrace',
-  ),
+  '\u23df': AccentRenderConfig(underImageName: 'underbrace'),
 
   ...katexCompatibleAccents,
 };
@@ -102,9 +98,10 @@ const katexCompatibleAccents = {
     overImageName: 'Overrightarrow',
   ),
   '\u23e0': AccentRenderConfig(
-      // '\u0311'
-      overImageName: 'overgroup',
-      underImageName: 'undergroup'),
+    // '\u0311'
+    overImageName: 'overgroup',
+    underImageName: 'undergroup',
+  ),
   // '\u': AccentRenderConfig(
   //   overImageName: 'overlinesegment',
   //   underImageName: 'underlinesegment',

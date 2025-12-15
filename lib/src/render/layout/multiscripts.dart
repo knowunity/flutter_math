@@ -21,17 +21,11 @@ import 'custom_layout.dart';
 /// This should also be a great showcase for [MultiChildLayoutParentData],
 /// but the lack of generic ([Object] type) is undesirable.
 
-enum _ScriptPos {
-  base,
-  sub,
-  sup,
-  presub,
-  presup,
-}
+enum _ScriptPos { base, sub, sup, presub, presup }
 
 class Multiscripts extends StatelessWidget {
   const Multiscripts({
-    Key? key,
+    super.key,
     this.alignPostscripts = false,
     required this.isBaseCharacterBox,
     required this.baseResult,
@@ -39,7 +33,7 @@ class Multiscripts extends StatelessWidget {
     this.supResult,
     this.presubResult,
     this.presupResult,
-  }) : super(key: key);
+  });
 
   final bool alignPostscripts;
   final bool isBaseCharacterBox;
@@ -52,58 +46,33 @@ class Multiscripts extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => CustomLayout(
-        delegate: MultiscriptsLayoutDelegate(
-          alignPostscripts: alignPostscripts,
-          italic: baseResult.italic,
-          isBaseCharacterBox: isBaseCharacterBox,
-          baseOptions: baseResult.options,
-          subOptions: subResult?.options,
-          supOptions: supResult?.options,
-          presubOptions: presubResult?.options,
-          presupOptions: presupResult?.options,
-        ),
-        children: <Widget>[
-          CustomLayoutId(
-            id: _ScriptPos.base,
-            child: baseResult.widget,
-          ),
-          if (subResult != null)
-            CustomLayoutId(
-              id: _ScriptPos.sub,
-              child: subResult!.widget,
-            ),
-          if (supResult != null)
-            CustomLayoutId(
-              id: _ScriptPos.sup,
-              child: supResult!.widget,
-            ),
-          if (presubResult != null)
-            CustomLayoutId(
-              id: _ScriptPos.presub,
-              child: presubResult!.widget,
-            ),
-          if (presupResult != null)
-            CustomLayoutId(
-              id: _ScriptPos.presup,
-              child: presupResult!.widget,
-            ),
-        ],
-      );
+    delegate: MultiscriptsLayoutDelegate(
+      alignPostscripts: alignPostscripts,
+      italic: baseResult.italic,
+      isBaseCharacterBox: isBaseCharacterBox,
+      baseOptions: baseResult.options,
+      subOptions: subResult?.options,
+      supOptions: supResult?.options,
+      presubOptions: presubResult?.options,
+      presupOptions: presupResult?.options,
+    ),
+    children: <Widget>[
+      CustomLayoutId(id: _ScriptPos.base, child: baseResult.widget),
+      if (subResult != null)
+        CustomLayoutId(id: _ScriptPos.sub, child: subResult!.widget),
+      if (supResult != null)
+        CustomLayoutId(id: _ScriptPos.sup, child: supResult!.widget),
+      if (presubResult != null)
+        CustomLayoutId(id: _ScriptPos.presub, child: presubResult!.widget),
+      if (presupResult != null)
+        CustomLayoutId(id: _ScriptPos.presup, child: presupResult!.widget),
+    ],
+  );
 }
 
 // Superscript and subscripts are handled in the TeXbook on page
 // 445-446, rules 18(a-f).
 class MultiscriptsLayoutDelegate extends IntrinsicLayoutDelegate<_ScriptPos> {
-  final bool alignPostscripts;
-  final double italic;
-
-  final bool isBaseCharacterBox;
-  final MathOptions baseOptions;
-  final MathOptions? subOptions;
-  final MathOptions? supOptions;
-  final MathOptions? presubOptions;
-  final MathOptions? presupOptions;
-
   MultiscriptsLayoutDelegate({
     required this.alignPostscripts,
     required this.italic,
@@ -114,13 +83,23 @@ class MultiscriptsLayoutDelegate extends IntrinsicLayoutDelegate<_ScriptPos> {
     required this.presubOptions,
     required this.presupOptions,
   });
+  final bool alignPostscripts;
+  final double italic;
 
-  var baselineDistance = 0.0;
+  final bool isBaseCharacterBox;
+  final MathOptions baseOptions;
+  final MathOptions? subOptions;
+  final MathOptions? supOptions;
+  final MathOptions? presubOptions;
+  final MathOptions? presupOptions;
+
+  double baselineDistance = 0;
 
   @override
   double computeDistanceToActualBaseline(
-          TextBaseline baseline, Map<_ScriptPos, RenderBox> childrenTable) =>
-      baselineDistance;
+    TextBaseline baseline,
+    Map<_ScriptPos, RenderBox> childrenTable,
+  ) => baselineDistance;
   // // This will trigger Flutter assertion error
   // nPlus(
   //   childrenTable[_ScriptPos.base].offset.dy,
@@ -143,10 +122,12 @@ class MultiscriptsLayoutDelegate extends IntrinsicLayoutDelegate<_ScriptPos> {
 
     final extendedSubSize = subSize != null ? subSize + scriptSpace : 0.0;
     final extendedSupSize = supSize != null ? supSize + scriptSpace : 0.0;
-    final extendedPresubSize =
-        presubSize != null ? presubSize + scriptSpace : 0.0;
-    final extendedPresupSize =
-        presupSize != null ? presupSize + scriptSpace : 0.0;
+    final extendedPresubSize = presubSize != null
+        ? presubSize + scriptSpace
+        : 0.0;
+    final extendedPresupSize = presupSize != null
+        ? presupSize + scriptSpace
+        : 0.0;
 
     final postscriptWidth = math.max(
       extendedSupSize,
@@ -251,11 +232,10 @@ class MultiscriptsLayoutDelegate extends IntrinsicLayoutDelegate<_ScriptPos> {
 }
 
 class _ScriptUvConf {
+  const _ScriptUvConf(this.fullHeight, this.baseline, this.options);
   final double fullHeight;
   final double baseline;
   final MathOptions options;
-
-  const _ScriptUvConf(this.fullHeight, this.baseline, this.options);
 }
 
 Tuple2<double, double> calculateUV({
@@ -294,18 +274,16 @@ Tuple2<double, double> calculateUV({
   } else if (sup != null) {
     // Rule 18c
     final dx = sup.fullHeight - sup.baseline;
-    final p = (baseOptions.style == MathStyle.display
-            ? metrics.sup1
-            : (baseOptions.style.cramped ? metrics.sup3 : metrics.sup2))
-        .cssEm
-        .toLpUnder(baseOptions);
+    final p =
+        (baseOptions.style == MathStyle.display
+                ? metrics.sup1
+                : (baseOptions.style.cramped ? metrics.sup3 : metrics.sup2))
+            .cssEm
+            .toLpUnder(baseOptions);
 
     u = math.max(
       u,
-      math.max(
-        p,
-        dx + 0.25 * metrics.xHeight.cssEm.toLpUnder(baseOptions),
-      ),
+      math.max(p, dx + 0.25 * metrics.xHeight.cssEm.toLpUnder(baseOptions)),
     );
     // Rule 18d
     if (sub != null) {

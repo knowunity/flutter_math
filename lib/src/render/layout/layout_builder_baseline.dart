@@ -6,18 +6,12 @@ class LayoutBuilderPreserveBaseline
   /// Creates a widget that defers its building until layout.
   ///
   /// The [builder] argument must not be null.
-  const LayoutBuilderPreserveBaseline({
-    Key? key,
-    required LayoutWidgetBuilder builder,
-  }) : super(key: key, builder: builder);
-
-  @override
-  LayoutWidgetBuilder get builder => super.builder;
+  const LayoutBuilderPreserveBaseline({super.key, required super.builder});
 
   @override
   _RenderLayoutBuilderPreserveBaseline createRenderObject(
-          BuildContext context) =>
-      _RenderLayoutBuilderPreserveBaseline();
+    BuildContext context,
+  ) => _RenderLayoutBuilderPreserveBaseline();
 }
 
 class _RenderLayoutBuilderPreserveBaseline extends RenderBox
@@ -32,25 +26,25 @@ class _RenderLayoutBuilderPreserveBaseline extends RenderBox
   @override
   double computeMinIntrinsicWidth(double height) {
     assert(_debugThrowIfNotCheckingIntrinsics());
-    return 0.0;
+    return 0;
   }
 
   @override
   double computeMaxIntrinsicWidth(double height) {
     assert(_debugThrowIfNotCheckingIntrinsics());
-    return 0.0;
+    return 0;
   }
 
   @override
   double computeMinIntrinsicHeight(double width) {
     assert(_debugThrowIfNotCheckingIntrinsics());
-    return 0.0;
+    return 0;
   }
 
   @override
   double computeMaxIntrinsicHeight(double width) {
     assert(_debugThrowIfNotCheckingIntrinsics());
-    return 0.0;
+    return 0;
   }
 
   @override
@@ -82,11 +76,12 @@ class _RenderLayoutBuilderPreserveBaseline extends RenderBox
     assert(() {
       if (!RenderObject.debugCheckingIntrinsics) {
         throw FlutterError(
-            'LayoutBuilder does not support returning intrinsic dimensions.\n'
-            'Calculating the intrinsic dimensions would require '
-            'running the layout '
-            'callback speculatively, which might mutate the live '
-            'render object tree.');
+          'LayoutBuilder does not support returning intrinsic dimensions.\n'
+          'Calculating the intrinsic dimensions would require '
+          'running the layout '
+          'callback speculatively, which might mutate the live '
+          'render object tree.',
+        );
       }
       return true;
     }());

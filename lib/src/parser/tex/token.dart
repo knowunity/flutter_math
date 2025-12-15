@@ -24,12 +24,13 @@
 import 'source_location.dart';
 
 class Token {
+  Token(this.text, [this.loc]);
+
+  factory Token.range(Token startToken, Token endToken, String text) =>
+      Token(text, SourceLocation.range(startToken, endToken));
+
   String text;
   SourceLocation? loc;
   bool noexpand = false;
   bool treatAsRelax = false;
-  Token(this.text, [this.loc]);
-
-  static Token range(Token startToken, Token endToken, String text) =>
-      Token(text, SourceLocation.range(startToken, endToken));
 }

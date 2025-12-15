@@ -15,28 +15,38 @@ const svgData = {
   'oiiintSize2': [1.98, 0.659],
 };
 
-Widget staticSvg(String name, MathOptions options,
-    {bool needBaseline = false}) {
-  final dimen = svgData[name];
-  if (dimen == null) {
-    throw ArgumentError.value(name, 'name', 'Invalid static svg name');
-  }
-  final width = dimen[0];
-  final height = dimen[1];
-  final viewPortWidth = width.cssEm.toLpUnder(options);
-  final viewPortHeight = height.cssEm.toLpUnder(options);
+class StaticSvgWidget extends StatelessWidget {
+  const StaticSvgWidget({
+    required this.name,
+    required this.options,
+    this.needBaseline = false,
+    super.key,
+  });
 
-  final svgWidget = svgWidgetFromPath(
-    svgPaths[name]!,
-    Size(viewPortWidth, viewPortHeight),
-    Rect.fromLTWH(0, 0, 1000 * width, 1000 * height),
-    options.color,
-  );
-  if (needBaseline) {
-    return ResetBaseline(
-      height: viewPortHeight,
-      child: svgWidget,
+  final String name;
+  final MathOptions options;
+  final bool needBaseline;
+
+  @override
+  Widget build(BuildContext context) {
+    final dimen = svgData[name];
+    if (dimen == null) {
+      throw ArgumentError.value(name, 'name', 'Invalid static svg name');
+    }
+    final width = dimen[0];
+    final height = dimen[1];
+    final viewPortWidth = width.cssEm.toLpUnder(options);
+    final viewPortHeight = height.cssEm.toLpUnder(options);
+
+    final svgWidget = SvgWidgetFromPath(
+      path: svgPaths[name]!,
+      viewPort: Size(viewPortWidth, viewPortHeight),
+      viewBox: Rect.fromLTWH(0, 0, 1000 * width, 1000 * height),
+      color: options.color,
     );
+    if (needBaseline) {
+      return ResetBaseline(height: viewPortHeight, child: svgWidget);
+    }
+    return svgWidget;
   }
-  return svgWidget;
 }

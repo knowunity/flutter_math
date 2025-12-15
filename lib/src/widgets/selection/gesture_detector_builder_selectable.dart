@@ -1,14 +1,13 @@
+import 'dart:async';
+
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
 import 'gesture_detector_builder.dart';
-import 'overlay_manager.dart';
 
 class SelectableMathSelectionGestureDetectorBuilder
     extends MathSelectionGestureDetectorBuilder {
-  SelectableMathSelectionGestureDetectorBuilder({
-    required SelectionOverlayManagerMixin delegate,
-  }) : super(delegate: delegate);
+  SelectableMathSelectionGestureDetectorBuilder({required super.delegate});
 
   @override
   void onForcePressStart(ForcePressDetails details) {
@@ -28,8 +27,9 @@ class SelectableMathSelectionGestureDetectorBuilder
     if (delegate.selectionEnabled) {
       delegate.handleSelectionChanged(
         delegate.getWordsRangeInRange(
-            from: details.globalPosition - details.offsetFromOrigin,
-            to: details.globalPosition),
+          from: details.globalPosition - details.offsetFromOrigin,
+          to: details.globalPosition,
+        ),
         SelectionChangedCause.longPress,
       );
     }
@@ -46,8 +46,7 @@ class SelectableMathSelectionGestureDetectorBuilder
             from: lastTapDownPosition!,
             cause: SelectionChangedCause.tap,
           );
-          // Should select word edge here, but not supporting now
-          break;
+        // Should select word edge here, but not supporting now
         case TargetPlatform.android:
         case TargetPlatform.fuchsia:
         case TargetPlatform.linux:
@@ -56,7 +55,6 @@ class SelectableMathSelectionGestureDetectorBuilder
             from: lastTapDownPosition!,
             cause: SelectionChangedCause.tap,
           );
-          break;
       }
     }
     // if (_state.widget.onTap != null)
@@ -71,7 +69,7 @@ class SelectableMathSelectionGestureDetectorBuilder
         cause: SelectionChangedCause.longPress,
       );
 
-      Feedback.forLongPress(delegate.context);
+      unawaited(Feedback.forLongPress(delegate.context));
 
       // renderEditable.selectWord(cause: SelectionChangedCause.longPress);
       // Feedback.forLongPress(_state.context);

@@ -11,6 +11,16 @@ import '../syntax_tree.dart';
 
 /// Frac node.
 class FracNode extends SlotableNode<EquationRowNode> {
+  // TODO continued
+
+  FracNode({
+    // this.options,
+    required this.numerator,
+    required this.denominator,
+    this.barSize,
+    this.continued = false,
+  });
+
   /// Numerator.
   final EquationRowNode numerator;
 
@@ -23,47 +33,31 @@ class FracNode extends SlotableNode<EquationRowNode> {
   final Measurement? barSize;
 
   /// Whether it is a continued frac `\cfrac`.
-  final bool continued; // TODO continued
-
-  FracNode({
-    // this.options,
-    required this.numerator,
-    required this.denominator,
-    this.barSize,
-    this.continued = false,
-  });
+  final bool continued;
 
   @override
   List<EquationRowNode> computeChildren() => [numerator, denominator];
 
   @override
   BuildResult buildWidget(
-          MathOptions options, List<BuildResult?> childBuildResults) =>
-      BuildResult(
-        options: options,
-        widget: CustomLayout(
-          delegate: FracLayoutDelegate(
-            barSize: barSize,
-            options: options,
-          ),
-          children: <Widget>[
-            CustomLayoutId(
-              id: _FracPos.numer,
-              child: childBuildResults[0]!.widget,
-            ),
-            CustomLayoutId(
-              id: _FracPos.denom,
-              child: childBuildResults[1]!.widget,
-            ),
-          ],
-        ),
-      );
+    MathOptions options,
+    List<BuildResult?> childBuildResults,
+  ) => BuildResult(
+    options: options,
+    widget: CustomLayout(
+      delegate: FracLayoutDelegate(barSize: barSize, options: options),
+      children: <Widget>[
+        CustomLayoutId(id: _FracPos.numer, child: childBuildResults[0]!.widget),
+        CustomLayoutId(id: _FracPos.denom, child: childBuildResults[1]!.widget),
+      ],
+    ),
+  );
 
   @override
   List<MathOptions> computeChildOptions(MathOptions options) => [
-        options.havingStyle(options.style.fracNum()),
-        options.havingStyle(options.style.fracDen()),
-      ];
+    options.havingStyle(options.style.fracNum()),
+    options.havingStyle(options.style.fracDen()),
+  ];
 
   @override
   bool shouldRebuildWidget(MathOptions oldOptions, MathOptions newOptions) =>
@@ -71,11 +65,11 @@ class FracNode extends SlotableNode<EquationRowNode> {
 
   @override
   FracNode updateChildren(List<EquationRowNode> newChildren) => FracNode(
-        // options: options ?? this.options,
-        numerator: newChildren[0],
-        denominator: newChildren[1],
-        barSize: barSize,
-      );
+    // options: options ?? this.options,
+    numerator: newChildren[0],
+    denominator: newChildren[1],
+    barSize: barSize,
+  );
 
   @override
   AtomType get leftType => AtomType.ord;
@@ -93,32 +87,24 @@ class FracNode extends SlotableNode<EquationRowNode> {
     });
 }
 
-enum _FracPos {
-  numer,
-  denom,
-}
+enum _FracPos { numer, denom }
 
 class FracLayoutDelegate extends IntrinsicLayoutDelegate<_FracPos> {
+  FracLayoutDelegate({required this.barSize, required this.options});
   final Measurement? barSize;
   final MathOptions options;
 
-  FracLayoutDelegate({
-    required this.barSize,
-    required this.options,
-  });
-
-  var theta = 0.0;
-  var height = 0.0;
-  var a = 0.0;
-  var width = 0.0;
-  var barLength = 0.0;
+  double theta = 0;
+  double height = 0;
+  double a = 0;
+  double width = 0;
+  double barLength = 0;
 
   @override
   double computeDistanceToActualBaseline(
     TextBaseline baseline,
     Map<_FracPos, RenderBox> childrenTable,
-  ) =>
-      height;
+  ) => height;
 
   @override
   AxisConfiguration<_FracPos> performHorizontalIntrinsicLayout({
@@ -159,11 +145,12 @@ class FracLayoutDelegate extends IntrinsicLayoutDelegate<_FracPos> {
     final xi8 = metrics.defaultRuleThickness.cssEm.toLpUnder(options);
     final theta = barSize?.toLpUnder(options) ?? xi8;
     // Rule 15b
-    var u = (options.style > MathStyle.text
-            ? metrics.num1
-            : (theta != 0 ? metrics.num2 : metrics.num3))
-        .cssEm
-        .toLpUnder(options);
+    var u =
+        (options.style > MathStyle.text
+                ? metrics.num1
+                : (theta != 0 ? metrics.num2 : metrics.num3))
+            .cssEm
+            .toLpUnder(options);
     var v = (options.style > MathStyle.text ? metrics.denom1 : metrics.denom2)
         .cssEm
         .toLpUnder(options);

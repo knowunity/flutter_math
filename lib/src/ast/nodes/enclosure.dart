@@ -10,6 +10,16 @@ import '../syntax_tree.dart';
 ///
 /// Examples: `\colorbox`, `\fbox`, `\cancel`.
 class EnclosureNode extends SlotableNode<EquationRowNode> {
+  EnclosureNode({
+    required this.base,
+    required this.hasBorder,
+    this.bordercolor,
+    this.backgroundcolor,
+    this.notation = const [],
+    this.horizontalPadding = Measurement.zero,
+    this.verticalPadding = Measurement.zero,
+  });
+
   /// Base where the enclosure is applied upon
   final EquationRowNode base;
 
@@ -36,37 +46,31 @@ class EnclosureNode extends SlotableNode<EquationRowNode> {
   /// Vertical padding.
   final Measurement verticalPadding;
 
-  EnclosureNode({
-    required this.base,
-    required this.hasBorder,
-    this.bordercolor,
-    this.backgroundcolor,
-    this.notation = const [],
-    this.horizontalPadding = Measurement.zero,
-    this.verticalPadding = Measurement.zero,
-  });
-
   @override
   BuildResult buildWidget(
-      MathOptions options, List<BuildResult?> childBuildResults) {
+    MathOptions options,
+    List<BuildResult?> childBuildResults,
+  ) {
     final horizontalPadding = this.horizontalPadding.toLpUnder(options);
     final verticalPadding = this.verticalPadding.toLpUnder(options);
 
     Widget widget = Stack(
       children: <Widget>[
-        Container(
-          // color: backgroundcolor,
+        DecoratedBox(
           decoration: hasBorder
               ? BoxDecoration(
                   color: backgroundcolor,
                   border: Border.all(
                     // TODO minRuleThickness
-                    width:
-                        options.fontMetrics.fboxrule.cssEm.toLpUnder(options),
+                    width: options.fontMetrics.fboxrule.cssEm.toLpUnder(
+                      options,
+                    ),
                     color: bordercolor ?? options.color,
                   ),
                 )
-              : null,
+              : (backgroundcolor != null
+                    ? BoxDecoration(color: backgroundcolor)
+                    : const BoxDecoration()),
           child: Padding(
             padding: EdgeInsets.symmetric(
               vertical: verticalPadding,
@@ -121,22 +125,14 @@ class EnclosureNode extends SlotableNode<EquationRowNode> {
       widget = CustomLayout<int>(
         delegate: HorizontalStrikeDelegate(
           vShift: options.fontMetrics.xHeight.cssEm.toLpUnder(options) / 2,
-          ruleThickness:
-              options.fontMetrics.defaultRuleThickness.cssEm.toLpUnder(options),
+          ruleThickness: options.fontMetrics.defaultRuleThickness.cssEm
+              .toLpUnder(options),
           color: bordercolor ?? options.color,
         ),
-        children: <Widget>[
-          CustomLayoutId(
-            id: 0,
-            child: widget,
-          ),
-        ],
+        children: <Widget>[CustomLayoutId(id: 0, child: widget)],
       );
     }
-    return BuildResult(
-      options: options,
-      widget: widget,
-    );
+    return BuildResult(options: options, widget: widget);
   }
 
   @override
@@ -183,13 +179,6 @@ class EnclosureNode extends SlotableNode<EquationRowNode> {
 }
 
 class LinePainter extends CustomPainter {
-  final double startRelativeX;
-  final double startRelativeY;
-  final double endRelativeX;
-  final double endRelativeY;
-  final double lineWidth;
-  final Color color;
-
   const LinePainter({
     required this.startRelativeX,
     required this.startRelativeY,
@@ -198,6 +187,12 @@ class LinePainter extends CustomPainter {
     required this.lineWidth,
     required this.color,
   });
+  final double startRelativeX;
+  final double startRelativeY;
+  final double endRelativeX;
+  final double endRelativeY;
+  final double lineWidth;
+  final Color color;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -215,23 +210,23 @@ class LinePainter extends CustomPainter {
 }
 
 class HorizontalStrikeDelegate extends CustomLayoutDelegate<int> {
-  final double ruleThickness;
-  final double vShift;
-  final Color color;
-
   HorizontalStrikeDelegate({
     required this.ruleThickness,
     required this.vShift,
     required this.color,
   });
+  final double ruleThickness;
+  final double vShift;
+  final Color color;
 
-  var height = 0.0;
-  var width = 0.0;
+  double height = 0;
+  double width = 0;
 
   @override
   double computeDistanceToActualBaseline(
-          TextBaseline baseline, Map<int, RenderBox> childrenTable) =>
-      height;
+    TextBaseline baseline,
+    Map<int, RenderBox> childrenTable,
+  ) => height;
 
   @override
   double getIntrinsicSize({
@@ -240,8 +235,7 @@ class HorizontalStrikeDelegate extends CustomLayoutDelegate<int> {
     required double extent,
     required double Function(RenderBox child, double extent) childSize,
     required Map<int, RenderBox> childrenTable,
-  }) =>
-      childSize(childrenTable[0]!, double.infinity);
+  }) => childSize(childrenTable[0]!, double.infinity);
 
   @override
   Size computeLayout(
@@ -265,14 +259,8 @@ class HorizontalStrikeDelegate extends CustomLayoutDelegate<int> {
   @override
   void additionalPaint(PaintingContext context, Offset offset) {
     context.canvas.drawLine(
-      Offset(
-        offset.dx,
-        offset.dy + height - vShift,
-      ),
-      Offset(
-        offset.dx + width,
-        offset.dy + height - vShift,
-      ),
+      Offset(offset.dx, offset.dy + height - vShift),
+      Offset(offset.dx + width, offset.dy + height - vShift),
       Paint()
         ..strokeWidth = ruleThickness
         ..color = color,

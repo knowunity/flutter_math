@@ -36,7 +36,7 @@ class Math extends StatelessWidget {
   ///
   /// See [Math] for its member documentation
   const Math({
-    Key? key,
+    super.key,
     this.ast,
     this.mathStyle = MathStyle.display,
     this.logicalPpi,
@@ -45,8 +45,60 @@ class Math extends StatelessWidget {
     this.parseError,
     this.textScaleFactor,
     this.textStyle,
-  })  : assert(ast != null || parseError != null),
-        super(key: key);
+    this.excludeSemantics = true,
+  }) : assert(ast != null || parseError != null);
+
+  /// Math builder using a TeX string
+  ///
+  /// {@template flutter_math_fork.widgets.math.tex_builder}
+  /// [expression] will first be parsed under [settings]. Then the acquired
+  /// [SyntaxTree] will be built under a specific options. If [ParseException]
+  /// is thrown or a build error occurs, [onErrorFallback] will be displayed.
+  ///
+  /// You can control the options via [mathStyle] and [textStyle].
+  /// {@endtemplate}
+  ///
+  /// See alse:
+  ///
+  /// * [Math.mathStyle]
+  /// * [Math.textStyle]
+  factory Math.tex(
+    String expression, {
+    Key? key,
+    MathStyle mathStyle = MathStyle.display,
+    TextStyle? textStyle,
+    OnErrorFallback onErrorFallback = defaultOnErrorFallback,
+    TexParserSettings settings = const TexParserSettings(),
+    double? textScaleFactor,
+    MathOptions? options,
+    bool excludeSemantics = true,
+  }) {
+    SyntaxTree? ast;
+    ParseException? parseError;
+
+    try {
+      ast = SyntaxTree(greenRoot: TexParser(expression, settings).parse());
+    } on ParseException catch (e) {
+      parseError = e;
+    } on Object catch (e) {
+      parseError = ParseException(
+        'Unsanitized parse exception detected: $e. '
+        'Please report this error with correponding input.',
+      );
+    }
+
+    return Math(
+      key: key,
+      ast: ast,
+      parseError: parseError,
+      options: options,
+      onErrorFallback: onErrorFallback,
+      mathStyle: mathStyle,
+      textScaleFactor: textScaleFactor,
+      textStyle: textStyle,
+      excludeSemantics: excludeSemantics,
+    );
+  }
 
   /// The equation to display.
   ///
@@ -117,51 +169,11 @@ class Math extends StatelessWidget {
   /// {@endtemplate}
   final TextStyle? textStyle;
 
-  /// Math builder using a TeX string
+  /// Whether to exclude this widget from the semantics tree.
   ///
-  /// {@template flutter_math_fork.widgets.math.tex_builder}
-  /// [expression] will first be parsed under [settings]. Then the acquired
-  /// [SyntaxTree] will be built under a specific options. If [ParseException]
-  /// is thrown or a build error occurs, [onErrorFallback] will be displayed.
-  ///
-  /// You can control the options via [mathStyle] and [textStyle].
-  /// {@endtemplate}
-  ///
-  /// See alse:
-  ///
-  /// * [Math.mathStyle]
-  /// * [Math.textStyle]
-  factory Math.tex(
-    String expression, {
-    Key? key,
-    MathStyle mathStyle = MathStyle.display,
-    TextStyle? textStyle,
-    OnErrorFallback onErrorFallback = defaultOnErrorFallback,
-    TexParserSettings settings = const TexParserSettings(),
-    double? textScaleFactor,
-    MathOptions? options,
-  }) {
-    SyntaxTree? ast;
-    ParseException? parseError;
-    try {
-      ast = SyntaxTree(greenRoot: TexParser(expression, settings).parse());
-    } on ParseException catch (e) {
-      parseError = e;
-    } on Object catch (e) {
-      parseError = ParseException('Unsanitized parse exception detected: $e.'
-          'Please report this error with correponding input.');
-    }
-    return Math(
-      key: key,
-      ast: ast,
-      parseError: parseError,
-      options: options,
-      onErrorFallback: onErrorFallback,
-      mathStyle: mathStyle,
-      textScaleFactor: textScaleFactor,
-      textStyle: textStyle,
-    );
-  }
+  /// Math equations are typically not screen-reader friendly, so this is
+  /// enabled by default to improve performance.
+  final bool excludeSemantics;
 
   @override
   Widget build(BuildContext context) {
@@ -169,25 +181,29 @@ class Math extends StatelessWidget {
       return onErrorFallback(parseError!);
     }
 
-    var options = this.options;
-    if (options == null) {
+    var effectiveOptions = options;
+    if (effectiveOptions == null) {
       var effectiveTextStyle = textStyle;
       if (effectiveTextStyle == null || effectiveTextStyle.inherit) {
-        effectiveTextStyle =
-            DefaultTextStyle.of(context).style.merge(textStyle);
+        effectiveTextStyle = DefaultTextStyle.of(
+          context,
+        ).style.merge(textStyle);
       }
       if (MediaQuery.boldTextOf(context)) {
-        effectiveTextStyle = effectiveTextStyle
-            .merge(const TextStyle(fontWeight: FontWeight.bold));
+        effectiveTextStyle = effectiveTextStyle.merge(
+          const TextStyle(fontWeight: FontWeight.bold),
+        );
       }
 
-      final textScaleFactor =
-          this.textScaleFactor ?? MediaQuery.textScaleFactorOf(context);
+      final scaleFactor =
+          textScaleFactor ?? MediaQuery.textScaleFactorOf(context);
 
-      options = MathOptions(
+      effectiveOptions = MathOptions(
         style: mathStyle,
-        fontSize: effectiveTextStyle.fontSize! * textScaleFactor,
-        mathFontOptions: effectiveTextStyle.fontWeight != FontWeight.normal && effectiveTextStyle.fontWeight != null
+        fontSize: effectiveTextStyle.fontSize! * scaleFactor,
+        mathFontOptions:
+            effectiveTextStyle.fontWeight != FontWeight.normal &&
+                effectiveTextStyle.fontWeight != null
             ? FontOptions(fontWeight: effectiveTextStyle.fontWeight!)
             : null,
         logicalPpi: logicalPpi,
@@ -196,21 +212,28 @@ class Math extends StatelessWidget {
     }
 
     Widget child;
-
     try {
-      child = ast!.buildWidget(options);
+      child = ast!.buildWidget(effectiveOptions);
     } on BuildException catch (e) {
       return onErrorFallback(e);
     } on Object catch (e) {
       return onErrorFallback(
-          BuildException('Unsanitized build exception detected: $e.'
-              'Please report this error with correponding input.'));
+        BuildException(
+          'Unsanitized build exception detected: $e. '
+          'Please report this error with correponding input.',
+        ),
+      );
     }
 
-    return Provider.value(
-      value: FlutterMathMode.view,
-      child: child,
-    );
+    // Wrap in ExcludeSemantics to skip expensive semantics tree building
+    if (excludeSemantics) {
+      child = ExcludeSemantics(child: child);
+    }
+
+    // Add RepaintBoundary to prevent unnecessary repaints from parent
+    child = RepaintBoundary(child: child);
+
+    return Provider.value(value: FlutterMathMode.view, child: child);
   }
 
   /// Default fallback function for [Math], [SelectableMath]
@@ -254,16 +277,19 @@ class Math extends StatelessWidget {
     );
     return BreakResult(
       parts: astBreakResult.parts
-          .map((part) => Math(
-                ast: part,
-                mathStyle: this.mathStyle,
-                logicalPpi: this.logicalPpi,
-                onErrorFallback: this.onErrorFallback,
-                options: this.options,
-                parseError: this.parseError,
-                textScaleFactor: this.textScaleFactor,
-                textStyle: this.textStyle,
-              ))
+          .map(
+            (part) => Math(
+              ast: part,
+              mathStyle: mathStyle,
+              logicalPpi: logicalPpi,
+              onErrorFallback: onErrorFallback,
+              options: options,
+              parseError: parseError,
+              textScaleFactor: textScaleFactor,
+              textStyle: textStyle,
+              excludeSemantics: excludeSemantics,
+            ),
+          )
           .toList(growable: false),
       penalties: astBreakResult.penalties,
     );

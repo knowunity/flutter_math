@@ -1,12 +1,7 @@
 import '../size.dart';
 import '../syntax_tree.dart';
 
-const ligatures = {
-  '–': '--',
-  '—': '---',
-  '“': '``',
-  '”': "''",
-};
+const ligatures = {'–': '--', '—': '---', '“': '``', '”': "''"};
 
 // Composite symbols caused by the folding of \not
 const negatedOperatorSymbols = {

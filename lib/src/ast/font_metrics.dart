@@ -1,4 +1,42 @@
 class FontMetrics {
+  // 0.4 pt / ptPerEm
+
+  const FontMetrics({
+    required this.slant,
+    required this.space,
+    required this.stretch,
+    required this.shrink,
+    required this.xHeight,
+    required this.quad,
+    required this.extraSpace,
+    required this.num1,
+    required this.num2,
+    required this.num3,
+    required this.denom1,
+    required this.denom2,
+    required this.sup1,
+    required this.sup2,
+    required this.sup3,
+    required this.sub1,
+    required this.sub2,
+    required this.supDrop,
+    required this.subDrop,
+    required this.delim1,
+    required this.delim2,
+    required this.axisHeight,
+    required this.defaultRuleThickness,
+    required this.bigOpSpacing1,
+    required this.bigOpSpacing2,
+    required this.bigOpSpacing3,
+    required this.bigOpSpacing4,
+    required this.bigOpSpacing5,
+    required this.sqrtRuleThickness,
+    required this.ptPerEm,
+    required this.doubleRuleSep,
+    required this.arrayRuleWidth,
+    required this.fboxsep,
+    required this.fboxrule,
+  });
   double get cssEmPerMu => quad / 18;
 
   final double slant; // sigma1
@@ -51,44 +89,7 @@ class FontMetrics {
   // `\showthe\arrayrulewidth` in LaTeX. Equals 0.4 / ptPerEm.
   final double arrayRuleWidth; // Two values from LaTeX source2e:
   final double fboxsep; // 3 pt / ptPerEm
-  final double fboxrule; // 0.4 pt / ptPerEm
-
-  const FontMetrics({
-    required this.slant,
-    required this.space,
-    required this.stretch,
-    required this.shrink,
-    required this.xHeight,
-    required this.quad,
-    required this.extraSpace,
-    required this.num1,
-    required this.num2,
-    required this.num3,
-    required this.denom1,
-    required this.denom2,
-    required this.sup1,
-    required this.sup2,
-    required this.sup3,
-    required this.sub1,
-    required this.sub2,
-    required this.supDrop,
-    required this.subDrop,
-    required this.delim1,
-    required this.delim2,
-    required this.axisHeight,
-    required this.defaultRuleThickness,
-    required this.bigOpSpacing1,
-    required this.bigOpSpacing2,
-    required this.bigOpSpacing3,
-    required this.bigOpSpacing4,
-    required this.bigOpSpacing5,
-    required this.sqrtRuleThickness,
-    required this.ptPerEm,
-    required this.doubleRuleSep,
-    required this.arrayRuleWidth,
-    required this.fboxsep,
-    required this.fboxrule,
-  });
+  final double fboxrule;
 
   static FontMetrics? fromMap(Map<String, double> map) {
     try {

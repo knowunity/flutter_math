@@ -34,39 +34,43 @@ import 'token.dart';
 // List of commands that act like macros but aren't defined as a macro,
 // function, or symbol.  Used in `isDefined`.
 const implicitCommands = {
-  '\\relax', // MacroExpander.js
+  r'\relax', // MacroExpander.js
   '^', // Parser.js
   '_', // Parser.js
-  '\\limits', // Parser.js
-  '\\nolimits', // Parser.js
+  r'\limits', // Parser.js
+  r'\nolimits', // Parser.js
 };
 
 class MacroExpander implements MacroContext {
   MacroExpander(this.input, this.settings, this.mode)
-      : this.macros = Namespace(builtinMacros, settings.macros),
-        this.lexer = Lexer(input, settings);
+    : macros = Namespace(builtinMacros, settings.macros),
+      lexer = Lexer(input, settings);
 
   String input;
   TexParserSettings settings;
+  @override
   Mode mode;
   int expansionCount = 0;
-  var stack = <Token>[];
+  List<Token> stack = <Token>[];
   Lexer lexer;
+  @override
   Namespace<MacroDefinition> macros;
 
+  @override
   Token expandAfterFuture() {
-    this.expandOnce();
-    return this.future();
+    expandOnce();
+    return future();
   }
 
+  @override
   Token expandNextToken() {
     while (true) {
-      final expanded = this.expandOnce();
+      final expanded = expandOnce();
       if (expanded != null) {
         if (expanded.text == r'\relax') {
-          this.stack.removeLast();
+          stack.removeLast();
         } else {
-          return this.stack.removeLast();
+          return stack.removeLast();
         }
       }
     }
@@ -75,35 +79,38 @@ class MacroExpander implements MacroContext {
   // switchMode is replaced by a plain setter
 
   void beginGroup() {
-    this.macros.beginGroup();
+    macros.beginGroup();
   }
 
   void endGroup() {
-    this.macros.endGroup();
+    macros.endGroup();
   }
 
+  @override
   Token? expandOnce([bool expandableOnly = false]) {
-    final topToken = this.popToken();
+    final topToken = popToken();
     final name = topToken.text;
-    final expansion = !topToken.noexpand ? this._getExpansion(name) : null;
+    final expansion = !topToken.noexpand ? _getExpansion(name) : null;
     if (expansion == null || (expandableOnly && expansion.unexpandable)) {
       if (expandableOnly &&
           expansion == null &&
-          name[0] == '\\' &&
-          this.isDefined(name)) {
+          name[0] == r'\' &&
+          isDefined(name)) {
         throw ParseException('Undefined control sequence: $name');
       }
-      this.pushToken(topToken);
+      pushToken(topToken);
       return topToken;
     }
-    this.expansionCount += 1;
-    if (this.expansionCount > this.settings.maxExpand) {
-      throw ParseException('Too many expansions: infinite loop or '
-          'need to increase maxExpand setting');
+    expansionCount += 1;
+    if (expansionCount > settings.maxExpand) {
+      throw ParseException(
+        'Too many expansions: infinite loop or '
+        'need to increase maxExpand setting',
+      );
     }
     var tokens = expansion.tokens;
     if (expansion.numArgs != 0) {
-      final args = this.consumeArgs(expansion.numArgs);
+      final args = consumeArgs(expansion.numArgs);
       // Make a copy to avoid modify to be sure.
       // Actually not needed with current implementation.
       // But who knows for the future?
@@ -113,7 +120,9 @@ class MacroExpander implements MacroContext {
         if (tok.text == '#') {
           if (i == 0) {
             throw ParseException(
-                'Incomplete placeholder at end of macro body', tok);
+              'Incomplete placeholder at end of macro body',
+              tok,
+            );
           }
           --i;
           tok = tokens[i];
@@ -129,58 +138,61 @@ class MacroExpander implements MacroContext {
         }
       }
     }
-    this.pushTokens(tokens);
+    pushTokens(tokens);
     return null;
   }
 
   void pushToken(Token token) {
-    this.stack.add(token);
+    stack.add(token);
   }
 
   void pushTokens(List<Token> tokens) {
-    this.stack.addAll(tokens);
+    stack.addAll(tokens);
   }
 
+  @override
   Token popToken() {
-    this.future();
-    return this.stack.removeLast();
+    future();
+    return stack.removeLast();
   }
 
+  @override
   Token future() {
-    if (this.stack.isEmpty) {
-      this.stack.add(this.lexer.lex());
+    if (stack.isEmpty) {
+      stack.add(lexer.lex());
     }
-    return this.stack.last;
+    return stack.last;
   }
 
   MacroExpansion? _getExpansion(String name) {
-    final definition = this.macros.get(name);
+    final definition = macros.get(name);
     if (definition == null) {
       return null;
     }
     return definition.expand(this);
   }
 
+  @override
   List<List<Token>> consumeArgs(int numArgs) {
-    final args = List<List<Token>>.generate(numArgs, (i) {
-      this.consumeSpaces();
-      final startOfArg = this.popToken();
+    return List<List<Token>>.generate(numArgs, (i) {
+      consumeSpaces();
+      final startOfArg = popToken();
       if (startOfArg.text == '{') {
         final arg = <Token>[];
         var depth = 1;
         while (depth != 0) {
-          final tok = this.popToken();
+          final tok = popToken();
           arg.add(tok);
           switch (tok.text) {
             case '{':
               ++depth;
-              break;
             case '}':
               --depth;
-              break;
             case 'EOF':
               throw ParseException(
-                  'End of input in macro argument', startOfArg);
+                'End of input in macro argument',
+                startOfArg,
+              );
           }
         }
         arg.removeLast();
@@ -191,54 +203,57 @@ class MacroExpander implements MacroContext {
         return [startOfArg];
       }
     });
-    return args;
   }
 
+  @override
   void consumeSpaces() {
     while (true) {
-      final token = this.future();
+      final token = future();
       if (token.text == ' ') {
-        this.stack.removeLast();
+        stack.removeLast();
       } else {
         break;
       }
     }
   }
 
+  @override
   bool isDefined(String name) =>
-      this.macros.has(name) ||
+      macros.has(name) ||
       texSymbolCommandConfigs[Mode.math]!.containsKey(name) ||
       texSymbolCommandConfigs[Mode.text]!.containsKey(name) ||
       functions.containsKey(name) ||
       implicitCommands.contains(name);
 
+  @override
   bool isExpandable(String name) {
     final macro = macros.get(name);
     return macro?.expandable ?? functions.containsKey(name);
   }
 
-  Lexer getNewLexer(String input) => Lexer(input, this.settings);
+  @override
+  Lexer getNewLexer(String input) => Lexer(input, settings);
 
   String? expandMacroAsText(String name) {
-    final tokens = this.expandMacro(name);
+    final tokens = expandMacro(name);
     if (tokens != null) {
-      return tokens.map((token) => token.text).join('');
+      return tokens.map((token) => token.text).join();
     }
     return null;
   }
 
   List<Token>? expandMacro(String name) {
-    if (this.macros.get(name) == null) {
+    if (macros.get(name) == null) {
       return null;
     }
     final output = <Token>[];
-    final oldStackLength = this.stack.length;
-    this.pushToken(Token(name));
-    while (this.stack.length > oldStackLength) {
-      final expanded = this.expandOnce();
+    final oldStackLength = stack.length;
+    pushToken(Token(name));
+    while (stack.length > oldStackLength) {
+      final expanded = expandOnce();
       // expandOnce returns Token if and only if it's fully expanded.
       if (expanded != null) {
-        output.add(this.stack.removeLast());
+        output.add(stack.removeLast());
       }
     }
     return output;
@@ -251,12 +266,12 @@ abstract class MacroContext {
   Token future();
   Token popToken();
   void consumeSpaces();
-//  Token expandAfterFuture();
-  // ignore: avoid_positional_boolean_parameters
+  //  Token expandAfterFuture();
+
   Token? expandOnce([bool expandableOnly]);
   Token expandAfterFuture();
   Token expandNextToken();
-//
+  //
   List<List<Token>> consumeArgs(int numArgs);
   bool isDefined(String name);
   bool isExpandable(String name);

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/gestures.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
@@ -24,8 +26,10 @@ class MathSelectionOverlay {
     this.clipboardStatus,
   }) : _handlesVisible = handlesVisible {
     final overlay = Overlay.of(context, rootOverlay: true);
-    _toolbarController =
-        AnimationController(duration: fadeDuration, vsync: overlay);
+    _toolbarController = AnimationController(
+      duration: fadeDuration,
+      vsync: overlay,
+    );
   }
 
   /// The context in which the selection handles should appear.
@@ -142,15 +146,20 @@ class MathSelectionOverlay {
     assert(_handles == null);
     _handles = <OverlayEntry>[
       OverlayEntry(
-          builder: (BuildContext context) =>
-              _buildHandle(context, MathSelectionHandlePosition.start)),
+        builder: (context) =>
+            _buildHandle(context, MathSelectionHandlePosition.start),
+      ),
       OverlayEntry(
-          builder: (BuildContext context) =>
-              _buildHandle(context, MathSelectionHandlePosition.end)),
+        builder: (context) =>
+            _buildHandle(context, MathSelectionHandlePosition.end),
+      ),
     ];
 
-    Overlay.of(context, rootOverlay: true, debugRequiredFor: debugRequiredFor)
-        .insertAll(_handles!);
+    Overlay.of(
+      context,
+      rootOverlay: true,
+      debugRequiredFor: debugRequiredFor,
+    ).insertAll(_handles!);
   }
 
   /// Destroys the handles by removing them from overlay.
@@ -166,9 +175,12 @@ class MathSelectionOverlay {
   void showToolbar() {
     assert(_toolbar == null);
     _toolbar = OverlayEntry(builder: _buildToolbar);
-    Overlay.of(context, rootOverlay: true, debugRequiredFor: debugRequiredFor)
-        .insert(_toolbar!);
-    _toolbarController.forward(from: 0.0);
+    Overlay.of(
+      context,
+      rootOverlay: true,
+      debugRequiredFor: debugRequiredFor,
+    ).insert(_toolbar!);
+    unawaited(_toolbarController.forward(from: 0));
   }
 
   /// Updates the overlay after the selection has changed.
@@ -232,7 +244,9 @@ class MathSelectionOverlay {
   }
 
   Widget _buildHandle(
-      BuildContext context, MathSelectionHandlePosition position) {
+    BuildContext context,
+    MathSelectionHandlePosition position,
+  ) {
     if ((_selection.isCollapsed &&
             position == MathSelectionHandlePosition.end) ||
         selectionControls == null) {
@@ -242,7 +256,7 @@ class MathSelectionOverlay {
       visible: handlesVisible,
       child: MathSelectionHandleOverlay(
         manager: manager,
-        onSelectionHandleChanged: (TextSelection newSelection) {
+        onSelectionHandleChanged: (newSelection) {
           _handleSelectionHandleChanged(newSelection, position);
         },
         onSelectionHandleTapped: onSelectionHandleTapped,
@@ -266,13 +280,15 @@ class MathSelectionOverlay {
 
     final editingRegion = manager.getLocalEditingRegion();
 
-    final isMultiline = false; // TODO
+    const isMultiline = false; // TODO
     // endpoints.last.point.dy - endpoints.first.point.dy >
     // manager.preferredLineHeight / 2;
 
     // If the selected text spans more than 1 line, horizontally center the
     // toolbar.
     // Derived from both iOS and Android.
+
+    // ignore: dead_code
     final midX = isMultiline
         ? editingRegion.width / 2
         : (endpoint1.dx + endpoint2.dx) / 2;
@@ -289,6 +305,7 @@ class MathSelectionOverlay {
         link: toolbarLayerLink,
         showWhenUnlinked: false,
         offset: -editingRegion.topLeft,
+
         child: selectionControls!.buildToolbar(
           context,
           editingRegion,
@@ -299,7 +316,7 @@ class MathSelectionOverlay {
             TextSelectionPoint(endpoint2, TextDirection.ltr),
           ],
           manager,
-          clipboardStatus!,
+          clipboardStatus,
           null,
         ),
       ),
@@ -307,18 +324,21 @@ class MathSelectionOverlay {
   }
 
   void _handleSelectionHandleChanged(
-      TextSelection newSelection, MathSelectionHandlePosition position) {
+    TextSelection newSelection,
+    MathSelectionHandlePosition position,
+  ) {
     TextPosition textPosition;
     switch (position) {
       case MathSelectionHandlePosition.start:
         textPosition = newSelection.base;
-        break;
       case MathSelectionHandlePosition.end:
         textPosition = newSelection.extent;
-        break;
     }
     manager.handleSelectionChanged(
-        newSelection, null, ExtraSelectionChangedCause.handle);
+      newSelection,
+      null,
+      ExtraSelectionChangedCause.handle,
+    );
     manager.bringIntoView(textPosition);
   }
 }

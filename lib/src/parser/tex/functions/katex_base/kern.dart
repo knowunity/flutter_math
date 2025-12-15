@@ -24,7 +24,7 @@
 part of katex_base;
 
 const _kernEntries = {
-  ['\\kern', '\\mkern', '\\hskip', '\\mskip']: FunctionSpec(
+  [r'\kern', r'\mkern', r'\hskip', r'\mskip']: FunctionSpec(
     numArgs: 1,
     allowedInText: true,
     handler: _kernHandler,
@@ -38,24 +38,25 @@ GreenNode _kernHandler(TexParser parser, FunctionContext context) {
   if (mathFunction) {
     if (!muUnit) {
       parser.settings.reportNonstrict(
-          'mathVsTextUnits',
-          "LaTeX's ${context.funcName} supports only mu units, "
-              'not ${size.unit} units');
+        'mathVsTextUnits',
+        "LaTeX's ${context.funcName} supports only mu units, "
+            'not ${size.unit} units',
+      );
     }
     if (parser.mode != Mode.math) {
-      parser.settings.reportNonstrict('mathVsTextUnits',
-          "LaTeX's ${context.funcName} works only in math mode");
+      parser.settings.reportNonstrict(
+        'mathVsTextUnits',
+        "LaTeX's ${context.funcName} works only in math mode",
+      );
     }
   } else {
     if (muUnit) {
-      parser.settings.reportNonstrict('mathVsTextUnits',
-          "LaTeX's ${context.funcName} doesn't support mu units");
+      parser.settings.reportNonstrict(
+        'mathVsTextUnits',
+        "LaTeX's ${context.funcName} doesn't support mu units",
+      );
     }
   }
 
-  return SpaceNode(
-    height: Measurement.zero,
-    width: size,
-    mode: parser.mode,
-  );
+  return SpaceNode(height: Measurement.zero, width: size, mode: parser.mode);
 }

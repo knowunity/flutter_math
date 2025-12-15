@@ -32,15 +32,17 @@ import '../options.dart';
 import '../syntax_tree.dart';
 
 class SymbolId {
+  const SymbolId(this.symbol, {this.variantForm = false});
   final String symbol;
   final bool variantForm;
-  const SymbolId(this.symbol, {this.variantForm = false});
 
   @override
-  bool operator ==(Object o) {
-    if (identical(this, o)) return true;
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
 
-    return o is SymbolId && o.symbol == symbol && o.variantForm == variantForm;
+    return other is SymbolId &&
+        other.symbol == symbol &&
+        other.variantForm == variantForm;
   }
 
   @override
@@ -48,22 +50,17 @@ class SymbolId {
 }
 
 class SymbolRenderConfig {
+  const SymbolRenderConfig({this.math, this.text, this.variantForm});
   final RenderConfig? math;
   final RenderConfig? text;
   final SymbolRenderConfig? variantForm;
-
-  const SymbolRenderConfig({
-    this.math,
-    this.text,
-    this.variantForm,
-  });
 }
 
 class RenderConfig {
+  const RenderConfig(this.defaultType, this.defaultFont, [this.replaceChar]);
   final String? replaceChar;
   final FontOptions defaultFont;
   final AtomType? defaultType;
-  const RenderConfig(this.defaultType, this.defaultFont, [this.replaceChar]);
 }
 
 const mainrm = FontOptions();
@@ -835,7 +832,9 @@ const symbolRenderConfigs = {
   ), // ⇊
   '\u21BE': SymbolRenderConfig(
     math: RenderConfig(
-        AtomType.rel, amsrm), // \u21BE \upharpoonright \restriction
+      AtomType.rel,
+      amsrm,
+    ), // \u21BE \upharpoonright \restriction
   ), // ↾
   '\u21C2': SymbolRenderConfig(
     math: RenderConfig(AtomType.rel, amsrm), // \u21C2 \downharpoonright
@@ -1273,7 +1272,7 @@ const symbolRenderConfigs = {
     math: RenderConfig(AtomType.ord, mainrm), // . \ldotp
     text: RenderConfig(AtomType.ord, mainrm), // .
   ), // .
-  '\"': SymbolRenderConfig(
+  '"': SymbolRenderConfig(
     math: RenderConfig(AtomType.ord, mainrm), // "
     text: RenderConfig(AtomType.ord, mainrm), // "
   ), // "
@@ -3575,9 +3574,13 @@ const symbolRenderConfigs = {
   ), // þ
   '\u00A0': SymbolRenderConfig(
     math: RenderConfig(
-        AtomType.spacing, mainrm), // \u00A0 \  ~ \space \nobreakspace
+      AtomType.spacing,
+      mainrm,
+    ), // \u00A0 \  ~ \space \nobreakspace
     text: RenderConfig(
-        AtomType.spacing, mainrm), // \u00A0 \  ~ \space \nobreakspace
+      AtomType.spacing,
+      mainrm,
+    ), // \u00A0 \  ~ \space \nobreakspace
   ), //
   ' ': SymbolRenderConfig(
     math: RenderConfig(AtomType.spacing, mainrm, '\u00A0'), //
@@ -3610,7 +3613,7 @@ const symbolRenderConfigs = {
   '\u00D8': SymbolRenderConfig(
     text: RenderConfig(AtomType.ord, mainrm), // \u00D8 \O
   ), // Ø
-  '\'': SymbolRenderConfig(
+  "'": SymbolRenderConfig(
     text: RenderConfig(AtomType.ord, mainrm, '\u2019'), // \'
   ), // '
   '\u2013': SymbolRenderConfig(
@@ -3647,8 +3650,10 @@ const symbolRenderConfigs = {
     math: RenderConfig(AtomType.rel, mainrm), // \perp \bot
   ), // ⊥
   '\u2225': SymbolRenderConfig(
-    math: RenderConfig(AtomType.rel,
-        mainrm), // \parallel \shortparallel \lVert \rVert \| \Vert
+    math: RenderConfig(
+      AtomType.rel,
+      mainrm,
+    ), // \parallel \shortparallel \lVert \rVert \| \Vert
     text: RenderConfig(AtomType.ord, mainrm), // \textbardbl
     variantForm: SymbolRenderConfig(
       math: RenderConfig(AtomType.rel, amsrm), // \shortparallel
@@ -3694,7 +3699,9 @@ const symbolRenderConfigs = {
   ), // ⊵
   '\u25B3': SymbolRenderConfig(
     math: RenderConfig(
-        AtomType.bin, mainrm), // \vartriangle \triangle \bigtriangleup
+      AtomType.bin,
+      mainrm,
+    ), // \vartriangle \triangle \bigtriangleup
     variantForm: SymbolRenderConfig(
       math: RenderConfig(AtomType.rel, amsrm), // \vartriangle
     ),
@@ -3781,7 +3788,7 @@ const symbolRenderConfigs = {
       math: RenderConfig(AtomType.bin, amsrm), // \smallsetminus
     ),
   ), // ∖
-  '\$': SymbolRenderConfig(
+  r'$': SymbolRenderConfig(
     math: RenderConfig(AtomType.ord, mainrm), // \\$
     text: RenderConfig(AtomType.ord, mainrm), // \\$ \textdollar
   ), // $
@@ -3834,7 +3841,7 @@ const symbolRenderConfigs = {
     math: RenderConfig(AtomType.close, mainrm), // \} \rbrace
     text: RenderConfig(AtomType.ord, mainrm), // \} \textbraceright
   ), // }
-  '\\': SymbolRenderConfig(
+  r'\': SymbolRenderConfig(
     math: RenderConfig(AtomType.ord, mainrm), // \backslash
     text: RenderConfig(AtomType.ord, mainrm), // \textbackslash
   ), // \

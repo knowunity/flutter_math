@@ -24,26 +24,32 @@
 part of katex_base;
 
 const _operatorNameEntries = {
-  ['\\operatorname', '\\operatorname*']:
-      FunctionSpec(numArgs: 1, handler: _operatorNameHandler),
+  [r'\operatorname', r'\operatorname*']: FunctionSpec(
+    numArgs: 1,
+    handler: _operatorNameHandler,
+  ),
 };
 GreenNode _operatorNameHandler(TexParser parser, FunctionContext context) {
   var name = parser.parseArgNode(mode: null, optional: false)!;
-  final scripts =
-      parser.parseScripts(allowLimits: context.funcName == '\\operatorname*');
-  final body = parser.parseGroup(context.funcName,
-          optional: false, greediness: 1, mode: null, consumeSpaces: true) ??
+  final scripts = parser.parseScripts(
+    allowLimits: context.funcName == r'\operatorname*',
+  );
+  final body =
+      parser.parseGroup(
+        context.funcName,
+        optional: false,
+        greediness: 1,
+        consumeSpaces: true,
+      ) ??
       EquationRowNode.empty();
 
   name = StyleNode(
     children: name.expandEquationRow(),
-    optionsDiff: OptionsDiff(
-      mathFontOptions: texMathFontOptions['\\mathrm'],
-    ),
+    optionsDiff: OptionsDiff(mathFontOptions: texMathFontOptions[r'\mathrm']),
   );
 
   if (!scripts.empty) {
-    if (scripts.limits == true) {
+    if (scripts.limits ?? false) {
       name = scripts.superscript != null
           ? OverNode(
               base: name.wrapWithEquationRow(),

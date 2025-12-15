@@ -25,26 +25,29 @@ part of katex_base;
 
 const _accentUnderEntries = {
   [
-    '\\underleftarrow',
-    '\\underrightarrow',
-    '\\underleftrightarrow',
-    '\\undergroup',
+    r'\underleftarrow',
+    r'\underrightarrow',
+    r'\underleftrightarrow',
+    r'\undergroup',
     // '\\underlinesegment': ,
-    '\\utilde',
+    r'\utilde',
 
-    '\\underline'
-  ]: FunctionSpec(numArgs: 1, handler: _accentUnderHandler),
+    r'\underline',
+  ]: FunctionSpec(
+    numArgs: 1,
+    handler: _accentUnderHandler,
+  ),
 };
 
 const accentUnderMapping = {
-  '\\underleftarrow': '\u2190',
-  '\\underrightarrow': '\u2192',
-  '\\underleftrightarrow': '\u2194',
-  '\\undergroup': '\u23e0',
+  r'\underleftarrow': '\u2190',
+  r'\underrightarrow': '\u2192',
+  r'\underleftrightarrow': '\u2194',
+  r'\undergroup': '\u23e0',
   // '\\underlinesegment',
-  '\\utilde': '\u007e',
+  r'\utilde': '\u007e',
 
-  '\\underline': '\u00af'
+  r'\underline': '\u00af',
 };
 
 GreenNode _accentUnderHandler(TexParser parser, FunctionContext context) {

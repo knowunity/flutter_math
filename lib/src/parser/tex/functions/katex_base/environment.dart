@@ -24,17 +24,18 @@
 part of katex_base;
 
 const _environmentEntries = {
-  ['\\begin', '\\end']: FunctionSpec(numArgs: 1, handler: _enviromentHandler)
+  [r'\begin', r'\end']: FunctionSpec(numArgs: 1, handler: _enviromentHandler),
 };
 GreenNode _enviromentHandler(TexParser parser, FunctionContext context) {
   final nameGroup = parser.parseArgNode(mode: Mode.text, optional: false)!;
   if (nameGroup.children.any((element) => element is! SymbolNode)) {
     throw ParseException('Invalid environment name');
   }
-  final envName =
-      nameGroup.children.map((node) => (node as SymbolNode).symbol).join();
+  final envName = nameGroup.children
+      .map((node) => (node! as SymbolNode).symbol)
+      .join();
 
-  if (context.funcName == '\\begin') {
+  if (context.funcName == r'\begin') {
     // begin...end is similar to left...right
     if (!environments.containsKey(envName)) {
       throw ParseException('No such environment: $envName');
@@ -44,29 +45,26 @@ GreenNode _enviromentHandler(TexParser parser, FunctionContext context) {
     final env = environments[envName]!;
     final result = env.handler(
       parser,
-      EnvContext(
-        mode: parser.mode,
-        envName: envName,
-      ),
+      EnvContext(mode: parser.mode, envName: envName),
     );
-    parser.expect('\\end', consume: false);
+    parser.expect(r'\end', consume: false);
     final endNameToken = parser.nextToken;
     final end = assertNodeType<_EndEnvironmentNode>(
-        parser.parseFunction(null, null, null));
+      parser.parseFunction(null, null, null),
+    );
     if (end.name != envName) {
       throw ParseException(
-          'Mismatch: \\begin{$envName} matched by \\end{${end.name}}',
-          endNameToken);
+        'Mismatch: \\begin{$envName} matched by \\end{${end.name}}',
+        endNameToken,
+      );
     }
     return result;
   } else {
-    return _EndEnvironmentNode(
-      name: envName,
-    );
+    return _EndEnvironmentNode(name: envName);
   }
 }
 
 class _EndEnvironmentNode extends TemporaryNode {
-  final String name;
   _EndEnvironmentNode({required this.name});
+  final String name;
 }

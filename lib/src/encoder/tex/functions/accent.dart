@@ -8,11 +8,13 @@ EncodeResult _accentEncoder(GreenNode node) {
       .map((entry) => entry.key)
       .toList(growable: false);
 
-  final textCommandCandidates = commandCandidates
-      .where((candidate) => functions[candidate]?.allowedInText == true);
+  final textCommandCandidates = commandCandidates.where(
+    (candidate) => functions[candidate]?.allowedInText ?? false,
+  );
 
-  final mathCommandCandidates = commandCandidates
-      .where((candidate) => functions[candidate]?.allowedInMath == true);
+  final mathCommandCandidates = commandCandidates.where(
+    (candidate) => functions[candidate]?.allowedInMath ?? false,
+  );
 
   if (commandCandidates.isEmpty) {
     return NonStrictEncodeResult(
@@ -33,58 +35,58 @@ EncodeResult _accentEncoder(GreenNode node) {
   final math = mathCommand != null
       ? TexCommandEncodeResult(command: mathCommand, args: node.children)
       : mathCommandCandidates.firstOrNull != null
-          ? NonStrictEncodeResult(
-              'imprecise accent',
-              'No strict match for accent symbol under math mode: '
-                  '${unicodeLiteral(accentNode.label)}, '
-                  '${accentNode.isStretchy ? '' : 'not '}stretchy and '
-                  '${accentNode.isShifty ? '' : 'not '}shifty',
-              TexCommandEncodeResult(
-                command: mathCommandCandidates.first,
-                args: node.children,
-              ),
-            )
-          : NonStrictEncodeResult(
-              'unknown accent',
-              'No strict match for accent symbol under math mode: '
-                  '${unicodeLiteral(accentNode.label)}, '
-                  '${accentNode.isStretchy ? '' : 'not '}stretchy and '
-                  '${accentNode.isShifty ? '' : 'not '}shifty',
-              TexCommandEncodeResult(
-                  command: commandCandidates.first, args: node.children),
-            );
+      ? NonStrictEncodeResult(
+          'imprecise accent',
+          'No strict match for accent symbol under math mode: '
+              '${unicodeLiteral(accentNode.label)}, '
+              '${accentNode.isStretchy ? '' : 'not '}stretchy and '
+              '${accentNode.isShifty ? '' : 'not '}shifty',
+          TexCommandEncodeResult(
+            command: mathCommandCandidates.first,
+            args: node.children,
+          ),
+        )
+      : NonStrictEncodeResult(
+          'unknown accent',
+          'No strict match for accent symbol under math mode: '
+              '${unicodeLiteral(accentNode.label)}, '
+              '${accentNode.isStretchy ? '' : 'not '}stretchy and '
+              '${accentNode.isShifty ? '' : 'not '}shifty',
+          TexCommandEncodeResult(
+            command: commandCandidates.first,
+            args: node.children,
+          ),
+        );
 
-  final textCommand =
-      accentNode.isStretchy == false && accentNode.isShifty == true
-          ? textCommandCandidates.firstOrNull
-          : null;
+  final textCommand = !accentNode.isStretchy && accentNode.isShifty
+      ? textCommandCandidates.firstOrNull
+      : null;
 
   final text = textCommand != null
       ? TexCommandEncodeResult(command: textCommand, args: node.children)
       : textCommandCandidates.firstOrNull != null
-          ? NonStrictEncodeResult(
-              'imprecise accent',
-              'No strict match for accent symbol under text mode: '
-                  '${unicodeLiteral(accentNode.label)}, '
-                  '${accentNode.isStretchy ? '' : 'not '}stretchy and '
-                  '${accentNode.isShifty ? '' : 'not '}shifty',
-              TexCommandEncodeResult(
-                command: textCommandCandidates.first,
-                args: node.children,
-              ),
-            )
-          : NonStrictEncodeResult(
-              'unknown accent',
-              'No strict match for accent symbol under text mode: '
-                  '${unicodeLiteral(accentNode.label)}, '
-                  '${accentNode.isStretchy ? '' : 'not '}stretchy and '
-                  '${accentNode.isShifty ? '' : 'not '}shifty',
-              TexCommandEncodeResult(
-                  command: commandCandidates.first, args: node.children),
-            );
+      ? NonStrictEncodeResult(
+          'imprecise accent',
+          'No strict match for accent symbol under text mode: '
+              '${unicodeLiteral(accentNode.label)}, '
+              '${accentNode.isStretchy ? '' : 'not '}stretchy and '
+              '${accentNode.isShifty ? '' : 'not '}shifty',
+          TexCommandEncodeResult(
+            command: textCommandCandidates.first,
+            args: node.children,
+          ),
+        )
+      : NonStrictEncodeResult(
+          'unknown accent',
+          'No strict match for accent symbol under text mode: '
+              '${unicodeLiteral(accentNode.label)}, '
+              '${accentNode.isStretchy ? '' : 'not '}stretchy and '
+              '${accentNode.isShifty ? '' : 'not '}shifty',
+          TexCommandEncodeResult(
+            command: commandCandidates.first,
+            args: node.children,
+          ),
+        );
 
-  return ModeDependentEncodeResult(
-    math: math,
-    text: text,
-  );
+  return ModeDependentEncodeResult(math: math, text: text);
 }

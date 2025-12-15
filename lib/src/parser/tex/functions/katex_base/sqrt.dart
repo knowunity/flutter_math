@@ -24,7 +24,7 @@
 part of katex_base;
 
 const _sqrtEntries = {
-  ['\\sqrt']: FunctionSpec(
+  [r'\sqrt']: FunctionSpec(
     numArgs: 1,
     numOptionalArgs: 1,
     handler: _sqrtHandler,

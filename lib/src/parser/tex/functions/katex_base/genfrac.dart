@@ -25,10 +25,10 @@ part of katex_base;
 
 const _genfracEntries = {
   [
-    '\\cfrac', '\\dfrac', '\\frac', '\\tfrac',
-    '\\dbinom', '\\binom', '\\tbinom',
-    '\\\\atopfrac', // can’t be entered directly
-    '\\\\bracefrac', '\\\\brackfrac', // ditto
+    r'\cfrac', r'\dfrac', r'\frac', r'\tfrac',
+    r'\dbinom', r'\binom', r'\tbinom',
+    r'\\atopfrac', // can’t be entered directly
+    r'\\bracefrac', r'\\brackfrac', // ditto
   ]: FunctionSpec<GreenNode>(
     numArgs: 2,
     greediness: 2,
@@ -37,30 +37,23 @@ const _genfracEntries = {
 
   // Infix generalized fractions -- these are not rendered directly, but
   // replaced immediately by one of the variants above.
-  ['\\over', '\\choose', '\\atop', '\\brace', '\\brack']:
-      FunctionSpec<GreenNode>(
-    numArgs: 0,
-    infix: true,
-    handler: _overHandler,
-  ),
+  [r'\over', r'\choose', r'\atop', r'\brace', r'\brack']:
+      FunctionSpec<GreenNode>(numArgs: 0, infix: true, handler: _overHandler),
 
-  ['\\genfrac']: FunctionSpec<GreenNode>(
+  [r'\genfrac']: FunctionSpec<GreenNode>(
     numArgs: 6,
     greediness: 6,
     handler: _genfracHandler,
   ),
 
   // \above is an infix fraction that also defines a fraction bar size.
-  ['\\above']: FunctionSpec<GreenNode>(
+  [r'\above']: FunctionSpec<GreenNode>(
     numArgs: 1,
     infix: true,
     handler: _aboveHandler,
   ),
 
-  ['\\\\abovefrac']: FunctionSpec(
-    numArgs: 3,
-    handler: _aboveFracHandler,
-  ),
+  [r'\\abovefrac']: FunctionSpec(numArgs: 3, handler: _aboveFracHandler),
 };
 
 GreenNode _fracHandler(TexParser parser, FunctionContext context) {
@@ -84,51 +77,44 @@ GreenNode _internalFracHandler({
   MathStyle? size;
 
   switch (funcName) {
-    case '\\cfrac':
-    case '\\dfrac':
-    case '\\frac':
-    case '\\tfrac':
+    case r'\cfrac':
+    case r'\dfrac':
+    case r'\frac':
+    case r'\tfrac':
       hasBarLine = true;
-      break;
-    case '\\\\atopfrac':
+    case r'\\atopfrac':
       hasBarLine = false;
-      break;
-    case '\\dbinom':
-    case '\\binom':
-    case '\\tbinom':
+    case r'\dbinom':
+    case r'\binom':
+    case r'\tbinom':
       hasBarLine = false;
       leftDelim = '(';
       rightDelim = ')';
-      break;
-    case '\\\\bracefrac':
+    case r'\\bracefrac':
       hasBarLine = false;
       leftDelim = '{';
       rightDelim = '}';
-      break;
-    case '\\\\brackfrac':
+    case r'\\brackfrac':
       hasBarLine = false;
       leftDelim = '[';
       rightDelim = ']';
-      break;
     default:
       throw ParseException('Unrecognized genfrac command');
   }
   switch (funcName) {
-    case '\\cfrac':
-    case '\\dfrac':
-    case '\\dbinom':
+    case r'\cfrac':
+    case r'\dfrac':
+    case r'\dbinom':
       size = MathStyle.display;
-      break;
-    case '\\tfrac':
-    case '\\tbinom':
+    case r'\tfrac':
+    case r'\tbinom':
       size = MathStyle.text;
-      break;
   }
   GreenNode res = FracNode(
     numerator: numer,
     denominator: denom,
     barSize: hasBarLine ? null : Measurement.zero,
-    continued: funcName == '\\cfrac',
+    continued: funcName == r'\cfrac',
   );
   if (leftDelim != null || rightDelim != null) {
     res = LeftRightNode(
@@ -149,21 +135,16 @@ GreenNode _internalFracHandler({
 GreenNode _overHandler(TexParser parser, FunctionContext context) {
   String replaceWith;
   switch (context.funcName) {
-    case '\\over':
-      replaceWith = '\\frac';
-      break;
-    case '\\choose':
-      replaceWith = '\\binom';
-      break;
-    case '\\atop':
-      replaceWith = '\\\\atopfrac';
-      break;
-    case '\\brace':
-      replaceWith = '\\\\bracefrac';
-      break;
-    case '\\brack':
-      replaceWith = '\\\\brackfrac';
-      break;
+    case r'\over':
+      replaceWith = r'\frac';
+    case r'\choose':
+      replaceWith = r'\binom';
+    case r'\atop':
+      replaceWith = r'\\atopfrac';
+    case r'\brace':
+      replaceWith = r'\\bracefrac';
+    case r'\brack':
+      replaceWith = r'\\brackfrac';
     default:
       throw ArgumentError('Unrecognized infix genfrac command');
   }
@@ -189,21 +170,22 @@ GreenNode _genfracHandler(TexParser parser, FunctionContext context) {
 
   final leftDelimNode = leftDelimArg is EquationRowNode
       ? leftDelimArg.children.length == 1
-          ? leftDelimArg.children.first
-          : null
+            ? leftDelimArg.children.first
+            : null
       : leftDelimArg;
   final rightDelimNode = rightDelimArg is EquationRowNode
       ? rightDelimArg.children.length == 1
-          ? rightDelimArg.children.first
-          : null
+            ? rightDelimArg.children.first
+            : null
       : rightDelimArg;
 
   final leftDelim =
       (leftDelimNode is SymbolNode && leftDelimNode.atomType == AtomType.open)
-          ? leftDelimNode.symbol
-          : null;
+      ? leftDelimNode.symbol
+      : null;
 
-  final rightDelim = (rightDelimNode is SymbolNode &&
+  final rightDelim =
+      (rightDelimNode is SymbolNode &&
           rightDelimNode.atomType == AtomType.close)
       ? rightDelimNode.symbol
       : null;

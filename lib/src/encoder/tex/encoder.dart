@@ -20,22 +20,23 @@ class TexEncoder extends Converter<GreenNode, String> {
 
 extension TexEncoderExt on GreenNode {
   /// Encodes the node into TeX
-  String encodeTeX({TexEncodeConf conf = const TexEncodeConf()}) =>
+  String encodeTeX({TexEncodeConf conf = TexEncodeConf.mathConf}) =>
       encodeTex(this).stringify(conf);
 }
 
 extension ListTexEncoderExt on List<GreenNode> {
   /// Encode the list of nodes into TeX
   String encodeTex() =>
-      this.wrapWithEquationRow().encodeTeX(conf: TexEncodeConf().mathParam());
+      wrapWithEquationRow().encodeTeX(conf: TexEncodeConf.mathConf.mathParam());
 }
 
 EncodeResult encodeTex(GreenNode node) {
   final cachedRes = texEncodingCache[node];
   if (cachedRes != null) return cachedRes;
 
-  final optimization = optimizationEntries
-      .firstWhereOrNull((entry) => entry.matcher.match(node));
+  final optimization = optimizationEntries.firstWhereOrNull(
+    (entry) => entry.matcher.match(node),
+  );
   if (optimization != null) {
     optimization.optimize(node);
     final cachedRes = texEncodingCache[node];
@@ -45,8 +46,10 @@ EncodeResult encodeTex(GreenNode node) {
   final type = node.runtimeType;
   final encoderFunction = encoderFunctions[type];
   if (encoderFunction == null) {
-    return NonStrictEncodeResult('unknown node type',
-        'Unrecognized node type $type encountered during encoding');
+    return NonStrictEncodeResult(
+      'unknown node type',
+      'Unrecognized node type $type encountered during encoding',
+    );
   }
 
   final encodeResult = encoderFunction(node);
@@ -55,21 +58,22 @@ EncodeResult encodeTex(GreenNode node) {
 }
 
 class TexEncodeConf extends EncodeConf {
-  final Mode mode;
-  final bool removeRowBracket;
-
   const TexEncodeConf({
     this.mode = Mode.math,
     this.removeRowBracket = false,
-    Strict strict = Strict.warn,
-    StrictFun? strictFun,
-  }) : super(strict: strict, strictFun: strictFun);
+    super.strict,
+    super.strictFun,
+  });
+  final Mode mode;
+  final bool removeRowBracket;
 
   static const mathConf = TexEncodeConf();
   static const mathParamConf = TexEncodeConf(removeRowBracket: true);
   static const textConf = TexEncodeConf(mode: Mode.text);
-  static const textParamConf =
-      TexEncodeConf(mode: Mode.text, removeRowBracket: true);
+  static const textParamConf = TexEncodeConf(
+    mode: Mode.text,
+    removeRowBracket: true,
+  );
 
   TexEncodeConf math() {
     if (mode == Mode.math && !removeRowBracket) return this;
@@ -106,13 +110,12 @@ class TexEncodeConf extends EncodeConf {
     bool? removeRowBracket,
     Strict? strict,
     StrictFun? strictFun,
-  }) =>
-      TexEncodeConf(
-        mode: mode ?? this.mode,
-        removeRowBracket: removeRowBracket ?? this.removeRowBracket,
-        strict: strict ?? this.strict,
-        strictFun: strictFun ?? this.strictFun,
-      );
+  }) => TexEncodeConf(
+    mode: mode ?? this.mode,
+    removeRowBracket: removeRowBracket ?? this.removeRowBracket,
+    strict: strict ?? this.strict,
+    strictFun: strictFun ?? this.strictFun,
+  );
 }
 
 String _handleArg(dynamic arg, EncodeConf conf) {
@@ -150,6 +153,13 @@ bool _isSingleSymbol(dynamic arg) {
 }
 
 class TexCommandEncodeResult extends EncodeResult {
+  TexCommandEncodeResult({
+    required this.command,
+    required this.args,
+    int? numArgs,
+    int? numOptionalArgs,
+  }) : _numArgs = numArgs,
+       _numOptionalArgs = numOptionalArgs;
   final String command;
 
   /// Accepted type: [Null], [String], [EncodeResult], [GreenNode]
@@ -163,41 +173,36 @@ class TexCommandEncodeResult extends EncodeResult {
   final int? _numOptionalArgs;
   late final int numOptionalArgs = _numOptionalArgs ?? spec.numOptionalArgs;
 
-  late final List<Mode?> argModes = spec.argModes ??
-      List.filled(numArgs + numOptionalArgs, null, growable: false);
-
-  TexCommandEncodeResult({
-    required this.command,
-    required this.args,
-    int? numArgs,
-    int? numOptionalArgs,
-  })  : _numArgs = numArgs,
-        _numOptionalArgs = numOptionalArgs;
+  late final List<Mode?> argModes =
+      spec.argModes ?? List.filled(numArgs + numOptionalArgs, null);
 
   @override
   String stringify(TexEncodeConf conf) {
-    assert(this.numArgs >= this.numOptionalArgs);
+    assert(numArgs >= numOptionalArgs);
     if (!spec.allowedInMath && conf.mode == Mode.math) {
-      conf.reportNonstrict('command mode mismatch',
-          'Text-only command $command occured in math encoding enviroment');
+      conf.reportNonstrict(
+        'command mode mismatch',
+        'Text-only command $command occured in math encoding enviroment',
+      );
     }
     if (!spec.allowedInText && conf.mode == Mode.text) {
-      conf.reportNonstrict('command mode mismatch',
-          'Math-only command $command occured in text encoding environment');
+      conf.reportNonstrict(
+        'command mode mismatch',
+        'Math-only command $command occured in text encoding environment',
+      );
     }
-    final argString = Iterable.generate(
-      numArgs + numOptionalArgs,
-      (index) {
-        final mode = argModes[index] ?? conf.mode;
-        final string = _handleArg(args[index],
-            mode == Mode.math ? conf.mathParam() : conf.textParam());
-        if (index < numOptionalArgs) {
-          return string.isEmpty ? '' : '[$string]';
-        } else {
-          return '{$string}'; // TODO optimize
-        }
-      },
-    ).join();
+    final argString = Iterable.generate(numArgs + numOptionalArgs, (index) {
+      final mode = argModes[index] ?? conf.mode;
+      final string = _handleArg(
+        args[index],
+        mode == Mode.math ? conf.mathParam() : conf.textParam(),
+      );
+      if (index < numOptionalArgs) {
+        return string.isEmpty ? '' : '[$string]';
+      } else {
+        return '{$string}'; // TODO optimize
+      }
+    }).join();
 
     if (argString.isNotEmpty && (argString[0] == '[' || argString[0] == '{')) {
       return '$command$argString';
@@ -217,7 +222,7 @@ extension TexEncoderJoinerExt on Iterable<String> {
       final next = (iterator..moveNext()).current;
       if (current.length == 1 ||
           (next.isNotEmpty && !isAlphaNumericUnit(next[0]) && next[0] != '*') ||
-          (current.isNotEmpty && current[current.length - 1] == '\}')) {
+          (current.isNotEmpty && current[current.length - 1] == '}')) {
         return current;
       }
       return '$current ';
@@ -226,9 +231,8 @@ extension TexEncoderJoinerExt on Iterable<String> {
 }
 
 class EquationRowTexEncodeResult extends EncodeResult {
-  final List<dynamic> children;
-
   const EquationRowTexEncodeResult(this.children);
+  final List<dynamic> children;
 
   @override
   String stringify(TexEncodeConf conf) {
@@ -239,7 +243,7 @@ class EquationRowTexEncodeResult extends EncodeResult {
       }
       return _handleArg(child, conf.ord());
     }).texJoin();
-    if (conf.removeRowBracket == true) {
+    if (conf.removeRowBracket) {
       return content;
     } else {
       return '{$content}';
@@ -248,9 +252,8 @@ class EquationRowTexEncodeResult extends EncodeResult {
 }
 
 class TransparentTexEncodeResult extends EncodeResult {
-  final List<dynamic> children;
-
   const TransparentTexEncodeResult(this.children);
+  final List<dynamic> children;
 
   @override
   String stringify(TexEncodeConf conf) =>
@@ -258,11 +261,10 @@ class TransparentTexEncodeResult extends EncodeResult {
 }
 
 class ModeDependentEncodeResult extends EncodeResult {
+  const ModeDependentEncodeResult({this.text, this.math});
   final dynamic text;
 
   final dynamic math;
-
-  const ModeDependentEncodeResult({this.text, this.math});
 
   @override
   String stringify(TexEncodeConf conf) =>
@@ -277,12 +279,13 @@ class ModeDependentEncodeResult extends EncodeResult {
 }
 
 class TexModeCommandEncodeResult extends EncodeResult {
+  const TexModeCommandEncodeResult({
+    required this.command,
+    required this.children,
+  });
   final String command;
 
   final List<dynamic> children;
-
-  const TexModeCommandEncodeResult(
-      {required this.command, required this.children});
 
   @override
   String stringify(TexEncodeConf conf) {
@@ -293,7 +296,7 @@ class TexModeCommandEncodeResult extends EncodeResult {
       }
       return _handleArg(child, conf.ord());
     }).texJoin();
-    if (conf.removeRowBracket == true) {
+    if (conf.removeRowBracket) {
       return '$command $content';
     } else {
       return '{$command $content}';
@@ -302,12 +305,6 @@ class TexModeCommandEncodeResult extends EncodeResult {
 }
 
 class TexMultiscriptEncodeResult extends EncodeResult {
-  final dynamic base;
-  final dynamic sub;
-  final dynamic sup;
-  final dynamic presub;
-  final dynamic presup;
-
   const TexMultiscriptEncodeResult({
     required this.base,
     this.sub,
@@ -315,12 +312,19 @@ class TexMultiscriptEncodeResult extends EncodeResult {
     this.presub,
     this.presup,
   });
+  final dynamic base;
+  final dynamic sub;
+  final dynamic sup;
+  final dynamic presub;
+  final dynamic presup;
 
   @override
   String stringify(TexEncodeConf conf) {
     if (conf.mode != Mode.math) {
-      conf.reportNonstrict('command mode mismatch',
-          'Sub/sup scripts occured in text encoding environment');
+      conf.reportNonstrict(
+        'command mode mismatch',
+        'Sub/sup scripts occured in text encoding environment',
+      );
     }
     if (presub != null || presup != null) {
       conf.reportNonstrict(
@@ -330,23 +334,11 @@ class TexMultiscriptEncodeResult extends EncodeResult {
     }
     return [
       if (presub != null || presup != null) '{}',
-      if (presub != null) ...[
-        '_',
-        _handleAndWrapArg(presub, conf.param()),
-      ],
-      if (presup != null) ...[
-        '^',
-        _handleAndWrapArg(presup, conf.param()),
-      ],
+      if (presub != null) ...['_', _handleAndWrapArg(presub, conf.param())],
+      if (presup != null) ...['^', _handleAndWrapArg(presup, conf.param())],
       _handleAndWrapArg(base, conf.param()),
-      if (sub != null) ...[
-        '_',
-        _handleAndWrapArg(sub, conf.param()),
-      ],
-      if (sup != null) ...[
-        '^',
-        _handleAndWrapArg(sup, conf.param()),
-      ],
+      if (sub != null) ...['_', _handleAndWrapArg(sub, conf.param())],
+      if (sup != null) ...['^', _handleAndWrapArg(sup, conf.param())],
     ].texJoin();
   }
 }

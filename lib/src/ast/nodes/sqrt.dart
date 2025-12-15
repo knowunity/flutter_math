@@ -12,8 +12,8 @@ import '../../render/layout/reset_baseline.dart';
 import '../../render/svg/delimiter.dart';
 import '../../render/svg/svg_geomertry.dart';
 import '../../render/svg/svg_string.dart';
-import '../../render/utils/render_box_offset.dart';
 import '../../render/utils/render_box_layout.dart';
+import '../../render/utils/render_box_offset.dart';
 import '../options.dart';
 import '../size.dart';
 import '../style.dart';
@@ -26,20 +26,19 @@ import '../syntax_tree.dart';
 /// - Latex:  `\sqrt`   `\sqrt[index]{base}`
 /// - MathML: `msqrt`   `mroot`
 class SqrtNode extends SlotableNode {
+  SqrtNode({required this.index, required this.base});
+
   /// The index.
   final EquationRowNode? index;
 
   /// The sqrt-and.
   final EquationRowNode base;
 
-  SqrtNode({
-    required this.index,
-    required this.base,
-  });
-
   @override
   BuildResult buildWidget(
-      MathOptions options, List<BuildResult?> childBuildResults) {
+    MathOptions options,
+    List<BuildResult?> childBuildResults,
+  ) {
     final baseResult = childBuildResults[1]!;
     final indexResult = childBuildResults[0];
     return BuildResult(
@@ -55,7 +54,6 @@ class SqrtNode extends SlotableNode {
             id: _SqrtPos.base,
             child: MinDimension(
               minHeight: options.fontMetrics.xHeight.cssEm.toLpUnder(options),
-              topPadding: 0,
               child: baseResult.widget,
             ),
           ),
@@ -66,7 +64,7 @@ class SqrtNode extends SlotableNode {
             // render lines in the base widget
             child: IgnorePointer(
               child: LayoutBuilderPreserveBaseline(
-                builder: (context, constraints) => sqrtSvg(
+                builder: (context, constraints) => SqrtSvgWidget(
                   minDelimiterHeight: constraints.minHeight,
                   baseWidth: constraints.minWidth,
                   options: options,
@@ -75,10 +73,7 @@ class SqrtNode extends SlotableNode {
             ),
           ),
           if (index != null)
-            CustomLayoutId(
-              id: _SqrtPos.ind,
-              child: indexResult!.widget,
-            ),
+            CustomLayoutId(id: _SqrtPos.ind, child: indexResult!.widget),
         ],
       ),
     );
@@ -86,9 +81,9 @@ class SqrtNode extends SlotableNode {
 
   @override
   List<MathOptions> computeChildOptions(MathOptions options) => [
-        options.havingStyle(MathStyle.scriptscript),
-        options.havingStyle(options.style.cramp()),
-      ];
+    options.havingStyle(MathStyle.scriptscript),
+    options.havingStyle(options.style.cramp()),
+  ];
 
   @override
   List<EquationRowNode?> computeChildren() => [index, base];
@@ -104,26 +99,15 @@ class SqrtNode extends SlotableNode {
       false;
 
   @override
-  SqrtNode updateChildren(List<EquationRowNode?> newChildren) => SqrtNode(
-        index: newChildren[0],
-        base: newChildren[1]!,
-      );
+  SqrtNode updateChildren(List<EquationRowNode?> newChildren) =>
+      SqrtNode(index: newChildren[0], base: newChildren[1]!);
 
   @override
-  Map<String, Object?> toJson() => super.toJson()
-    ..addAll({
-      'index': index?.toJson(),
-      'base': base.toJson(),
-    });
+  Map<String, Object?> toJson() =>
+      super.toJson()..addAll({'index': index?.toJson(), 'base': base.toJson()});
 
-  SqrtNode copyWith({
-    EquationRowNode? index,
-    EquationRowNode? base,
-  }) =>
-      SqrtNode(
-        index: index ?? this.index,
-        base: base ?? this.base,
-      );
+  SqrtNode copyWith({EquationRowNode? index, EquationRowNode? base}) =>
+      SqrtNode(index: index ?? this.index, base: base ?? this.base);
 }
 
 enum _SqrtPos {
@@ -134,23 +118,23 @@ enum _SqrtPos {
 
 // Square roots are handled in the TeXbook pg. 443, Rule 11.
 class SqrtLayoutDelegate extends CustomLayoutDelegate<_SqrtPos> {
-  final MathOptions options;
-  final MathOptions baseOptions;
   // final MathOptions indexOptions;
 
   SqrtLayoutDelegate({
     required this.options,
-    required this.baseOptions,
-    // required this.indexOptions,
+    required this.baseOptions, // required this.indexOptions,
   });
-  var heightAboveBaseline = 0.0;
-  var svgHorizontalPos = 0.0;
-  var svgVerticalPos = 0.0;
+  final MathOptions options;
+  final MathOptions baseOptions;
+  double heightAboveBaseline = 0;
+  double svgHorizontalPos = 0;
+  double svgVerticalPos = 0;
 
   @override
   double computeDistanceToActualBaseline(
-          TextBaseline baseline, Map<_SqrtPos, RenderBox> childrenTable) =>
-      heightAboveBaseline;
+    TextBaseline baseline,
+    Map<_SqrtPos, RenderBox> childrenTable,
+  ) => heightAboveBaseline;
 
   @override
   double getIntrinsicSize({
@@ -159,8 +143,7 @@ class SqrtLayoutDelegate extends CustomLayoutDelegate<_SqrtPos> {
     required double extent,
     required double Function(RenderBox child, double extent) childSize,
     required Map<_SqrtPos, RenderBox> childrenTable,
-  }) =>
-      0;
+  }) => 0;
 
   @override
   Size computeLayout(
@@ -172,21 +155,19 @@ class SqrtLayoutDelegate extends CustomLayoutDelegate<_SqrtPos> {
     final index = childrenTable[_SqrtPos.ind];
     final surd = childrenTable[_SqrtPos.surd]!;
 
-    final Size baseSize = base.getLayoutSize(infiniteConstraint, dry: dry);
-    final Size indexSize = index?.getLayoutSize(
-          infiniteConstraint,
-          dry: dry,
-        ) ??
-        Size.zero;
+    final baseSize = base.getLayoutSize(infiniteConstraint, dry: dry);
+    final indexSize =
+        index?.getLayoutSize(infiniteConstraint, dry: dry) ?? Size.zero;
 
     final baseHeight = dry ? 0 : base.layoutHeight;
     final baseWidth = baseSize.width;
     final indexHeight = dry ? 0 : index?.layoutHeight ?? 0.0;
     final indexWidth = indexSize.width;
 
-    final theta = baseOptions.fontMetrics.defaultRuleThickness.cssEm
-        .toLpUnder(baseOptions);
-    var phi = baseOptions.style > MathStyle.text
+    final theta = baseOptions.fontMetrics.defaultRuleThickness.cssEm.toLpUnder(
+      baseOptions,
+    );
+    final phi = baseOptions.style > MathStyle.text
         ? baseOptions.fontMetrics.xHeight.cssEm.toLpUnder(baseOptions)
         : theta;
     var psi = theta + 0.25 * phi.abs();
@@ -196,7 +177,7 @@ class SqrtLayoutDelegate extends CustomLayoutDelegate<_SqrtPos> {
       minWidth: baseWidth,
       minHeight: minSqrtHeight,
     );
-    final Size surdSize = surd.getLayoutSize(surdConstraints, dry: dry);
+    final surdSize = surd.getLayoutSize(surdConstraints, dry: dry);
 
     final advanceWidth = getSqrtAdvanceWidth(minSqrtHeight, baseWidth, options);
 
@@ -207,8 +188,10 @@ class SqrtLayoutDelegate extends CustomLayoutDelegate<_SqrtPos> {
     final indexLeftPadding = 0.5.pt.toLpUnder(options);
 
     // Horizontal layout
-    final sqrtHorizontalPos =
-        math.max(0.0, indexLeftPadding + indexSize.width + indexRightPadding);
+    final sqrtHorizontalPos = math.max(
+      0,
+      indexLeftPadding + indexSize.width + indexRightPadding,
+    );
     final width = sqrtHorizontalPos + surdSize.width;
 
     // Vertical layout
@@ -225,20 +208,29 @@ class SqrtLayoutDelegate extends CustomLayoutDelegate<_SqrtPos> {
     final bodyHeight = baseHeight + psi + ruleWidth;
     final bodyDepth = surdSize.height - bodyHeight;
     final indexShift = 0.6 * (bodyHeight - bodyDepth);
-    final sqrtVerticalPos =
-        math.max(0.0, indexHeight + indexShift - baseHeight - psi - ruleWidth);
+    final sqrtVerticalPos = math.max(
+      0,
+      indexHeight + indexShift - baseHeight - psi - ruleWidth,
+    );
     final height = sqrtVerticalPos + surdSize.height;
 
     // Position children
     if (!dry) {
-      svgHorizontalPos = sqrtHorizontalPos;
+      svgHorizontalPos = sqrtHorizontalPos.toDouble();
       heightAboveBaseline = bodyHeight + sqrtVerticalPos;
 
       base.offset = Offset(
-          sqrtHorizontalPos + advanceWidth, heightAboveBaseline - baseHeight);
-      index?.offset = Offset(sqrtHorizontalPos - indexRightPadding - indexWidth,
-          heightAboveBaseline - indexShift - indexHeight);
-      surd.offset = Offset(sqrtHorizontalPos, sqrtVerticalPos);
+        sqrtHorizontalPos + advanceWidth,
+        heightAboveBaseline - baseHeight,
+      );
+      index?.offset = Offset(
+        sqrtHorizontalPos - indexRightPadding - indexWidth,
+        heightAboveBaseline - indexShift - indexHeight,
+      );
+      surd.offset = Offset(
+        sqrtHorizontalPos.toDouble(),
+        sqrtVerticalPos.toDouble(),
+      );
     }
 
     return Size(width, height);
@@ -263,7 +255,10 @@ const emPad = vbPad / 1000;
 // We will use a highly similar strategy while sticking to the strict meaning
 // of TexBook Rule 11. We do not choose the style at *normalsize*
 double getSqrtAdvanceWidth(
-    double minDelimiterHeight, double baseWidth, MathOptions options) {
+  double minDelimiterHeight,
+  double baseWidth,
+  MathOptions options,
+) {
   // final newOptions = options.havingBaseSize();
   final delimConf = sqrtDelimieterSequence.firstWhereOrNull(
     (element) =>
@@ -278,18 +273,12 @@ double getSqrtAdvanceWidth(
   if (delimConf != null) {
     final delimOptions = options.havingStyle(delimConf.style);
     if (delimConf.font.fontName == 'Main-Regular') {
-      final advanceWidth = 0.833.cssEm.toLpUnder(delimOptions);
-      return advanceWidth;
+      return 0.833.cssEm.toLpUnder(delimOptions);
     } else {
-      // We will directly apply corresponding font
-
-      final advanceWidth = 1.0.cssEm.toLpUnder(delimOptions);
-
-      return advanceWidth;
+      return 1.0.cssEm.toLpUnder(delimOptions);
     }
   } else {
-    final advanceWidth = 1.056.cssEm.toLpUnder(options);
-    return advanceWidth;
+    return 1.056.cssEm.toLpUnder(options);
   }
 }
 
@@ -297,121 +286,130 @@ double getSqrtAdvanceWidth(
 // KaTeX chooses the style and font of the \\surd to cover inner at *normalsize*
 // We will use a highly similar strategy while sticking to the strict meaning
 // of TexBook Rule 11. We do not choose the style at *normalsize*
-Widget sqrtSvg({
-  required double minDelimiterHeight,
-  required double baseWidth,
-  required MathOptions options,
-}) {
-  // final newOptions = options.havingBaseSize();
-  final delimConf = sqrtDelimieterSequence.firstWhereOrNull(
-    (element) =>
-        getHeightForDelim(
-          delim: '\u221A', // √
-          fontName: element.font.fontName,
-          style: element.style,
-          options: options,
-        ) >
-        minDelimiterHeight,
-  );
+class SqrtSvgWidget extends StatelessWidget {
+  const SqrtSvgWidget({
+    required this.minDelimiterHeight,
+    required this.baseWidth,
+    required this.options,
+    super.key,
+  });
 
-  final extraViniculum = 0.0; //math.max(0.0, options)
-  // final ruleWidth =
-  //     options.fontMetrics.sqrtRuleThickness.cssEm.toLpUnder(options);
-  // TODO: support Settings.minRuleThickness.
+  final double minDelimiterHeight;
+  final double baseWidth;
+  final MathOptions options;
 
-  // These are the known height + depth for \u221A
-  if (delimConf != null) {
-    final fontHeight = const {
-      'Main-Regular': 1.0,
-      'Size1-Regular': 1.2,
-      'Size2-Regular': 1.8,
-      'Size3-Regular': 2.4,
-      'Size4-Regular': 3.0,
-    }[delimConf.font.fontName]!;
-    final delimOptions = options.havingStyle(delimConf.style);
-    final viewPortHeight =
-        (fontHeight + extraViniculum + emPad).cssEm.toLpUnder(delimOptions);
-    if (delimConf.font.fontName == 'Main-Regular') {
-      // We will be vertically stretching the sqrtMain path (by viewPort vs
-      // viewBox) to mimic the height of \u221A under Main-Regular font and
-      // corresponding Mathstyle.
-      final advanceWidth = 0.833.cssEm.toLpUnder(delimOptions);
-      final viewPortWidth = advanceWidth + baseWidth;
-      final viewBoxHeight = 1000 + 1000 * extraViniculum + vbPad;
-      final viewBoxWidth = viewPortWidth.lp.toCssEmUnder(delimOptions) * 1000;
-      final svgPath = sqrtPath('sqrtMain', extraViniculum, viewBoxHeight);
-      return ResetBaseline(
-        height: (options.fontMetrics.sqrtRuleThickness + extraViniculum)
-            .cssEm
-            .toLpUnder(delimOptions),
-        child: MinDimension(
-          topPadding: -emPad.cssEm.toLpUnder(delimOptions),
-          child: svgWidgetFromPath(
-            svgPath,
-            Size(viewPortWidth, viewPortHeight),
-            Rect.fromLTWH(0, 0, viewBoxWidth, viewBoxHeight),
-            options.color,
-            align: Alignment.topLeft,
-            fit: BoxFit.fill,
+  @override
+  Widget build(BuildContext context) {
+    // final newOptions = options.havingBaseSize();
+    final delimConf = sqrtDelimieterSequence.firstWhereOrNull(
+      (element) =>
+          getHeightForDelim(
+            delim: '\u221A', // √
+            fontName: element.font.fontName,
+            style: element.style,
+            options: options,
+          ) >
+          minDelimiterHeight,
+    );
+
+    const extraViniculum = 0.0; //math.max(0.0, options)
+    // final ruleWidth =
+    //     options.fontMetrics.sqrtRuleThickness.cssEm.toLpUnder(options);
+    // TODO: support Settings.minRuleThickness.
+
+    // These are the known height + depth for \u221A
+    if (delimConf != null) {
+      final fontHeight = const {
+        'Main-Regular': 1.0,
+        'Size1-Regular': 1.2,
+        'Size2-Regular': 1.8,
+        'Size3-Regular': 2.4,
+        'Size4-Regular': 3.0,
+      }[delimConf.font.fontName]!;
+      final delimOptions = options.havingStyle(delimConf.style);
+      final viewPortHeight = (fontHeight + extraViniculum + emPad).cssEm
+          .toLpUnder(delimOptions);
+      if (delimConf.font.fontName == 'Main-Regular') {
+        // We will be vertically stretching the sqrtMain path (by viewPort vs
+        // viewBox) to mimic the height of \u221A under Main-Regular font and
+        // corresponding Mathstyle.
+        final advanceWidth = 0.833.cssEm.toLpUnder(delimOptions);
+        final viewPortWidth = advanceWidth + baseWidth;
+        const viewBoxHeight = 1000 + 1000 * extraViniculum + vbPad;
+        final viewBoxWidth = viewPortWidth.lp.toCssEmUnder(delimOptions) * 1000;
+        final svgPath = sqrtPath('sqrtMain', extraViniculum, viewBoxHeight);
+        return ResetBaseline(
+          height: (options.fontMetrics.sqrtRuleThickness + extraViniculum).cssEm
+              .toLpUnder(delimOptions),
+          child: MinDimension(
+            topPadding: -emPad.cssEm.toLpUnder(delimOptions),
+            child: SvgWidgetFromPath(
+              path: svgPath,
+              viewPort: Size(viewPortWidth, viewPortHeight),
+              viewBox: Rect.fromLTWH(0, 0, viewBoxWidth, viewBoxHeight),
+              color: options.color,
+            ),
           ),
-        ),
-      );
-    } else {
-      // We will directly apply corresponding font
+        );
+      } else {
+        // We will directly apply corresponding font
 
-      final advanceWidth = 1.0.cssEm.toLpUnder(delimOptions);
-      final viewPortWidth = math.max(
-        advanceWidth + baseWidth,
-        1.02.cssEm.toCssEmUnder(delimOptions),
-      );
-      final viewBoxHeight = (1000 + vbPad) * fontHeight;
-      final viewBoxWidth = viewPortWidth.lp.toCssEmUnder(delimOptions) * 1000;
-      final svgPath = sqrtPath('sqrt${delimConf.font.fontName.substring(0, 5)}',
-          extraViniculum, viewBoxHeight);
+        final advanceWidth = 1.0.cssEm.toLpUnder(delimOptions);
+        final viewPortWidth = math.max(
+          advanceWidth + baseWidth,
+          1.02.cssEm.toCssEmUnder(delimOptions),
+        );
+        final viewBoxHeight = (1000 + vbPad) * fontHeight;
+        final viewBoxWidth = viewPortWidth.lp.toCssEmUnder(delimOptions) * 1000;
+        final svgPath = sqrtPath(
+          'sqrt${delimConf.font.fontName.substring(0, 5)}',
+          extraViniculum,
+          viewBoxHeight,
+        );
+        return ResetBaseline(
+          height: (options.fontMetrics.sqrtRuleThickness + extraViniculum).cssEm
+              .toLpUnder(delimOptions),
+          child: MinDimension(
+            topPadding: -emPad.cssEm.toLpUnder(delimOptions),
+            child: SvgWidgetFromPath(
+              path: svgPath,
+              viewPort: Size(viewPortWidth, viewPortHeight),
+              viewBox: Rect.fromLTWH(0, 0, viewBoxWidth, viewBoxHeight),
+              color: options.color,
+              fit: BoxFit
+                  .cover, // BoxFit.fitHeight, // For DomCanvas compatibility
+            ),
+          ),
+        );
+      }
+    } else {
+      // We will use the viewBoxHeight parameter in sqrtTall path
+      final viewPortHeight =
+          minDelimiterHeight +
+          (extraViniculum + emPad).cssEm.toLpUnder(options);
+      final viewBoxHeight =
+          1000 * minDelimiterHeight.lp.toCssEmUnder(options) +
+          extraViniculum +
+          vbPad;
+      final advanceWidth = 1.056.cssEm.toLpUnder(options);
+      final viewPortWidth = advanceWidth + baseWidth;
+      final viewBoxWidth = viewPortWidth.lp.toCssEmUnder(options) * 1000;
+      final svgPath = sqrtPath('sqrtTall', extraViniculum, viewBoxHeight);
       return ResetBaseline(
-        height: (options.fontMetrics.sqrtRuleThickness + extraViniculum)
-            .cssEm
-            .toLpUnder(delimOptions),
+        height: (options.fontMetrics.sqrtRuleThickness + extraViniculum).cssEm
+            .toLpUnder(options),
         child: MinDimension(
-          topPadding: -emPad.cssEm.toLpUnder(delimOptions),
-          child: svgWidgetFromPath(
-            svgPath,
-            Size(viewPortWidth, viewPortHeight),
-            Rect.fromLTWH(0, 0, viewBoxWidth, viewBoxHeight),
-            options.color,
-            align: Alignment.topLeft,
+          topPadding: -emPad.cssEm.toLpUnder(options),
+          child: SvgWidgetFromPath(
+            path: svgPath,
+            viewPort: Size(viewPortWidth, viewPortHeight),
+            viewBox: Rect.fromLTWH(0, 0, viewBoxWidth, viewBoxHeight),
+            color: options.color,
             fit: BoxFit
                 .cover, // BoxFit.fitHeight, // For DomCanvas compatibility
           ),
         ),
       );
     }
-  } else {
-    // We will use the viewBoxHeight parameter in sqrtTall path
-    final viewPortHeight =
-        minDelimiterHeight + (extraViniculum + emPad).cssEm.toLpUnder(options);
-    final viewBoxHeight = 1000 * minDelimiterHeight.lp.toCssEmUnder(options) +
-        extraViniculum +
-        vbPad;
-    final advanceWidth = 1.056.cssEm.toLpUnder(options);
-    final viewPortWidth = advanceWidth + baseWidth;
-    final viewBoxWidth = viewPortWidth.lp.toCssEmUnder(options) * 1000;
-    final svgPath = sqrtPath('sqrtTall', extraViniculum, viewBoxHeight);
-    return ResetBaseline(
-      height: (options.fontMetrics.sqrtRuleThickness + extraViniculum)
-          .cssEm
-          .toLpUnder(options),
-      child: MinDimension(
-        topPadding: -emPad.cssEm.toLpUnder(options),
-        child: svgWidgetFromPath(
-          svgPath,
-          Size(viewPortWidth, viewPortHeight),
-          Rect.fromLTWH(0, 0, viewBoxWidth, viewBoxHeight),
-          options.color,
-          align: Alignment.topLeft,
-          fit: BoxFit.cover, // BoxFit.fitHeight, // For DomCanvas compatibility
-        ),
-      ),
-    );
   }
 }

@@ -22,16 +22,23 @@ BuildResult makeRlapCompositeSymbol(
   MathOptions options,
 ) {
   final res1 = makeBaseSymbol(
-      symbol: char1, atomType: type, mode: mode, options: options);
+    symbol: char1,
+    atomType: type,
+    mode: mode,
+    options: options,
+  );
   final res2 = makeBaseSymbol(
-      symbol: char2, atomType: type, mode: mode, options: options);
+    symbol: char2,
+    atomType: type,
+    mode: mode,
+    options: options,
+  );
   return BuildResult(
     italic: res2.italic,
     options: options,
     widget: Row(
       crossAxisAlignment: CrossAxisAlignment.baseline,
       textBaseline: TextBaseline.alphabetic,
-      mainAxisAlignment: MainAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
         ResetDimension(
@@ -54,9 +61,17 @@ BuildResult makeCompactedCompositeSymbol(
   MathOptions options,
 ) {
   final res1 = makeBaseSymbol(
-      symbol: char1, atomType: type, mode: mode, options: options);
+    symbol: char1,
+    atomType: type,
+    mode: mode,
+    options: options,
+  );
   final res2 = makeBaseSymbol(
-      symbol: char2, atomType: type, mode: mode, options: options);
+    symbol: char2,
+    atomType: type,
+    mode: mode,
+    options: options,
+  );
   final widget1 = char1 != ':'
       ? res1.widget
       : ShiftBaseline(
@@ -76,10 +91,7 @@ BuildResult makeCompactedCompositeSymbol(
     options: options,
     widget: Line(
       children: <Widget>[
-        LineElement(
-          child: widget1,
-          trailingMargin: spacing.toLpUnder(options),
-        ),
+        LineElement(trailingMargin: spacing.toLpUnder(options), child: widget1),
         widget2,
       ],
     ),
@@ -102,32 +114,29 @@ BuildResult makeDecoratedEqualSymbol(
     case '\u2259':
       decoratorSymbols = ['\u2227']; // \wedge
       decoratorSize = MathSize.tiny;
-      break;
     case '\u225A':
       decoratorSymbols = ['\u2228']; // \vee
       decoratorSize = MathSize.tiny;
-      break;
     case '\u225B':
       decoratorSymbols = ['\u22c6']; // \star
       decoratorSize = MathSize.scriptsize;
-      break;
     case '\u225D':
       decoratorSymbols = ['d', 'e', 'f'];
       decoratorSize = MathSize.tiny;
-      decoratorFont = texMathFontOptions['\\mathrm']!;
-      break;
+      decoratorFont = texMathFontOptions[r'\mathrm'];
     case '\u225E':
       decoratorSymbols = ['m'];
       decoratorSize = MathSize.tiny;
-      decoratorFont = texMathFontOptions['\\mathrm']!;
-      break;
+      decoratorFont = texMathFontOptions[r'\mathrm'];
     case '\u225F':
       decoratorSymbols = ['?'];
       decoratorSize = MathSize.tiny;
-      break;
     default:
       throw ArgumentError.value(
-          unicodeLiteral(symbol), 'symbol', 'Not a decorator character');
+        unicodeLiteral(symbol),
+        'symbol',
+        'Not a decorator character',
+      );
   }
 
   final decorator = StyleNode(
@@ -141,10 +150,16 @@ BuildResult makeDecoratedEqualSymbol(
   );
 
   final proxyNode = OverNode(
-    base: SymbolNode(symbol: '=', mode: mode, overrideAtomType: type)
-        .wrapWithEquationRow(),
+    base: SymbolNode(
+      symbol: '=',
+      mode: mode,
+      overrideAtomType: type,
+    ).wrapWithEquationRow(),
     above: decorator.wrapWithEquationRow(),
   );
-  return SyntaxNode(parent: null, value: proxyNode, pos: 0)
-      .buildWidget(options);
+  return SyntaxNode(
+    parent: null,
+    value: proxyNode,
+    pos: 0,
+  ).buildWidget(options);
 }

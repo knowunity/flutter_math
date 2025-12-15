@@ -14,6 +14,12 @@ import '../syntax_tree.dart';
 ///
 /// Example: `\xleftarrow`
 class StretchyOpNode extends SlotableNode<EquationRowNode?> {
+  StretchyOpNode({
+    required this.above,
+    required this.below,
+    required this.symbol,
+  }) : assert(above != null || below != null);
+
   /// Unicode symbol for the operator.
   final String symbol;
 
@@ -23,19 +29,14 @@ class StretchyOpNode extends SlotableNode<EquationRowNode?> {
   /// Arguments below the operator.
   final EquationRowNode? below;
 
-  StretchyOpNode({
-    required this.above,
-    required this.below,
-    required this.symbol,
-  }) : assert(above != null || below != null);
-
   @override
   BuildResult buildWidget(
-      MathOptions options, List<BuildResult?> childBuildResults) {
+    MathOptions options,
+    List<BuildResult?> childBuildResults,
+  ) {
     final verticalPadding = 2.0.mu.toLpUnder(options);
     return BuildResult(
       options: options,
-      italic: 0.0,
       widget: VList(
         baselineReferenceWidgetIndex: above != null ? 1 : 0,
         children: <Widget>[
@@ -52,10 +53,10 @@ class StretchyOpNode extends SlotableNode<EquationRowNode?> {
               builder: (context, constraints) => ShiftBaseline(
                 relativePos: 0.5,
                 offset: options.fontMetrics.xHeight.cssEm.toLpUnder(options),
-                child: strechySvgSpan(
-                  stretchyOpMapping[symbol] ?? symbol,
-                  constraints.minWidth,
-                  options,
+                child: StrechySvgSpanWidget(
+                  name: stretchyOpMapping[symbol] ?? symbol,
+                  width: constraints.minWidth,
+                  options: options,
                 ),
               ),
             ),
@@ -64,7 +65,7 @@ class StretchyOpNode extends SlotableNode<EquationRowNode?> {
             Padding(
               padding: EdgeInsets.only(top: verticalPadding),
               child: childBuildResults[1]!.widget,
-            )
+            ),
         ],
       ),
     );
@@ -72,9 +73,9 @@ class StretchyOpNode extends SlotableNode<EquationRowNode?> {
 
   @override
   List<MathOptions> computeChildOptions(MathOptions options) => [
-        options.havingStyle(options.style.sup()),
-        options.havingStyle(options.style.sub()),
-      ];
+    options.havingStyle(options.style.sup()),
+    options.havingStyle(options.style.sub()),
+  ];
 
   @override
   List<EquationRowNode?> computeChildren() => [above, below];

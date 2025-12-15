@@ -21,7 +21,6 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-// ignore_for_file: prefer_single_quotes
 const unicodeSymbols = {
   "\u00e1": "\u0061\u0301", // á = \'{a}
   "\u00e0": "\u0061\u0300", // à = \`{a}

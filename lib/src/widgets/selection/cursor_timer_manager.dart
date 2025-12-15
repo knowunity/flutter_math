@@ -7,7 +7,8 @@ import 'selection_manager.dart';
 
 /// Helper class that keeps state relevant to the editing cursor.
 mixin CursorTimerManagerMixin<T extends StatefulWidget>
-    on SelectionManagerMixin<T> implements TickerProvider {
+    on SelectionManagerMixin<T>
+    implements TickerProvider {
   static const _kCursorBlinkHalfPeriod = Duration(milliseconds: 500);
 
   static const _fadeDuration = Duration(milliseconds: 250);
@@ -18,8 +19,10 @@ mixin CursorTimerManagerMixin<T extends StatefulWidget>
 
   bool get cursorOpacityAnimates;
 
+  @override
   bool get hasFocus;
 
+  @override
   FocusNode get focusNode;
 
   Timer? _cursorTimer;
@@ -35,8 +38,10 @@ mixin CursorTimerManagerMixin<T extends StatefulWidget>
 
   @override
   void initState() {
-    cursorBlinkOpacityController =
-        AnimationController(vsync: this, duration: _fadeDuration);
+    cursorBlinkOpacityController = AnimationController(
+      vsync: this,
+      duration: _fadeDuration,
+    );
     super.initState();
     _oldController = controller
       ..addListener(_startOrStopOrResetCursorTimerIfNeeded);
@@ -46,7 +51,7 @@ mixin CursorTimerManagerMixin<T extends StatefulWidget>
   }
 
   @override
-  void didUpdateWidget(covariant oldWidget) {
+  void didUpdateWidget(covariant T oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (controller != _oldController) {
       _oldController.removeListener(_startOrStopOrResetCursorTimerIfNeeded);
@@ -82,8 +87,12 @@ mixin CursorTimerManagerMixin<T extends StatefulWidget>
       //
       // These values and curves have been obtained through eyeballing, so are
       // likely not exactly the same as the values for native iOS.
-      cursorBlinkOpacityController.animateTo(targetOpacity,
-          curve: Curves.easeOut);
+      unawaited(
+        cursorBlinkOpacityController.animateTo(
+          targetOpacity,
+          curve: Curves.easeOut,
+        ),
+      );
     } else {
       cursorBlinkOpacityController.value = targetOpacity;
     }
@@ -100,8 +109,10 @@ mixin CursorTimerManagerMixin<T extends StatefulWidget>
     cursorBlinkOpacityController.value = 1.0;
     if (EditableText.debugDeterministicCursor) return;
     if (cursorOpacityAnimates) {
-      _cursorTimer =
-          Timer.periodic(_kCursorBlinkWaitForStart, _cursorWaitForStart);
+      _cursorTimer = Timer.periodic(
+        _kCursorBlinkWaitForStart,
+        _cursorWaitForStart,
+      );
     } else {
       _cursorTimer = Timer.periodic(_kCursorBlinkHalfPeriod, _cursorTick);
     }
@@ -120,7 +131,7 @@ mixin CursorTimerManagerMixin<T extends StatefulWidget>
   }
 
   void _startOrStopOrResetCursorTimerIfNeeded() {
-    if (showCursor != true) {
+    if (!showCursor) {
       _stopCursorTimer();
       return;
     }

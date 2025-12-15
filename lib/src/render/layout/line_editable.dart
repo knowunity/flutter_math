@@ -10,8 +10,8 @@ import '../../utils/num_extension.dart';
 import 'line.dart';
 
 class EditableLine extends MultiChildRenderObjectWidget {
-  EditableLine({
-    Key? key,
+  const EditableLine({
+    super.key,
     this.crossAxisAlignment = CrossAxisAlignment.baseline,
     this.cursorBlinkOpacityController,
     required this.cursorColor,
@@ -34,8 +34,8 @@ class EditableLine extends MultiChildRenderObjectWidget {
     this.endHandleLayerLink,
     this.textBaseline = TextBaseline.alphabetic,
     this.textDirection,
-    List<Widget> children = const [],
-  }) : super(key: key, children: children);
+    super.children,
+  });
 
   final CrossAxisAlignment crossAxisAlignment;
 
@@ -115,46 +115,61 @@ class EditableLine extends MultiChildRenderObjectWidget {
 
   @override
   void updateRenderObject(
-          BuildContext context, RenderEditableLine renderObject) =>
-      renderObject
-        ..crossAxisAlignment = crossAxisAlignment
-        ..cursorBlinkOpacityController = cursorBlinkOpacityController
-        ..cursorColor = cursorColor
-        ..cursorOffset = cursorOffset
-        ..cursorRadius = cursorRadius
-        ..cursorWidth = cursorWidth
-        ..cursorHeight = cursorHeight
-        ..devicePixelRatio = devicePixelRatio
-        ..hintingColor = hintingColor
-        ..minDepth = minDepth
-        ..minHeight = minHeight
-        ..node = node
-        ..paintCursorAboveText = paintCursorAboveText
-        ..preferredLineHeight = preferredLineHeight
-        ..selection = selection
-        ..selectionColor = selectionColor
-        ..showCursor = showCursor
-        ..startHandleLayerLink = startHandleLayerLink
-        ..endHandleLayerLink = endHandleLayerLink
-        ..textBaseline = textBaseline
-        ..textDirection = getEffectiveTextDirection(context);
+    BuildContext context,
+    RenderEditableLine renderObject,
+  ) => renderObject
+    ..crossAxisAlignment = crossAxisAlignment
+    ..cursorBlinkOpacityController = cursorBlinkOpacityController
+    ..cursorColor = cursorColor
+    ..cursorOffset = cursorOffset
+    ..cursorRadius = cursorRadius
+    ..cursorWidth = cursorWidth
+    ..cursorHeight = cursorHeight
+    ..devicePixelRatio = devicePixelRatio
+    ..hintingColor = hintingColor
+    ..minDepth = minDepth
+    ..minHeight = minHeight
+    ..node = node
+    ..paintCursorAboveText = paintCursorAboveText
+    ..preferredLineHeight = preferredLineHeight
+    ..selection = selection
+    ..selectionColor = selectionColor
+    ..showCursor = showCursor
+    ..startHandleLayerLink = startHandleLayerLink
+    ..endHandleLayerLink = endHandleLayerLink
+    ..textBaseline = textBaseline
+    ..textDirection = getEffectiveTextDirection(context);
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(EnumProperty<TextBaseline>('textBaseline', textBaseline,
-        defaultValue: null));
-    properties.add(EnumProperty<CrossAxisAlignment>(
-        'crossAxisAlignment', crossAxisAlignment));
-    properties.add(EnumProperty<TextDirection>('textDirection', textDirection,
-        defaultValue: null));
+    properties.add(
+      EnumProperty<TextBaseline>(
+        'textBaseline',
+        textBaseline,
+        defaultValue: null,
+      ),
+    );
+    properties.add(
+      EnumProperty<CrossAxisAlignment>(
+        'crossAxisAlignment',
+        crossAxisAlignment,
+      ),
+    );
+    properties.add(
+      EnumProperty<TextDirection>(
+        'textDirection',
+        textDirection,
+        defaultValue: null,
+      ),
+    );
   }
 }
 
 class RenderEditableLine extends RenderLine {
   RenderEditableLine({
-    List<RenderBox>? children,
-    CrossAxisAlignment crossAxisAlignment = CrossAxisAlignment.baseline,
+    super.children,
+    super.crossAxisAlignment,
     AnimationController? cursorBlinkOpacityController,
     required Color cursorColor,
     Offset? cursorOffset,
@@ -163,8 +178,8 @@ class RenderEditableLine extends RenderLine {
     double? cursorHeight,
     double devicePixelRatio = 1.0,
     Color? hintingColor,
-    double minDepth = 0,
-    double minHeight = 0,
+    super.minDepth,
+    super.minHeight,
     required this.node,
     bool paintCursorAboveText = false,
     required this.preferredLineHeight,
@@ -173,32 +188,23 @@ class RenderEditableLine extends RenderLine {
     bool showCursor = false,
     LayerLink? startHandleLayerLink,
     LayerLink? endHandleLayerLink,
-    TextBaseline textBaseline = TextBaseline.alphabetic,
-    TextDirection? textDirection = TextDirection.ltr,
-  })  :
-        // assert(!showCursor || cursorColor != null),
-        _cursorBlinkOpacityController = cursorBlinkOpacityController,
-        _cursorColor = cursorColor,
-        _cursorOffset = cursorOffset,
-        _cursorRadius = cursorRadius,
-        _cursorWidth = cursorWidth,
-        _cursorHeight = cursorHeight,
-        _devicePixelRatio = devicePixelRatio,
-        _hintingColor = hintingColor,
-        _paintCursorAboveText = paintCursorAboveText,
-        _selection = selection,
-        _selectionColor = selectionColor,
-        _showCursor = showCursor,
-        _startHandleLayerLink = startHandleLayerLink,
-        _endHandleLayerLink = endHandleLayerLink,
-        super(
-          children: children,
-          crossAxisAlignment: crossAxisAlignment,
-          minDepth: minDepth,
-          minHeight: minHeight,
-          textBaseline: textBaseline,
-          textDirection: textDirection,
-        );
+    super.textBaseline,
+    super.textDirection,
+  }) : // assert(!showCursor || cursorColor != null),
+       _cursorBlinkOpacityController = cursorBlinkOpacityController,
+       _cursorColor = cursorColor,
+       _cursorOffset = cursorOffset,
+       _cursorRadius = cursorRadius,
+       _cursorWidth = cursorWidth,
+       _cursorHeight = cursorHeight,
+       _devicePixelRatio = devicePixelRatio,
+       _hintingColor = hintingColor,
+       _paintCursorAboveText = paintCursorAboveText,
+       _selection = selection,
+       _selectionColor = selectionColor,
+       _showCursor = showCursor,
+       _startHandleLayerLink = startHandleLayerLink,
+       _endHandleLayerLink = endHandleLayerLink;
 
   AnimationController? get cursorBlinkOpacityController =>
       _cursorBlinkOpacityController;
@@ -296,7 +302,6 @@ class RenderEditableLine extends RenderLine {
 
   EquationRowNode node;
 
-  /// {@template flutter.rendering.editable.paintCursorOnTop}
   bool get paintCursorAboveText => _paintCursorAboveText;
   bool _paintCursorAboveText;
   set paintCursorAboveText(bool value) {
@@ -376,8 +381,8 @@ class RenderEditableLine extends RenderLine {
   int getNearestLeftCaretIndexForPoint(Offset globalOffset) {
     final localOffset = globalToLocal(globalOffset);
     var index = 0;
-    while (
-        index < caretOffsets.length && caretOffsets[index] <= localOffset.dx) {
+    while (index < caretOffsets.length &&
+        caretOffsets[index] <= localOffset.dx) {
       index++;
     }
     return math.max(0, index - 1);
@@ -461,35 +466,29 @@ class RenderEditableLine extends RenderLine {
 
   void _paintCaret(Canvas canvas, Offset baselineOffset) {
     final paint = Paint()
-      ..color =
-          _cursorColor.withOpacity(_cursorBlinkOpacityController?.value ?? 0);
+      ..color = _cursorColor.withOpacity(
+        _cursorBlinkOpacityController?.value ?? 0,
+      );
 
-    Rect _caretPrototype;
+    Rect caretPrototype;
 
     switch (defaultTargetPlatform) {
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:
-        _caretPrototype = Rect.fromLTWH(
-          0.0,
-          0.0,
-          _cursorWidth,
-          cursorHeight + 2,
-        );
-        break;
+        caretPrototype = Rect.fromLTWH(0, 0, _cursorWidth, cursorHeight + 2);
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
       case TargetPlatform.linux:
       case TargetPlatform.windows:
-        _caretPrototype = Rect.fromLTWH(
-          0.0,
-          0.0, // _kCaretHeightOffset,
+        caretPrototype = Rect.fromLTWH(
+          0,
+          0, // _kCaretHeightOffset,
           _cursorWidth,
           cursorHeight, // - 2.0 * _kCaretHeightOffset,
         );
-        break;
     }
 
-    var caretRect = _caretPrototype
+    var caretRect = caretPrototype
         .shift(baselineOffset)
         .shift(Offset(0, -0.9 * cursorHeight)); // 0.9 is eyeballed
 
@@ -498,7 +497,7 @@ class RenderEditableLine extends RenderLine {
     }
 
     // final double caretHeight =
-    //     _textPainter.getFullHeightForCaret(textPosition, _caretPrototype);
+    //     _textPainter.getFullHeightForCaret(textPosition, __caretPrototype);
     // if (caretHeight != null) {
     //   switch (defaultTargetPlatform) {
     //     case TargetPlatform.iOS:
@@ -545,11 +544,11 @@ class RenderEditableLine extends RenderLine {
     final pixelMultiple = 1.0 / _devicePixelRatio;
     final pixelPerfectOffsetX = caretPosition.dx.isFinite
         ? (caretPosition.dx / pixelMultiple).round() * pixelMultiple -
-            caretPosition.dx
+              caretPosition.dx
         : 0.0;
     final pixelPerfectOffsetY = caretPosition.dy.isFinite
         ? (caretPosition.dy / pixelMultiple).round() * pixelMultiple -
-            caretPosition.dy
+              caretPosition.dy
         : 0.0;
     return Offset(pixelPerfectOffsetX, pixelPerfectOffsetY);
   }

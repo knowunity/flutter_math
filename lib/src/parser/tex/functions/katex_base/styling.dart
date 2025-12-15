@@ -24,23 +24,18 @@
 part of katex_base;
 
 const _stylingEntries = {
-  [
-    '\\displaystyle',
-    '\\textstyle',
-    '\\scriptstyle',
-    '\\scriptscriptstyle',
-  ]: FunctionSpec(
-    numArgs: 0,
-    allowedInText: true,
-    handler: _stylingHandler,
-  ),
+  [r'\displaystyle', r'\textstyle', r'\scriptstyle', r'\scriptscriptstyle']:
+      FunctionSpec(numArgs: 0, allowedInText: true, handler: _stylingHandler),
 };
 
 GreenNode _stylingHandler(TexParser parser, FunctionContext context) {
   final body = parser.parseExpression(
-      breakOnInfix: true, breakOnTokenText: context.breakOnTokenText);
+    breakOnInfix: true,
+    breakOnTokenText: context.breakOnTokenText,
+  );
   final style = parseMathStyle(
-      context.funcName.substring(1, context.funcName.length - 5));
+    context.funcName.substring(1, context.funcName.length - 5),
+  );
   return StyleNode(
     children: body,
     optionsDiff: OptionsDiff(style: style),

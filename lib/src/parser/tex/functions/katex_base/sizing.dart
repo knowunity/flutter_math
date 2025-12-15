@@ -24,17 +24,17 @@
 part of katex_base;
 
 const _sizeFuncs = [
-  '\\tiny',
-  '\\sixptsize',
-  '\\scriptsize',
-  '\\footnotesize',
-  '\\small',
-  '\\normalsize',
-  '\\large',
-  '\\Large',
-  '\\LARGE',
-  '\\huge',
-  '\\Huge',
+  r'\tiny',
+  r'\sixptsize',
+  r'\scriptsize',
+  r'\footnotesize',
+  r'\small',
+  r'\normalsize',
+  r'\large',
+  r'\Large',
+  r'\LARGE',
+  r'\huge',
+  r'\Huge',
 ];
 
 const _sizingEntries = {
@@ -47,7 +47,8 @@ const _sizingEntries = {
 
 GreenNode _sizingHandler(TexParser parser, FunctionContext context) {
   final body = parser.parseExpression(
-      breakOnInfix: false, breakOnTokenText: context.breakOnTokenText);
+    breakOnTokenText: context.breakOnTokenText,
+  );
   return StyleNode(
     children: body,
     optionsDiff: OptionsDiff(

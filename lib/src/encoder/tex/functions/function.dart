@@ -8,9 +8,10 @@ EncodeResult _functionEncoder(GreenNode node) {
     'The default encoder for FunctionNode is used, which is imprecise. '
         'Non better alternatives were found.',
     TransparentTexEncodeResult(<dynamic>[
-      TexCommandEncodeResult(command: '\\operatorname', args: <dynamic>[
-        functionNode.functionName,
-      ]),
+      TexCommandEncodeResult(
+        command: r'\operatorname',
+        args: <dynamic>[functionNode.functionName],
+      ),
       functionNode.argument,
     ]),
   );
@@ -23,21 +24,24 @@ final _functionOptimizationEntries = [
         child: isA<StyleNode>(
           matchSelf: (node) =>
               node.optionsDiff.mathFontOptions ==
-              texMathFontOptions['\\mathrm'],
+              texMathFontOptions[r'\mathrm'],
         ),
       ),
     ),
     optimize: (node) {
       final functionNode = node as FunctionNode;
       texEncodingCache[node] = TransparentTexEncodeResult(<dynamic>[
-        TexCommandEncodeResult(command: '\\operatorname', args: <dynamic>[
-          _optionsDiffEncode(
-            (functionNode.functionName.children.first as StyleNode)
-                .optionsDiff
-                .removeMathFont(),
-            functionNode.functionName.children.first.children,
-          )
-        ]),
+        TexCommandEncodeResult(
+          command: r'\operatorname',
+          args: <dynamic>[
+            _optionsDiffEncode(
+              (functionNode.functionName.children.first as StyleNode)
+                  .optionsDiff
+                  .removeMathFont(),
+              functionNode.functionName.children.first.children,
+            ),
+          ],
+        ),
         functionNode.argument,
       ]);
     },
@@ -45,9 +49,7 @@ final _functionOptimizationEntries = [
   // Optimization for plain invocations like \sin \lim
   OptimizationEntry(
     matcher: isA<FunctionNode>(
-      firstChild: isA<EquationRowNode>(
-        everyChild: isA<SymbolNode>(),
-      ),
+      firstChild: isA<EquationRowNode>(everyChild: isA<SymbolNode>()),
     ),
     optimize: (node) {
       final functionNode = node as FunctionNode;
@@ -89,7 +91,7 @@ final _functionOptimizationEntries = [
       if (isFunction || isLimit) {
         texEncodingCache[node] = TransparentTexEncodeResult(<dynamic>[
           TexMultiscriptEncodeResult(
-            base: name + (isLimit ? '\\nolimits' : ''),
+            base: name + (isLimit ? r'\nolimits' : ''),
             sub: scriptsNode.sub,
             sup: scriptsNode.sup,
           ),
@@ -102,21 +104,29 @@ final _functionOptimizationEntries = [
   OptimizationEntry(
     matcher: isA<FunctionNode>(
       firstChild: isA<EquationRowNode>(
-        child: isA<OverNode>(
-          firstChild: _nameMatcher.or(isA<EquationRowNode>(
-            child: isA<UnderNode>(firstChild: _nameMatcher),
-          )),
-        ).or(isA<UnderNode>(
-          firstChild: _nameMatcher.or(isA<EquationRowNode>(
-            child: isA<OverNode>(firstChild: _nameMatcher),
-          )),
-        )),
+        child:
+            isA<OverNode>(
+              firstChild: _nameMatcher.or(
+                isA<EquationRowNode>(
+                  child: isA<UnderNode>(firstChild: _nameMatcher),
+                ),
+              ),
+            ).or(
+              isA<UnderNode>(
+                firstChild: _nameMatcher.or(
+                  isA<EquationRowNode>(
+                    child: isA<OverNode>(firstChild: _nameMatcher),
+                  ),
+                ),
+              ),
+            ),
       ),
     ),
     optimize: (node) {
       final functionNode = node as FunctionNode;
       var nameNode = functionNode.functionName.children.first;
-      GreenNode? sub, sup;
+      GreenNode? sub;
+      GreenNode? sup;
       final outer = nameNode;
       if (outer is OverNode) {
         sup = outer.above;
@@ -138,14 +148,14 @@ final _functionOptimizationEntries = [
         }
       }
       final name =
-          '\\${nameNode.children.map((child) => (child as SymbolNode).symbol).join()}';
+          '\\${nameNode.children.map((child) => (child! as SymbolNode).symbol).join()}';
 
       final isFunction = mathFunctions.contains(name);
       final isLimit = mathLimits.contains(name);
       if (isFunction || isLimit) {
         texEncodingCache[node] = TransparentTexEncodeResult(<dynamic>[
           TexMultiscriptEncodeResult(
-            base: name + (isFunction ? '\\limits' : ''),
+            base: name + (isFunction ? r'\limits' : ''),
             sub: sub,
             sup: sup,
           ),
@@ -156,6 +166,4 @@ final _functionOptimizationEntries = [
   ),
 ];
 
-final _nameMatcher = isA<EquationRowNode>(
-  everyChild: isA<SymbolNode>(),
-);
+final _nameMatcher = isA<EquationRowNode>(everyChild: isA<SymbolNode>());

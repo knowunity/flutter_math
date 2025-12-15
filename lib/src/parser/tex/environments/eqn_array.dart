@@ -42,19 +42,11 @@ import '../parser.dart';
 import 'array.dart';
 
 const eqnArrayEntries = {
-  [
-    'cases',
-    'dcases',
-    'rcases',
-    'drcases',
-  ]: EnvSpec(
+  ['cases', 'dcases', 'rcases', 'drcases']: EnvSpec(
     numArgs: 0,
     handler: _casesHandler,
   ),
-  ['aligned']: EnvSpec(
-    numArgs: 0,
-    handler: _alignedHandler,
-  ),
+  ['aligned']: EnvSpec(numArgs: 0, handler: _alignedHandler),
   // ['gathered']: EnvSpec(numArgs: 0, handler: _gatheredHandler),
   ['alignedat']: EnvSpec(numArgs: 1, handler: _alignedAtHandler),
 };
@@ -65,7 +57,7 @@ GreenNode _casesHandler(TexParser parser, EnvContext context) {
     concatRow: (cells) {
       final children = [
         SpaceNode.alignerOrSpacer(),
-        if (cells.length >= 1) ...cells[0].children,
+        if (cells.isNotEmpty) ...cells[0].children,
         if (cells.length > 1) SpaceNode.alignerOrSpacer(),
         if (cells.length > 1)
           SpaceNode(height: Measurement.zero, width: 1.0.em, mode: Mode.math),
@@ -76,12 +68,14 @@ GreenNode _casesHandler(TexParser parser, EnvContext context) {
         children.add(SpaceNode.alignerOrSpacer());
       }
       if (context.envName == 'dcases' || context.envName == 'drcases') {
-        return EquationRowNode(children: [
-          StyleNode(
-            optionsDiff: OptionsDiff(style: MathStyle.display),
-            children: children,
-          )
-        ]);
+        return EquationRowNode(
+          children: [
+            StyleNode(
+              optionsDiff: const OptionsDiff(style: MathStyle.display),
+              children: children,
+            ),
+          ],
+        );
       } else {
         return EquationRowNode(children: children);
       }
@@ -121,7 +115,7 @@ GreenNode _alignedAtHandler(TexParser parser, EnvContext context) {
   final numNode = assertNodeType<EquationRowNode>(arg);
   final string = numNode.children
       .map((e) => assertNodeType<SymbolNode>(e).symbol)
-      .join('');
+      .join();
   final cols = int.tryParse(string);
   if (cols == null) {
     throw ParseException('Invalid argument for environment: alignedat');
@@ -131,8 +125,10 @@ GreenNode _alignedAtHandler(TexParser parser, EnvContext context) {
     addJot: true,
     concatRow: (cells) {
       if (cells.length > 2 * cols) {
-        throw ParseException('Too many math in a row: '
-            'expected ${2 * cols}, but got ${cells.length}');
+        throw ParseException(
+          'Too many math in a row: '
+          'expected ${2 * cols}, but got ${cells.length}',
+        );
       }
       final expanded = cells
           .expand((cell) => [...cell.children, SpaceNode.alignerOrSpacer()])
@@ -149,12 +145,12 @@ EquationArrayNode parseEqnArray(
 }) {
   // Parse body of array with \\ temporarily mapped to \cr
   parser.macroExpander.beginGroup();
-  parser.macroExpander.macros.set('\\\\', MacroDefinition.fromString('\\cr'));
+  parser.macroExpander.macros.set(r'\\', MacroDefinition.fromString(r'\cr'));
 
   // Get current arraystretch if it's not set by the environment
-  double? arrayStretch = 1.0;
+  double? arrayStretch = 1;
   // if (arrayStretch == null) {
-  final stretch = parser.macroExpander.expandMacroAsText('\\arraystretch');
+  final stretch = parser.macroExpander.expandMacroAsText(r'\arraystretch');
   if (stretch == null) {
     // Default \arraystretch from lttab.dtx
     arrayStretch = 1.0;
@@ -175,13 +171,13 @@ EquationArrayNode parseEqnArray(
   final hLinesBeforeRow = <MatrixSeparatorStyle>[];
 
   // Test for \hline at the top of the array.
-  hLinesBeforeRow
-      .add(getHLines(parser).lastOrNull ?? MatrixSeparatorStyle.none);
+  hLinesBeforeRow.add(
+    getHLines(parser).lastOrNull ?? MatrixSeparatorStyle.none,
+  );
 
   while (true) {
     // Parse each cell in its own group (namespace)
-    final cellBody =
-        parser.parseExpression(breakOnInfix: false, breakOnTokenText: '\\cr');
+    final cellBody = parser.parseExpression(breakOnTokenText: r'\cr');
     parser.macroExpander.endGroup();
     parser.macroExpander.beginGroup();
 
@@ -191,7 +187,7 @@ EquationArrayNode parseEqnArray(
     final next = parser.fetch().text;
     if (next == '&') {
       parser.consume();
-    } else if (next == '\\end') {
+    } else if (next == r'\end') {
       // Arrays terminate newlines with `\crcr` which consumes a `\cr` if
       // the last line is empty.
       // NOTE: Currently, `cell` is the last item added into `row`.
@@ -202,19 +198,22 @@ EquationArrayNode parseEqnArray(
         hLinesBeforeRow.add(MatrixSeparatorStyle.none);
       }
       break;
-    } else if (next == '\\cr') {
+    } else if (next == r'\cr') {
       final cr = assertNodeType<CrNode>(parser.parseFunction(null, null, null));
       rowGaps.add(cr.size ?? Measurement.zero);
 
       // check for \hline(s) following the row separator
-      hLinesBeforeRow
-          .add(getHLines(parser).lastOrNull ?? MatrixSeparatorStyle.none);
+      hLinesBeforeRow.add(
+        getHLines(parser).lastOrNull ?? MatrixSeparatorStyle.none,
+      );
 
       row = [];
       body.add(row);
     } else {
       throw ParseException(
-          'Expected & or \\\\ or \\cr or \\end', parser.nextToken);
+        r'Expected & or \\ or \cr or \end',
+        parser.nextToken,
+      );
     }
   }
 

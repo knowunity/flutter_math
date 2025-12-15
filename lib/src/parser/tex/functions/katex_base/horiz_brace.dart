@@ -24,15 +24,17 @@
 part of katex_base;
 
 const _horizBraceEntries = {
-  ['\\overbrace', '\\underbrace']:
-      FunctionSpec(numArgs: 1, handler: _horizBraceHandler),
+  [r'\overbrace', r'\underbrace']: FunctionSpec(
+    numArgs: 1,
+    handler: _horizBraceHandler,
+  ),
 };
 
 GreenNode _horizBraceHandler(TexParser parser, FunctionContext context) {
   final base = parser.parseArgNode(mode: null, optional: false)!;
   final scripts = parser.parseScripts();
   var res = base;
-  if (context.funcName == '\\overbrace') {
+  if (context.funcName == r'\overbrace') {
     res = AccentNode(
       base: res.wrapWithEquationRow(),
       label: '\u23de',
@@ -53,10 +55,7 @@ GreenNode _horizBraceHandler(TexParser parser, FunctionContext context) {
     }
     return res;
   } else {
-    res = AccentUnderNode(
-      base: res.wrapWithEquationRow(),
-      label: '\u23df',
-    );
+    res = AccentUnderNode(base: res.wrapWithEquationRow(), label: '\u23df');
     if (scripts.subscript != null) {
       res = UnderNode(
         base: res.wrapWithEquationRow(),

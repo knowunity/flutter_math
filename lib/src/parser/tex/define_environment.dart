@@ -28,22 +28,17 @@ import 'environments/eqn_array.dart';
 import 'parser.dart';
 
 class EnvContext {
-  final Mode mode;
-  final String envName;
   // final TexParser parser;
   const EnvContext({
     required this.mode,
     required this.envName,
     // required this.parser,
   });
+  final Mode mode;
+  final String envName;
 }
 
 class EnvSpec {
-  final int numArgs;
-  final int greediness;
-  final bool allowedInText;
-  final int numOptionalArgs;
-  final GreenNode Function(TexParser parser, EnvContext context) handler;
   const EnvSpec({
     required this.numArgs,
     this.greediness = 1,
@@ -51,6 +46,11 @@ class EnvSpec {
     this.numOptionalArgs = 0,
     required this.handler,
   });
+  final int numArgs;
+  final int greediness;
+  final bool allowedInText;
+  final int numOptionalArgs;
+  final GreenNode Function(TexParser parser, EnvContext context) handler;
 }
 
 final Map<String, EnvSpec> _environments = {};
@@ -65,7 +65,4 @@ Map<String, EnvSpec> get environments {
   return _environments;
 }
 
-final _environmentsEntries = {
-  ...arrayEntries,
-  ...eqnArrayEntries,
-};
+final _environmentsEntries = {...arrayEntries, ...eqnArrayEntries};

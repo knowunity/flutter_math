@@ -24,14 +24,16 @@
 part of katex_base;
 
 const _breakEntries = {
-  ['\\nobreak', '\\allowbreak']:
-      FunctionSpec(numArgs: 0, handler: _breakHandler)
+  [r'\nobreak', r'\allowbreak']: FunctionSpec(
+    numArgs: 0,
+    handler: _breakHandler,
+  ),
 };
 
 GreenNode _breakHandler(TexParser parser, FunctionContext context) => SpaceNode(
-      height: Measurement.zero,
-      width: Measurement.zero,
-      breakPenalty: context.funcName == '\\nobreak' ? 10000 : 0,
-      // noBreak: context.funcName == '\\nobreak',
-      mode: parser.mode,
-    );
+  height: Measurement.zero,
+  width: Measurement.zero,
+  breakPenalty: context.funcName == r'\nobreak' ? 10000 : 0,
+  // noBreak: context.funcName == '\\nobreak',
+  mode: parser.mode,
+);

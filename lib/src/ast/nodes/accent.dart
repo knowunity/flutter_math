@@ -19,6 +19,13 @@ import '../types.dart';
 ///
 /// Examples: `\hat`
 class AccentNode extends SlotableNode<EquationRowNode> {
+  AccentNode({
+    required this.base,
+    required this.label,
+    required this.isStretchy,
+    required this.isShifty,
+  });
+
   /// Base where the accent is applied upon.
   final EquationRowNode base;
 
@@ -34,16 +41,12 @@ class AccentNode extends SlotableNode<EquationRowNode> {
   ///
   /// Shifty accent will shift according to the italic of [base].
   final bool isShifty;
-  AccentNode({
-    required this.base,
-    required this.label,
-    required this.isStretchy,
-    required this.isShifty,
-  });
 
   @override
   BuildResult buildWidget(
-      MathOptions options, List<BuildResult?> childBuildResults) {
+    MathOptions options,
+    List<BuildResult?> childBuildResults,
+  ) {
     // Checking of character box is done automatically by the passing of
     // BuildResult, so we don't need to check it here.
     final baseResult = childBuildResults[0]!;
@@ -61,7 +64,11 @@ class AccentNode extends SlotableNode<EquationRowNode> {
       if (label == '\u2192') {
         // We need non-null baseline. Because ShiftBaseline cannot deal with a
         // baseline distance of null due to Flutter rendering pipeline design.
-        accentSymbolWidget = staticSvg('vec', options, needBaseline: true);
+        accentSymbolWidget = StaticSvgWidget(
+          name: 'vec',
+          options: options,
+          needBaseline: true,
+        );
       } else {
         final accentRenderConfig = accentRenderConfigs[label];
         if (accentRenderConfig == null || accentRenderConfig.overChar == null) {
@@ -69,7 +76,6 @@ class AccentNode extends SlotableNode<EquationRowNode> {
         } else {
           accentSymbolWidget = makeBaseSymbol(
             symbol: accentRenderConfig.overChar!,
-            variantForm: false,
             atomType: AtomType.ord,
             mode: Mode.text,
             options: options,
@@ -81,11 +87,11 @@ class AccentNode extends SlotableNode<EquationRowNode> {
       // fit exactly with the width even if it means overflow.
       accentWidget = LayoutBuilder(
         builder: (context, constraints) => ResetDimension(
-          depth: 0.0, // Cut off xHeight
+          depth: 0, // Cut off xHeight
           width: constraints.minWidth, // Ensure width
           child: ShiftBaseline(
             // \tilde is submerged below baseline in KaTeX fonts
-            relativePos: 1.0,
+            relativePos: 1,
             // Shift baseline up by xHeight
             offset: -options.fontMetrics.xHeight.cssEm.toLpUnder(options),
             child: accentSymbolWidget,
@@ -99,7 +105,9 @@ class AccentNode extends SlotableNode<EquationRowNode> {
           // \overline needs a special case, as KaTeX does.
           if (label == '\u00AF') {
             final defaultRuleThickness = options
-                .fontMetrics.defaultRuleThickness.cssEm
+                .fontMetrics
+                .defaultRuleThickness
+                .cssEm
                 .toLpUnder(options);
             return Padding(
               padding: EdgeInsets.only(bottom: 3 * defaultRuleThickness),
@@ -115,10 +123,10 @@ class AccentNode extends SlotableNode<EquationRowNode> {
                 accentRenderConfig.overImageName == null) {
               return Container();
             }
-            var svgWidget = strechySvgSpan(
-              accentRenderConfig.overImageName!,
-              constraints.minWidth,
-              options,
+            final svgWidget = StrechySvgSpanWidget(
+              name: accentRenderConfig.overImageName!,
+              width: constraints.minWidth,
+              options: options,
             );
             // \horizBrace also needs a special case, as KaTeX does.
             if (label == '\u23de') {
@@ -149,7 +157,6 @@ class AccentNode extends SlotableNode<EquationRowNode> {
           // Set min height
           MinDimension(
             minHeight: options.fontMetrics.xHeight.cssEm.toLpUnder(options),
-            topPadding: 0,
             child: baseResult.widget,
           ),
         ],
@@ -158,8 +165,9 @@ class AccentNode extends SlotableNode<EquationRowNode> {
   }
 
   @override
-  List<MathOptions> computeChildOptions(MathOptions options) =>
-      [options.havingCrampedStyle()];
+  List<MathOptions> computeChildOptions(MathOptions options) => [
+    options.havingCrampedStyle(),
+  ];
 
   @override
   List<EquationRowNode> computeChildren() => [base];
@@ -192,11 +200,10 @@ class AccentNode extends SlotableNode<EquationRowNode> {
     String? label,
     bool? isStretchy,
     bool? isShifty,
-  }) =>
-      AccentNode(
-        base: base ?? this.base,
-        label: label ?? this.label,
-        isStretchy: isStretchy ?? this.isStretchy,
-        isShifty: isShifty ?? this.isShifty,
-      );
+  }) => AccentNode(
+    base: base ?? this.base,
+    label: label ?? this.label,
+    isStretchy: isStretchy ?? this.isStretchy,
+    isShifty: isShifty ?? this.isShifty,
+  );
 }

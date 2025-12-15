@@ -24,20 +24,27 @@
 part of katex_base;
 
 const _encloseEntries = {
-  ['\\colorbox']: FunctionSpec(
-      numArgs: 2,
-      allowedInText: true,
-      greediness: 3,
-      handler: _colorboxHandler),
-  ['\\fcolorbox']: FunctionSpec(
-      numArgs: 3,
-      allowedInText: true,
-      greediness: 3,
-      handler: _fcolorboxHandler),
-  ['\\fbox']:
-      FunctionSpec(numArgs: 1, allowedInText: true, handler: _fboxHandler),
-  ['\\cancel', '\\bcancel', '\\xcancel', '\\sout']:
-      FunctionSpec(numArgs: 1, handler: _cancelHandler),
+  [r'\colorbox']: FunctionSpec(
+    numArgs: 2,
+    allowedInText: true,
+    greediness: 3,
+    handler: _colorboxHandler,
+  ),
+  [r'\fcolorbox']: FunctionSpec(
+    numArgs: 3,
+    allowedInText: true,
+    greediness: 3,
+    handler: _fcolorboxHandler,
+  ),
+  [r'\fbox']: FunctionSpec(
+    numArgs: 1,
+    allowedInText: true,
+    handler: _fboxHandler,
+  ),
+  [r'\cancel', r'\bcancel', r'\xcancel', r'\sout']: FunctionSpec(
+    numArgs: 1,
+    handler: _cancelHandler,
+  ),
 };
 
 GreenNode _colorboxHandler(TexParser parser, FunctionContext context) {
@@ -86,10 +93,10 @@ GreenNode _cancelHandler(TexParser parser, FunctionContext context) {
   final body = parser.parseArgNode(mode: null, optional: false)!;
   return EnclosureNode(
     notation: const {
-      '\\cancel': ['updiagonalstrike'],
-      '\\bcancel': ['downdiagonalstrike'],
-      '\\xcancel': ['updiagonalstrike, downdiagonalstrike'],
-      '\\sout': ['horizontalstrike'],
+      r'\cancel': ['updiagonalstrike'],
+      r'\bcancel': ['downdiagonalstrike'],
+      r'\xcancel': ['updiagonalstrike, downdiagonalstrike'],
+      r'\sout': ['horizontalstrike'],
     }[context.funcName]!,
     hasBorder: false,
     base: body.wrapWithEquationRow(),

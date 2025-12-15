@@ -1,4 +1,5 @@
 //ignore_for_file: lines_longer_than_80_chars
+
 import 'dart:math' as math;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -10,9 +11,9 @@ import '../utils/render_box_layout.dart';
 class VListParentData extends ContainerBoxParentData<RenderBox> {
   BoxConstraints Function(double width)? customCrossSize;
 
-  double trailingMargin = 0.0;
+  double trailingMargin = 0;
 
-  double hShift = 0.0;
+  double hShift = 0;
 
   @override
   String toString() =>
@@ -20,24 +21,23 @@ class VListParentData extends ContainerBoxParentData<RenderBox> {
 }
 
 class VListElement extends ParentDataWidget<VListParentData> {
+  const VListElement({
+    super.key,
+    this.customCrossSize,
+    this.trailingMargin = 0.0,
+    this.hShift = 0.0,
+    required super.child,
+  });
   final BoxConstraints Function(double width)? customCrossSize;
 
   final double trailingMargin;
 
   final double hShift;
 
-  const VListElement({
-    Key? key,
-    this.customCrossSize,
-    this.trailingMargin = 0.0,
-    this.hShift = 0.0,
-    required Widget child,
-  }) : super(key: key, child: child);
-
   @override
   void applyParentData(RenderObject renderObject) {
     assert(renderObject.parentData is VListParentData);
-    final parentData = renderObject.parentData as VListParentData;
+    final parentData = renderObject.parentData! as VListParentData;
     var needsLayout = false;
 
     if (parentData.customCrossSize != customCrossSize) {
@@ -64,8 +64,13 @@ class VListElement extends ParentDataWidget<VListParentData> {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(FlagProperty('customSize',
-        value: customCrossSize != null, ifTrue: 'using relative size'));
+    properties.add(
+      FlagProperty(
+        'customSize',
+        value: customCrossSize != null,
+        ifTrue: 'using relative size',
+      ),
+    );
     properties.add(DoubleProperty('trailingMargin', trailingMargin));
     properties.add(DoubleProperty('horizontalShift', hShift));
   }
@@ -106,15 +111,15 @@ class VListElement extends ParentDataWidget<VListParentData> {
 /// In implementation it is a two-pass layout process and even more efficient
 /// than Flutter's Column.
 class VList extends MultiChildRenderObjectWidget {
-  VList({
-    Key? key,
+  const VList({
+    super.key,
     this.textBaseline = TextBaseline.alphabetic,
     this.baselineReferenceWidgetIndex = 0,
     // this.baselineOffset = 0,
     this.crossAxisAlignment = CrossAxisAlignment.center,
     this.textDirection,
-    List<Widget> children = const [],
-  }) : super(key: key, children: children);
+    super.children,
+  });
   final TextBaseline textBaseline;
   final int baselineReferenceWidgetIndex;
   // final double baselineOffset;
@@ -139,7 +144,9 @@ class VList extends MultiChildRenderObjectWidget {
 
   @override
   void updateRenderObject(
-      BuildContext context, covariant RenderRelativeWidthColumn renderObject) {
+    BuildContext context,
+    covariant RenderRelativeWidthColumn renderObject,
+  ) {
     renderObject
       ..textBaseline = textBaseline
       ..baselineReferenceWidgetIndex = baselineReferenceWidgetIndex
@@ -151,17 +158,35 @@ class VList extends MultiChildRenderObjectWidget {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(EnumProperty<TextBaseline>('textBaseline', textBaseline,
-        defaultValue: null));
-    properties.add(IntProperty(
-        'baselineReferenceWidgetNum', baselineReferenceWidgetIndex,
-        defaultValue: 0));
+    properties.add(
+      EnumProperty<TextBaseline>(
+        'textBaseline',
+        textBaseline,
+        defaultValue: null,
+      ),
+    );
+    properties.add(
+      IntProperty(
+        'baselineReferenceWidgetNum',
+        baselineReferenceWidgetIndex,
+        defaultValue: 0,
+      ),
+    );
     // properties
     // .add(DoubleProperty('baselineOffset', baselineOffset, defaultValue: 0));
-    properties.add(EnumProperty<CrossAxisAlignment>(
-        'crossAxisAlignment', crossAxisAlignment));
-    properties.add(EnumProperty<TextDirection>('textDirection', textDirection,
-        defaultValue: null));
+    properties.add(
+      EnumProperty<CrossAxisAlignment>(
+        'crossAxisAlignment',
+        crossAxisAlignment,
+      ),
+    );
+    properties.add(
+      EnumProperty<TextDirection>(
+        'textDirection',
+        textDirection,
+        defaultValue: null,
+      ),
+    );
   }
 }
 
@@ -177,11 +202,11 @@ class RenderRelativeWidthColumn extends RenderBox
     // double baselineOffset = 0,
     CrossAxisAlignment crossAxisAlignment = CrossAxisAlignment.center,
     TextDirection? textDirection = TextDirection.ltr,
-  })  : _textBaseline = textBaseline,
-        _baselineReferenceWidgetIndex = baselineReferenceWidgetIndex,
-        // _baselineOffset = baselineOffset,
-        _crossAxisAlignment = crossAxisAlignment,
-        _textDirection = textDirection {
+  }) : _textBaseline = textBaseline,
+       _baselineReferenceWidgetIndex = baselineReferenceWidgetIndex,
+       // _baselineOffset = baselineOffset,
+       _crossAxisAlignment = crossAxisAlignment,
+       _textDirection = textDirection {
     addAll(children);
   }
 
@@ -233,8 +258,10 @@ class RenderRelativeWidthColumn extends RenderBox
   bool get _debugHasNecessaryDirections {
     if (crossAxisAlignment == CrossAxisAlignment.start ||
         crossAxisAlignment == CrossAxisAlignment.end) {
-      assert(textDirection != null,
-          'Vertical $runtimeType with $crossAxisAlignment has a null textDirection, so the alignment cannot be resolved.');
+      assert(
+        textDirection != null,
+        'Vertical $runtimeType with $crossAxisAlignment has a null textDirection, so the alignment cannot be resolved.',
+      );
     }
     return true;
   }
@@ -252,9 +279,9 @@ class RenderRelativeWidthColumn extends RenderBox
   double _getIntrinsicSize({
     required Axis sizingDirection,
     required double
-        extent, // the extent in the direction that isn't the sizing direction
+    extent, // the extent in the direction that isn't the sizing direction
     required double Function(RenderBox child, double extent)
-        childSize, // a method to find the size in the sizing direction
+    childSize, // a method to find the size in the sizing direction
   }) {
     if (sizingDirection == Axis.vertical) {
       // INTRINSIC MAIN SIZE
@@ -264,7 +291,7 @@ class RenderRelativeWidthColumn extends RenderBox
       var child = firstChild;
       while (child != null) {
         inflexibleSpace += childSize(child, extent);
-        final childParentData = child.parentData as VListParentData;
+        final childParentData = child.parentData! as VListParentData;
         child = childParentData.nextSibling;
       }
       return inflexibleSpace;
@@ -279,7 +306,7 @@ class RenderRelativeWidthColumn extends RenderBox
         final childMainSize = child.getMaxIntrinsicHeight(double.infinity);
         final crossSize = childSize(child, childMainSize);
         maxCrossSize = math.max(maxCrossSize, crossSize);
-        final childParentData = child.parentData as VListParentData;
+        final childParentData = child.parentData! as VListParentData;
         child = childParentData.nextSibling;
       }
       return maxCrossSize;
@@ -288,35 +315,31 @@ class RenderRelativeWidthColumn extends RenderBox
 
   @override
   double computeMinIntrinsicWidth(double height) => _getIntrinsicSize(
-        sizingDirection: Axis.horizontal,
-        extent: height,
-        childSize: (RenderBox child, double extent) =>
-            child.getMinIntrinsicWidth(extent),
-      );
+    sizingDirection: Axis.horizontal,
+    extent: height,
+    childSize: (child, extent) => child.getMinIntrinsicWidth(extent),
+  );
 
   @override
   double computeMaxIntrinsicWidth(double height) => _getIntrinsicSize(
-        sizingDirection: Axis.horizontal,
-        extent: height,
-        childSize: (RenderBox child, double extent) =>
-            child.getMaxIntrinsicWidth(extent),
-      );
+    sizingDirection: Axis.horizontal,
+    extent: height,
+    childSize: (child, extent) => child.getMaxIntrinsicWidth(extent),
+  );
 
   @override
   double computeMinIntrinsicHeight(double width) => _getIntrinsicSize(
-        sizingDirection: Axis.vertical,
-        extent: width,
-        childSize: (RenderBox child, double extent) =>
-            child.getMinIntrinsicHeight(extent),
-      );
+    sizingDirection: Axis.vertical,
+    extent: width,
+    childSize: (child, extent) => child.getMinIntrinsicHeight(extent),
+  );
 
   @override
   double computeMaxIntrinsicHeight(double width) => _getIntrinsicSize(
-        sizingDirection: Axis.vertical,
-        extent: width,
-        childSize: (RenderBox child, double extent) =>
-            child.getMaxIntrinsicHeight(extent),
-      );
+    sizingDirection: Axis.vertical,
+    extent: width,
+    childSize: (child, extent) => child.getMaxIntrinsicHeight(extent),
+  );
 
   double? distanceToBaseline;
 
@@ -334,8 +357,7 @@ class RenderRelativeWidthColumn extends RenderBox
         return 0;
       case CrossAxisAlignment.start:
       case CrossAxisAlignment.baseline:
-      case CrossAxisAlignment.stretch: // TODO
-      default:
+      case CrossAxisAlignment.stretch:
         return width;
     }
   }
@@ -362,7 +384,7 @@ class RenderRelativeWidthColumn extends RenderBox
     var child = firstChild;
     final relativeChildren = <RenderBox>[];
     while (child != null) {
-      final childParentData = child.parentData as VListParentData;
+      final childParentData = child.parentData! as VListParentData;
       if (childParentData.customCrossSize != null) {
         relativeChildren.add(child);
       } else {
@@ -383,11 +405,12 @@ class RenderRelativeWidthColumn extends RenderBox
 
     // Then we lay out custom sized children
     for (final child in relativeChildren) {
-      final childParentData = child.parentData as VListParentData;
+      final childParentData = child.parentData! as VListParentData;
       assert(childParentData.customCrossSize != null);
 
-      final childConstraints =
-          childParentData.customCrossSize!(fixedChildrenCrossSize);
+      final childConstraints = childParentData.customCrossSize!(
+        fixedChildrenCrossSize,
+      );
       final childSize = child.getLayoutSize(childConstraints, dry: dry);
       final width = childSize.width;
       final right = getRightMost(crossAxisAlignment, width);
@@ -398,8 +421,9 @@ class RenderRelativeWidthColumn extends RenderBox
     }
 
     // Calculate size
-    final size =
-        constraints.constrain(Size(rightMost - leftMost, allocatedSize));
+    final size = constraints.constrain(
+      Size(rightMost - leftMost, allocatedSize),
+    );
     if (dry) {
       // We can return the size at this point when doing the dry layout.
       return size;
@@ -408,33 +432,29 @@ class RenderRelativeWidthColumn extends RenderBox
     final actualSize = size.height;
     final crossSize = size.width;
     final actualSizeDelta = actualSize - allocatedSize;
-    _overflow = math.max(0.0, -actualSizeDelta);
+    _overflow = math.max(0, -actualSizeDelta);
 
     // Position elements
     var index = 0;
     var childMainPosition = 0.0;
     child = firstChild;
     while (child != null) {
-      final childParentData = child.parentData as VListParentData;
+      final childParentData = child.parentData! as VListParentData;
       var childCrossPosition = 0.0;
       switch (crossAxisAlignment) {
         case CrossAxisAlignment.start:
           childCrossPosition = textDirection == TextDirection.ltr
               ? childParentData.hShift - leftMost
               : rightMost - child.size.width + crossSize;
-          break;
         case CrossAxisAlignment.end:
           childCrossPosition = textDirection == TextDirection.rtl
               ? childParentData.hShift - leftMost
               : rightMost - child.size.width + crossSize;
-          break;
         case CrossAxisAlignment.center:
           childCrossPosition = -child.size.width / 2 - leftMost;
-          break;
         case CrossAxisAlignment.stretch:
         case CrossAxisAlignment.baseline:
           childCrossPosition = 0.0;
-          break;
       }
       childCrossPosition += childParentData.hShift;
       childParentData.offset = Offset(childCrossPosition, childMainPosition);
@@ -466,7 +486,11 @@ class RenderRelativeWidthColumn extends RenderBox
     if (size.isEmpty) return;
 
     context.pushClipRect(
-        needsCompositing, offset, Offset.zero & size, defaultPaint);
+      needsCompositing,
+      offset,
+      Offset.zero & size,
+      defaultPaint,
+    );
     assert(() {
       // Only set this if it's null to save work. It gets reset to null if the
       // _direction changes.
@@ -494,12 +518,15 @@ class RenderRelativeWidthColumn extends RenderBox
       // rect is never used for drawing, just for determining the overflow
       // location and amount.
       Rect overflowChildRect;
-      overflowChildRect =
-          Rect.fromLTWH(0.0, 0.0, 0.0, size.height + _overflow!);
+      overflowChildRect = Rect.fromLTWH(0, 0, 0, size.height + _overflow!);
 
       paintOverflowIndicator(
-          context, offset, Offset.zero & size, overflowChildRect,
-          overflowHints: debugOverflowHints);
+        context,
+        offset,
+        Offset.zero & size,
+        overflowChildRect,
+        overflowHints: debugOverflowHints,
+      );
       return true;
     }());
   }
@@ -518,13 +545,28 @@ class RenderRelativeWidthColumn extends RenderBox
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(EnumProperty<CrossAxisAlignment>(
-        'crossAxisAlignment', crossAxisAlignment));
-    properties.add(EnumProperty<TextDirection>('textDirection', textDirection,
-        defaultValue: null));
-    properties.add(EnumProperty<TextBaseline>('textBaseline', textBaseline,
-        defaultValue: null));
-    properties.add(IntProperty(
-        'baselineReferenceWidgetIndex', baselineReferenceWidgetIndex));
+    properties.add(
+      EnumProperty<CrossAxisAlignment>(
+        'crossAxisAlignment',
+        crossAxisAlignment,
+      ),
+    );
+    properties.add(
+      EnumProperty<TextDirection>(
+        'textDirection',
+        textDirection,
+        defaultValue: null,
+      ),
+    );
+    properties.add(
+      EnumProperty<TextBaseline>(
+        'textBaseline',
+        textBaseline,
+        defaultValue: null,
+      ),
+    );
+    properties.add(
+      IntProperty('baselineReferenceWidgetIndex', baselineReferenceWidgetIndex),
+    );
   }
 }

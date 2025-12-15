@@ -14,26 +14,6 @@ import 'accent.dart';
 
 /// Node for an unbreakable symbol.
 class SymbolNode extends LeafNode {
-  /// Unicode symbol.
-  final String symbol;
-
-  /// Whether it is a varaint form.
-  ///
-  /// Refer to MathJaX's variantForm
-  final bool variantForm;
-
-  /// Effective atom type for this symbol;
-  late final AtomType atomType = overrideAtomType ??
-      getDefaultAtomTypeForSymbol(symbol, variantForm: variantForm, mode: mode);
-
-  /// Overriding atom type;
-  final AtomType? overrideAtomType;
-
-  /// Overriding atom font;
-  final FontOptions? overrideFont;
-
-  final Mode mode;
-
   // bool get noBreak => symbol == '\u00AF';
 
   SymbolNode({
@@ -44,13 +24,39 @@ class SymbolNode extends LeafNode {
     this.mode = Mode.math,
   }) : assert(symbol.isNotEmpty);
 
+  /// Unicode symbol.
+  final String symbol;
+
+  /// Whether it is a varaint form.
+  ///
+  /// Refer to MathJaX's variantForm
+  final bool variantForm;
+
+  /// Effective atom type for this symbol;
+  late final AtomType atomType =
+      overrideAtomType ??
+      getDefaultAtomTypeForSymbol(symbol, variantForm: variantForm, mode: mode);
+
+  /// Overriding atom type;
+  final AtomType? overrideAtomType;
+
+  /// Overriding atom font;
+  final FontOptions? overrideFont;
+
+  @override
+  final Mode mode;
+
   @override
   BuildResult buildWidget(
-      MathOptions options, List<BuildResult?> childBuildResults) {
-    final expanded = symbol.runes.expand((code) {
-      final ch = String.fromCharCode(code);
-      return unicodeSymbols[ch]?.split('') ?? [ch];
-    }).toList(growable: false);
+    MathOptions options,
+    List<BuildResult?> childBuildResults,
+  ) {
+    final expanded = symbol.runes
+        .expand((code) {
+          final ch = String.fromCharCode(code);
+          return unicodeSymbols[ch]?.split('') ?? [ch];
+        })
+        .toList(growable: false);
 
     // If symbol is single code
     if (expanded.length == 1) {
@@ -70,8 +76,8 @@ class SymbolNode extends LeafNode {
           expanded[0] = '\u0237'; // dotless j, in math and text mode
         }
       }
-      GreenNode res = this.withSymbol(expanded[0]);
-      for (var ch in expanded.skip(1)) {
+      GreenNode res = withSymbol(expanded[0]);
+      for (final ch in expanded.skip(1)) {
         final accent = unicodeAccents[ch];
         if (accent == null) {
           break;
@@ -87,14 +93,7 @@ class SymbolNode extends LeafNode {
       return SyntaxNode(parent: null, value: res, pos: 0).buildWidget(options);
     } else {
       // TODO: log a warning here.
-      return BuildResult(
-        widget: Container(
-          height: 0,
-          width: 0,
-        ),
-        options: options,
-        italic: 0,
-      );
+      return BuildResult(widget: const SizedBox.shrink(), options: options);
     }
   }
 
@@ -149,12 +148,13 @@ AtomType getDefaultAtomTypeForSymbol(
   if (variantForm) {
     symbolRenderConfig = symbolRenderConfig?.variantForm;
   }
-  final renderConfig =
-      mode == Mode.math ? symbolRenderConfig?.math : symbolRenderConfig?.text;
+  final renderConfig = mode == Mode.math
+      ? symbolRenderConfig?.math
+      : symbolRenderConfig?.text;
   if (renderConfig != null) {
     return renderConfig.defaultType ?? AtomType.ord;
   }
-  if (variantForm == false && mode == Mode.math) {
+  if (!variantForm && mode == Mode.math) {
     if (negatedOperatorSymbols.containsKey(symbol)) {
       return AtomType.rel;
     }

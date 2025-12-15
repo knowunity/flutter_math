@@ -12,8 +12,5 @@ EncodeResult _accentUnderEncoder(GreenNode node) {
           'No strict match for accent_under symbol under math mode: '
               '${unicodeLiteral(accentNode.label)}',
         )
-      : TexCommandEncodeResult(
-          command: command,
-          args: accentNode.children,
-        );
+      : TexCommandEncodeResult(command: command, args: accentNode.children);
 }

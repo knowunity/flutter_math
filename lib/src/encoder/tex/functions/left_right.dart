@@ -4,34 +4,35 @@ EncodeResult _leftRightEncoder(GreenNode node) {
   final leftRightNode = node as LeftRightNode;
   final left = _delimEncoder(leftRightNode.leftDelim);
   final right = _delimEncoder(leftRightNode.rightDelim);
-  final middles =
-      leftRightNode.middle.map(_delimEncoder).toList(growable: false);
+  final middles = leftRightNode.middle
+      .map(_delimEncoder)
+      .toList(growable: false);
   return TransparentTexEncodeResult(<dynamic>[
-    '\\left',
+    r'\left',
     left,
     ...leftRightNode.body.first.children,
     for (var i = 1; i < leftRightNode.body.length; i++) ...[
-      '\\middle',
+      r'\middle',
       middles[i - 1],
       ...leftRightNode.body[i].children,
     ],
-    '\\right',
+    r'\right',
     right,
   ]);
 }
 
 EncodeResult _delimEncoder(String? delim) {
-  if (delim == null) return StaticEncodeResult('.');
+  if (delim == null) return const StaticEncodeResult('.');
   final result = _baseSymbolEncoder(delim, Mode.math);
   return result != null
       ? delimiterCommands.contains(result)
-          ? StaticEncodeResult(result)
-          : NonStrictEncodeResult.string(
-              'illegal delimiter',
-              'Non-delimiter symbol ${unicodeLiteral(delim)} '
-                  'occured as delimiter',
-              result,
-            )
+            ? StaticEncodeResult(result)
+            : NonStrictEncodeResult.string(
+                'illegal delimiter',
+                'Non-delimiter symbol ${unicodeLiteral(delim)} '
+                    'occured as delimiter',
+                result,
+              )
       : NonStrictEncodeResult.string(
           'unknown symbol',
           'Unrecognized symbol encountered during TeX encoding: '

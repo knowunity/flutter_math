@@ -36,7 +36,7 @@ mixin FocusManagerMixin<T extends StatefulWidget> on State<T> {
   Widget build(BuildContext context) {
     super.build(context);
     _focusAttachment.reparent();
-    return _NullWidget();
+    return const _NullWidget();
   }
 }
 
@@ -46,7 +46,8 @@ class _NullWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     throw FlutterError(
-        'Widgets that mix FocusManagerMixin into their State must call'
-        'super.build() but must ignore the return value of the superclass.');
+      'Widgets that mix FocusManagerMixin into their State must call '
+      'super.build() but must ignore the return value of the superclass.',
+    );
   }
 }

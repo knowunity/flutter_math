@@ -8,6 +8,21 @@ import 'matrix.dart';
 
 /// Equantion array node. Brings support for equationa alignment.
 class EquationArrayNode extends SlotableNode<EquationRowNode?> {
+  EquationArrayNode({
+    this.addJot = false,
+    required this.body,
+    this.arrayStretch = 1.0,
+    List<MatrixSeparatorStyle>? hlines,
+    List<Measurement>? rowSpacings,
+  }) : hlines = (hlines ?? []).extendToByFill(
+         body.length + 1,
+         MatrixSeparatorStyle.none,
+       ),
+       rowSpacings = (rowSpacings ?? []).extendToByFill(
+         body.length,
+         Measurement.zero,
+       );
+
   /// `arrayStretch` parameter from the context.
   ///
   /// Affects the minimum row height and row depth for each row.
@@ -31,43 +46,35 @@ class EquationArrayNode extends SlotableNode<EquationRowNode?> {
   /// Spacings between rows;
   final List<Measurement> rowSpacings;
 
-  EquationArrayNode({
-    this.addJot = false,
-    required this.body,
-    this.arrayStretch = 1.0,
-    List<MatrixSeparatorStyle>? hlines,
-    List<Measurement>? rowSpacings,
-  })  : hlines = (hlines ?? [])
-            .extendToByFill(body.length + 1, MatrixSeparatorStyle.none),
-        rowSpacings =
-            (rowSpacings ?? []).extendToByFill(body.length, Measurement.zero);
-
   @override
   BuildResult buildWidget(
-          MathOptions options, List<BuildResult?> childBuildResults) =>
-      BuildResult(
-        options: options,
-        widget: ShiftBaseline(
-          relativePos: 0.5,
-          offset: options.fontMetrics.axisHeight.cssEm.toLpUnder(options),
-          child: EqnArray(
-            ruleThickness: options.fontMetrics.defaultRuleThickness.cssEm
-                .toLpUnder(options),
-            jotSize: addJot ? 3.0.pt.toLpUnder(options) : 0.0,
-            arrayskip: 12.0.pt.toLpUnder(options) * arrayStretch,
-            hlines: hlines,
-            rowSpacings: rowSpacings
-                .map((e) => e.toLpUnder(options))
-                .toList(growable: false),
-            children:
-                childBuildResults.map((e) => e!.widget).toList(growable: false),
-          ),
+    MathOptions options,
+    List<BuildResult?> childBuildResults,
+  ) => BuildResult(
+    options: options,
+    widget: ShiftBaseline(
+      relativePos: 0.5,
+      offset: options.fontMetrics.axisHeight.cssEm.toLpUnder(options),
+      child: EqnArray(
+        ruleThickness: options.fontMetrics.defaultRuleThickness.cssEm.toLpUnder(
+          options,
         ),
-      );
+        jotSize: addJot ? 3.0.pt.toLpUnder(options) : 0.0,
+        arrayskip: 12.0.pt.toLpUnder(options) * arrayStretch,
+        hlines: hlines,
+        rowSpacings: rowSpacings
+            .map((e) => e.toLpUnder(options))
+            .toList(growable: false),
+        children: childBuildResults
+            .map((e) => e!.widget)
+            .toList(growable: false),
+      ),
+    ),
+  );
 
   @override
   List<MathOptions> computeChildOptions(MathOptions options) =>
-      List.filled(body.length, options, growable: false);
+      List.filled(body.length, options);
 
   @override
   List<EquationRowNode> computeChildren() => body;
@@ -89,11 +96,11 @@ class EquationArrayNode extends SlotableNode<EquationRowNode?> {
   @override
   Map<String, Object?> toJson() => super.toJson()
     ..addAll({
-      if (addJot != false) 'addJot': addJot,
+      if (addJot) 'addJot': addJot,
       'body': body.map((e) => e.toJson()),
       if (arrayStretch != 1.0) 'arrayStretch': arrayStretch,
       'hlines': hlines.map((e) => e.toString()),
-      'rowSpacings': rowSpacings.map((e) => e.toString())
+      'rowSpacings': rowSpacings.map((e) => e.toString()),
     });
 
   EquationArrayNode copyWith({
@@ -102,12 +109,11 @@ class EquationArrayNode extends SlotableNode<EquationRowNode?> {
     List<EquationRowNode>? body,
     List<MatrixSeparatorStyle>? hlines,
     List<Measurement>? rowSpacings,
-  }) =>
-      EquationArrayNode(
-        arrayStretch: arrayStretch ?? this.arrayStretch,
-        addJot: addJot ?? this.addJot,
-        body: body ?? this.body,
-        hlines: hlines ?? this.hlines,
-        rowSpacings: rowSpacings ?? this.rowSpacings,
-      );
+  }) => EquationArrayNode(
+    arrayStretch: arrayStretch ?? this.arrayStretch,
+    addJot: addJot ?? this.addJot,
+    body: body ?? this.body,
+    hlines: hlines ?? this.hlines,
+    rowSpacings: rowSpacings ?? this.rowSpacings,
+  );
 }

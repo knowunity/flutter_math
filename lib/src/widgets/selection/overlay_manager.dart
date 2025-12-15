@@ -10,8 +10,10 @@ import 'selection_manager.dart';
 mixin SelectionOverlayManagerMixin<T extends StatefulWidget>
     on SelectionManagerMixin<T>
     implements MathSelectionGestureDetectorBuilderDelegate {
+  @override
   FocusNode get focusNode;
 
+  @override
   bool get hasFocus => focusNode.hasFocus;
 
   double get preferredLineHeight;
@@ -32,9 +34,9 @@ mixin SelectionOverlayManagerMixin<T extends StatefulWidget>
   bool toolbarVisible = false;
 
   late SelectableMathSelectionGestureDetectorBuilder
-      _selectionGestureDetectorBuilder;
+  _selectionGestureDetectorBuilder;
   SelectableMathSelectionGestureDetectorBuilder
-      get selectionGestureDetectorBuilder => _selectionGestureDetectorBuilder;
+  get selectionGestureDetectorBuilder => _selectionGestureDetectorBuilder;
 
   @override
   void initState() {
@@ -109,9 +111,12 @@ mixin SelectionOverlayManagerMixin<T extends StatefulWidget>
     return false;
   }
 
+  @override
   void handleSelectionChanged(
-      TextSelection selection, SelectionChangedCause? cause,
-      [ExtraSelectionChangedCause? extraCause]) {
+    TextSelection selection,
+    SelectionChangedCause? cause, [
+    ExtraSelectionChangedCause? extraCause,
+  ]) {
     super.handleSelectionChanged(selection, cause, extraCause);
 
     if (extraCause != ExtraSelectionChangedCause.handle) {
@@ -137,8 +142,9 @@ mixin SelectionOverlayManagerMixin<T extends StatefulWidget>
       _selectionOverlay!.handlesVisible = _shouldShowSelectionHandles(cause);
       if (SchedulerBinding.instance.schedulerPhase ==
           SchedulerPhase.persistentCallbacks) {
-        SchedulerBinding.instance
-            .addPostFrameCallback((_) => _selectionOverlay!.showHandles());
+        SchedulerBinding.instance.addPostFrameCallback(
+          (_) => _selectionOverlay!.showHandles(),
+        );
       } else {
         _selectionOverlay!.showHandles();
       }

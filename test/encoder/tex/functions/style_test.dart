@@ -31,16 +31,18 @@ void main() {
     test('font handling', () {
       expect(
         StyleNode(
-          optionsDiff:
-              OptionsDiff(mathFontOptions: texMathFontOptions['\\mathbf']),
+          optionsDiff: OptionsDiff(
+            mathFontOptions: texMathFontOptions['\\mathbf'],
+          ),
           children: [SymbolNode(symbol: 'a')],
         ).encodeTeX(),
         '\\mathbf{a}',
       );
       expect(
         StyleNode(
-          optionsDiff:
-              OptionsDiff(textFontOptions: texTextFontOptions['\\textbf']),
+          optionsDiff: OptionsDiff(
+            textFontOptions: texTextFontOptions['\\textbf'],
+          ),
           children: [SymbolNode(symbol: 'a', mode: Mode.text)],
         ).encodeTeX(),
         '\\textbf{a}',
@@ -71,16 +73,18 @@ void main() {
       );
 
       expect(
-        EquationRowNode(children: [
-          SymbolNode(symbol: 'z'),
-          StyleNode(
-            optionsDiff: OptionsDiff(
-              style: MathStyle.display,
-              size: MathSize.scriptsize,
+        EquationRowNode(
+          children: [
+            SymbolNode(symbol: 'z'),
+            StyleNode(
+              optionsDiff: OptionsDiff(
+                style: MathStyle.display,
+                size: MathSize.scriptsize,
+              ),
+              children: [SymbolNode(symbol: 'a')],
             ),
-            children: [SymbolNode(symbol: 'a')],
-          ),
-        ]).encodeTeX(),
+          ],
+        ).encodeTeX(),
         '{z\\displaystyle \\scriptsize a}',
       );
     });

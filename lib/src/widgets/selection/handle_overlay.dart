@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/gestures.dart';
@@ -7,8 +8,8 @@ import 'overlay.dart';
 import 'overlay_manager.dart';
 
 class MathSelectionHandleOverlay extends StatefulWidget {
-  MathSelectionHandleOverlay({
-    Key? key,
+  const MathSelectionHandleOverlay({
+    super.key,
     // required this.ast,
     required this.manager,
     required this.selection,
@@ -19,7 +20,7 @@ class MathSelectionHandleOverlay extends StatefulWidget {
     this.onSelectionHandleTapped,
     required this.selectionControls,
     this.dragStartBehavior = DragStartBehavior.start,
-  }) : super(key: key);
+  });
 
   // final SyntaxTree ast;
   final SelectionOverlayManagerMixin manager;
@@ -54,15 +55,17 @@ class _MathSelectionHandleOverlayState extends State<MathSelectionHandleOverlay>
     super.initState();
 
     _controller = AnimationController(
-        duration: SelectionOverlay.fadeDuration, vsync: this);
+      duration: SelectionOverlay.fadeDuration,
+      vsync: this,
+    );
 
-    _controller.forward();
+    unawaited(_controller.forward());
   }
 
   @override
   void didUpdateWidget(MathSelectionHandleOverlay oldWidget) {
     super.didUpdateWidget(oldWidget);
-    _controller.forward();
+    unawaited(_controller.forward());
   }
 
   @override
@@ -72,9 +75,10 @@ class _MathSelectionHandleOverlayState extends State<MathSelectionHandleOverlay>
   }
 
   void _handleDragStart(DragStartDetails details) {
-    final handleSize = widget.selectionControls
-        .getHandleSize(widget.manager.preferredLineHeight);
-    _dragPosition = details.globalPosition + Offset(0.0, -handleSize.height);
+    final handleSize = widget.selectionControls.getHandleSize(
+      widget.manager.preferredLineHeight,
+    );
+    _dragPosition = details.globalPosition + Offset(0, -handleSize.height);
   }
 
   void _handleDragUpdate(DragUpdateDetails details) {
@@ -82,8 +86,9 @@ class _MathSelectionHandleOverlayState extends State<MathSelectionHandleOverlay>
     final position = widget.manager.getPositionForOffset(_dragPosition);
 
     if (widget.selection.isCollapsed) {
-      widget
-          .onSelectionHandleChanged(TextSelection.collapsed(offset: position));
+      widget.onSelectionHandleChanged(
+        TextSelection.collapsed(offset: position),
+      );
       return;
     }
 
@@ -94,13 +99,11 @@ class _MathSelectionHandleOverlayState extends State<MathSelectionHandleOverlay>
           baseOffset: position,
           extentOffset: widget.selection.extentOffset,
         );
-        break;
       case MathSelectionHandlePosition.end:
         newSelection = TextSelection(
           baseOffset: widget.selection.baseOffset,
           extentOffset: position,
         );
-        break;
     }
 
     if (newSelection.baseOffset >= newSelection.extentOffset) {
@@ -112,7 +115,7 @@ class _MathSelectionHandleOverlayState extends State<MathSelectionHandleOverlay>
 
   void _handleTap() {
     if (widget.onSelectionHandleTapped != null) {
-      widget.onSelectionHandleTapped!();
+      widget.onSelectionHandleTapped?.call();
     }
   }
 
@@ -129,7 +132,6 @@ class _MathSelectionHandleOverlayState extends State<MathSelectionHandleOverlay>
           TextSelectionHandleType.left,
           TextSelectionHandleType.right,
         );
-        break;
       case MathSelectionHandlePosition.end:
         // For collapsed selections, we shouldn't be building the [end] handle.
         assert(!widget.selection.isCollapsed);
@@ -139,7 +141,6 @@ class _MathSelectionHandleOverlayState extends State<MathSelectionHandleOverlay>
           TextSelectionHandleType.right,
           TextSelectionHandleType.left,
         );
-        break;
     }
 
     final handleAnchor = widget.selectionControls.getHandleAnchor(
@@ -160,7 +161,9 @@ class _MathSelectionHandleOverlayState extends State<MathSelectionHandleOverlay>
     // Make sure the GestureDetector is big enough to be easily interactive.
     final interactiveRect = handleRect.expandToInclude(
       Rect.fromCircle(
-          center: handleRect.center, radius: kMinInteractiveDimension / 2),
+        center: handleRect.center,
+        radius: kMinInteractiveDimension / 2,
+      ),
     );
     final padding = RelativeRect.fromLTRB(
       math.max((interactiveRect.width - handleRect.width) / 2, 0),

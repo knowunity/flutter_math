@@ -41,10 +41,7 @@ void main() {
     test('produces correct penalty values', () {
       expect(
         r'a\allowbreak >+b',
-        toBreakLike(
-          [r'a\allowbreak', '>', '+', 'b'],
-          [0, 500, 700, 10000],
-        ),
+        toBreakLike([r'a\allowbreak', '>', '+', 'b'], [0, 500, 700, 10000]),
       );
 
       expect(
@@ -66,8 +63,9 @@ void main() {
       final widget = Math.tex(r'a+b>c');
       final breakRes = widget.texBreak();
       expect(breakRes.parts.length, 3);
-      await tester
-          .pumpWidget(MaterialApp(home: Wrap(children: breakRes.parts)));
+      await tester.pumpWidget(
+        MaterialApp(home: Wrap(children: breakRes.parts)),
+      );
     });
   });
 }
@@ -79,24 +77,34 @@ class _ToBreakLike extends Matcher {
   final List<int>? targetPenalties;
 
   _ToBreakLike(List<String> target, this.targetPenalties)
-      : target = target.map(getParsed).toList(growable: false);
+    : target = target.map(getParsed).toList(growable: false);
 
   @override
-  Description describe(Description description) => description
-      .add('Tex-style line breaking results shoudld match target: $target');
+  Description describe(Description description) => description.add(
+    'Tex-style line breaking results shoudld match target: $target',
+  );
 
   @override
-  Description describeMismatch(dynamic item, Description mismatchDescription,
-      Map matchState, bool verbose) {
+  Description describeMismatch(
+    dynamic item,
+    Description mismatchDescription,
+    Map matchState,
+    bool verbose,
+  ) {
     if (item is String) {
       final breakRes = getBreak(item);
 
-      return mismatchDescription
-          .add('${breakRes.parts.map((e) => e.encodeTeX()).toList()} '
-              'with penalties of ${breakRes.penalties}');
+      return mismatchDescription.add(
+        '${breakRes.parts.map((e) => e.encodeTeX()).toList()} '
+        'with penalties of ${breakRes.penalties}',
+      );
     }
-    return super
-        .describeMismatch(item, mismatchDescription, matchState, verbose);
+    return super.describeMismatch(
+      item,
+      mismatchDescription,
+      matchState,
+      verbose,
+    );
   }
 
   @override

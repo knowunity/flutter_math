@@ -61,54 +61,55 @@ extension UnitExt on Unit {
   double? get toPt => _ptPerUnit[this];
 
   String get name => const {
-        Unit.pt: 'pt',
-        Unit.mm: 'mm',
-        Unit.cm: 'cm',
-        Unit.inches: 'inches',
-        Unit.bp: 'bp',
-        Unit.pc: 'pc',
-        Unit.dd: 'dd',
-        Unit.cc: 'cc',
-        Unit.nd: 'nd',
-        Unit.nc: 'nc',
-        Unit.sp: 'sp',
-        Unit.px: 'px',
-        Unit.ex: 'ex',
-        Unit.em: 'em',
-        Unit.mu: 'mu',
-        Unit.lp: 'lp',
-        Unit.cssEm: 'cssEm',
-      }[this]!;
+    Unit.pt: 'pt',
+    Unit.mm: 'mm',
+    Unit.cm: 'cm',
+    Unit.inches: 'inches',
+    Unit.bp: 'bp',
+    Unit.pc: 'pc',
+    Unit.dd: 'dd',
+    Unit.cc: 'cc',
+    Unit.nd: 'nd',
+    Unit.nc: 'nc',
+    Unit.sp: 'sp',
+    Unit.px: 'px',
+    Unit.ex: 'ex',
+    Unit.em: 'em',
+    Unit.mu: 'mu',
+    Unit.lp: 'lp',
+    Unit.cssEm: 'cssEm',
+  }[this]!;
 
   static Unit? parse(String unit) => unit.parseUnit();
 }
 
 extension UnitExtOnString on String {
   Unit? parseUnit() => const {
-        'pt': Unit.pt,
-        'mm': Unit.mm,
-        'cm': Unit.cm,
-        'inches': Unit.inches,
-        'bp': Unit.bp,
-        'pc': Unit.pc,
-        'dd': Unit.dd,
-        'cc': Unit.cc,
-        'nd': Unit.nd,
-        'nc': Unit.nc,
-        'sp': Unit.sp,
-        'px': Unit.px,
-        'ex': Unit.ex,
-        'em': Unit.em,
-        'mu': Unit.mu,
-        'lp': Unit.lp,
-        'cssEm': Unit.cssEm,
-      }[this];
+    'pt': Unit.pt,
+    'mm': Unit.mm,
+    'cm': Unit.cm,
+    'inches': Unit.inches,
+    'bp': Unit.bp,
+    'pc': Unit.pc,
+    'dd': Unit.dd,
+    'cc': Unit.cc,
+    'nd': Unit.nd,
+    'nc': Unit.nc,
+    'sp': Unit.sp,
+    'px': Unit.px,
+    'ex': Unit.ex,
+    'em': Unit.em,
+    'mu': Unit.mu,
+    'lp': Unit.lp,
+    'cssEm': Unit.cssEm,
+  }[this];
 }
 
 class Measurement {
+  const Measurement({required this.value, required this.unit});
+
   final double value;
   final Unit unit;
-  const Measurement({required this.value, required this.unit});
 
   double toLpUnder(MathOptions options) {
     if (unit == Unit.lp) return value;
@@ -136,8 +137,23 @@ class Measurement {
             options.fontSize *
             options.fontMetrics.quad *
             options.havingStyle(options.style.atLeastText()).sizeMultiplier;
-      default:
-        throw ArgumentError("Invalid unit: '${unit.toString()}'");
+      case Unit.lp:
+        // Already handled above, but needed for exhaustive switch
+        return value;
+      case Unit.pt:
+      case Unit.mm:
+      case Unit.cm:
+      case Unit.inches:
+      case Unit.bp:
+      case Unit.pc:
+      case Unit.dd:
+      case Unit.cc:
+      case Unit.nd:
+      case Unit.nc:
+      case Unit.sp:
+      case Unit.px:
+        // These cases are handled by unit.toPt check above
+        throw ArgumentError('Invalid unit: $unit');
     }
   }
 
@@ -186,16 +202,16 @@ enum MathSize {
 
 extension SizeModeExt on MathSize {
   double get sizeMultiplier => const [
-        0.5,
-        0.6,
-        0.7,
-        0.8,
-        0.9,
-        1.0,
-        1.2,
-        1.44,
-        1.728,
-        2.074,
-        2.488,
-      ][this.index];
+    0.5,
+    0.6,
+    0.7,
+    0.8,
+    0.9,
+    1.0,
+    1.2,
+    1.44,
+    1.728,
+    2.074,
+    2.488,
+  ][index];
 }

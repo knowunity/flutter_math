@@ -14,10 +14,9 @@ abstract class Matcher {
 }
 
 class OrMatcher extends Matcher {
+  const OrMatcher(this.matcher1, this.matcher2);
   final Matcher matcher1;
   final Matcher matcher2;
-
-  const OrMatcher(this.matcher1, this.matcher2);
 
   @override
   bool match(GreenNode? node) => matcher1.match(node) || matcher2.match(node);
@@ -37,15 +36,6 @@ class NullMatcher extends Matcher {
 const isNull = NullMatcher();
 
 class NodeMatcher<T extends GreenNode> extends Matcher {
-  final bool Function(T node)? matchSelf;
-  final int selfSpecificity;
-  final Matcher? child;
-  final List<Matcher>? children;
-  final Matcher? firstChild;
-  final Matcher? lastChild;
-  final Matcher? everyChild;
-  final Matcher? anyChild;
-
   const NodeMatcher({
     this.matchSelf,
     this.selfSpecificity = 100,
@@ -56,6 +46,14 @@ class NodeMatcher<T extends GreenNode> extends Matcher {
     this.everyChild,
     this.anyChild,
   });
+  final bool Function(T node)? matchSelf;
+  final int selfSpecificity;
+  final Matcher? child;
+  final List<Matcher>? children;
+  final Matcher? firstChild;
+  final Matcher? lastChild;
+  final Matcher? everyChild;
+  final Matcher? anyChild;
 
   @override
   int get specificity =>
@@ -69,9 +67,10 @@ class NodeMatcher<T extends GreenNode> extends Matcher {
         (anyChild?.specificity ?? 0),
       ].max;
 
+  @override
   bool match(GreenNode? node) {
     if (node is! T) return false;
-    if (matchSelf != null && matchSelf!(node) == false) return false;
+    if (matchSelf != null && !matchSelf!(node)) return false;
     if (child != null) {
       if (node.children.length != 1) return false;
       if (!child!.match(node.children.first)) return false;
@@ -108,14 +107,13 @@ NodeMatcher<T> isA<T extends GreenNode>({
   Matcher? lastChild,
   Matcher? everyChild,
   Matcher? anyChild,
-}) =>
-    NodeMatcher<T>(
-      matchSelf: matchSelf,
-      selfSpecificity: selfSpecificity,
-      child: child,
-      children: children,
-      firstChild: firstChild,
-      lastChild: lastChild,
-      everyChild: everyChild,
-      anyChild: anyChild,
-    );
+}) => NodeMatcher<T>(
+  matchSelf: matchSelf,
+  selfSpecificity: selfSpecificity,
+  child: child,
+  children: children,
+  firstChild: firstChild,
+  lastChild: lastChild,
+  everyChild: everyChild,
+  anyChild: anyChild,
+);

@@ -24,15 +24,15 @@
 part of katex_base;
 
 const _underOverEntries = {
-  ['\\stackrel', '\\overset', '\\underset']: FunctionSpec(
+  [r'\stackrel', r'\overset', r'\underset']: FunctionSpec(
     numArgs: 2,
     handler: _underOverHandler,
-  )
+  ),
 };
 GreenNode _underOverHandler(TexParser parser, FunctionContext context) {
   final shiftedArg = parser.parseArgNode(mode: null, optional: false)!;
   final baseArg = parser.parseArgNode(mode: null, optional: false)!;
-  if (context.funcName == '\\underset') {
+  if (context.funcName == r'\underset') {
     return UnderNode(
       base: baseArg.wrapWithEquationRow(),
       below: shiftedArg.wrapWithEquationRow(),
@@ -41,7 +41,7 @@ GreenNode _underOverHandler(TexParser parser, FunctionContext context) {
     return OverNode(
       base: baseArg.wrapWithEquationRow(),
       above: shiftedArg.wrapWithEquationRow(),
-      stackRel: context.funcName == '\\stackrel',
+      stackRel: context.funcName == r'\stackrel',
     );
   }
 }

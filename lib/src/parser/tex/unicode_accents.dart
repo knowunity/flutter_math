@@ -24,15 +24,15 @@
 import '../../ast/types.dart';
 
 const Map<String, Map<Mode, String?>> unicodeAccents = {
-  '\u0300': {Mode.text: '\\`', Mode.math: '\\grave'},
-  '\u0308': {Mode.text: '\\"', Mode.math: '\\ddot'},
-  '\u0303': {Mode.text: '\\~', Mode.math: '\\tilde'},
-  '\u0304': {Mode.text: '\\=', Mode.math: '\\bar'},
-  '\u0301': {Mode.text: "\\'", Mode.math: '\\acute'},
-  '\u0306': {Mode.text: '\\u', Mode.math: '\\breve'},
-  '\u030c': {Mode.text: '\\v', Mode.math: '\\check'},
-  '\u0302': {Mode.text: '\\^', Mode.math: '\\hat'},
-  '\u0307': {Mode.text: '\\.', Mode.math: '\\dot'},
-  '\u030a': {Mode.text: '\\r', Mode.math: '\\mathring'},
-  '\u030b': {Mode.text: '\\H', Mode.math: null},
+  '\u0300': {Mode.text: r'\`', Mode.math: r'\grave'},
+  '\u0308': {Mode.text: r'\"', Mode.math: r'\ddot'},
+  '\u0303': {Mode.text: r'\~', Mode.math: r'\tilde'},
+  '\u0304': {Mode.text: r'\=', Mode.math: r'\bar'},
+  '\u0301': {Mode.text: r"\'", Mode.math: r'\acute'},
+  '\u0306': {Mode.text: r'\u', Mode.math: r'\breve'},
+  '\u030c': {Mode.text: r'\v', Mode.math: r'\check'},
+  '\u0302': {Mode.text: r'\^', Mode.math: r'\hat'},
+  '\u0307': {Mode.text: r'\.', Mode.math: r'\dot'},
+  '\u030a': {Mode.text: r'\r', Mode.math: r'\mathring'},
+  '\u030b': {Mode.text: r'\H', Mode.math: null},
 };

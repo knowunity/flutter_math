@@ -1,4 +1,4 @@
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 
 import '../../render/layout/reset_dimension.dart';
 import '../options.dart';
@@ -9,6 +9,14 @@ import '../types.dart';
 ///
 /// Example: `\phantom` `\hphantom`.
 class PhantomNode extends LeafNode {
+  PhantomNode({
+    required this.phantomChild,
+    this.zeroHeight = false,
+    this.zeroWidth = false,
+    this.zeroDepth = false,
+  });
+
+  @override
   Mode get mode => Mode.math;
 
   /// The phantomed child.
@@ -26,23 +34,18 @@ class PhantomNode extends LeafNode {
   /// Whether to eliminate depth.
   final bool zeroDepth;
 
-  PhantomNode({
-    required this.phantomChild,
-    this.zeroHeight = false,
-    this.zeroWidth = false,
-    this.zeroDepth = false,
-  });
-
   @override
   BuildResult buildWidget(
-      MathOptions options, List<BuildResult?> childBuildResults) {
-    final phantomRedNode =
-        SyntaxNode(parent: null, value: phantomChild, pos: 0);
-    final phantomResult = phantomRedNode.buildWidget(options);
-    Widget widget = Opacity(
-      opacity: 0.0,
-      child: phantomResult.widget,
+    MathOptions options,
+    List<BuildResult?> childBuildResults,
+  ) {
+    final phantomRedNode = SyntaxNode(
+      parent: null,
+      value: phantomChild,
+      pos: 0,
     );
+    final phantomResult = phantomRedNode.buildWidget(options);
+    Widget widget = Opacity(opacity: 0, child: phantomResult.widget);
     widget = ResetDimension(
       width: zeroWidth ? 0 : null,
       height: zeroHeight ? 0 : null,
@@ -70,7 +73,7 @@ class PhantomNode extends LeafNode {
   Map<String, Object?> toJson() => super.toJson()
     ..addAll({
       'phantomChild': phantomChild.toJson(),
-      if (zeroWidth != false) 'zeroWidth': zeroWidth,
-      if (zeroHeight != false) 'zeroHeight': zeroHeight,
+      if (zeroWidth) 'zeroWidth': zeroWidth,
+      if (zeroHeight) 'zeroHeight': zeroHeight,
     });
 }

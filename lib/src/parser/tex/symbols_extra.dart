@@ -18,25 +18,24 @@ const extraTexMathSymbolCommandConfigs = {
 
   // Negated relations
   // '\\not': TexSymbolConfig('\u0338'),
-  '\\neq': TexSymbolConfig('\u2260'),
-  '\\notin': TexSymbolConfig('\u2209'),
-  '\\notni': TexSymbolConfig('\u220C'),
+  r'\neq': TexSymbolConfig('\u2260'),
+  r'\notin': TexSymbolConfig('\u2209'),
+  r'\notni': TexSymbolConfig('\u220C'),
   '\u2260': TexSymbolConfig('\u2260'),
   '\u2209': TexSymbolConfig('\u2209'),
   '\u220C': TexSymbolConfig('\u220C'),
 
   // colon
-  '\\colon': TexSymbolConfig(':', type: AtomType.punct), // From MathJax
-
+  r'\colon': TexSymbolConfig(':', type: AtomType.punct), // From MathJax
   // Composite characters
-  '\\dblcolon': TexSymbolConfig('\u2237'),
-  '\\coloneqq': TexSymbolConfig('\u2254'),
-  '\\eqqcolon': TexSymbolConfig('\u2255'),
-  '\\eqcolon': TexSymbolConfig('\u2239'),
-  '\\llbracket': TexSymbolConfig('\u27e6'),
-  '\\rrbracket': TexSymbolConfig('\u27e7'),
-  '\\lBrace': TexSymbolConfig('\u2983'),
-  '\\rBrace': TexSymbolConfig('\u2984'),
+  r'\dblcolon': TexSymbolConfig('\u2237'),
+  r'\coloneqq': TexSymbolConfig('\u2254'),
+  r'\eqqcolon': TexSymbolConfig('\u2255'),
+  r'\eqcolon': TexSymbolConfig('\u2239'),
+  r'\llbracket': TexSymbolConfig('\u27e6'),
+  r'\rrbracket': TexSymbolConfig('\u27e7'),
+  r'\lBrace': TexSymbolConfig('\u2983'),
+  r'\rBrace': TexSymbolConfig('\u2984'),
 
   // // Private KaTeX code point
   // '\\gvertneqq': TexSymbolConfig('\u2269', type: AtomType.rel),

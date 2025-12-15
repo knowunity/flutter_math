@@ -7,10 +7,11 @@ abstract class FlutterMathException implements Exception {
 
 /// Exceptions occured during build.
 class BuildException implements FlutterMathException {
+  const BuildException(this.message, {this.trace});
+  @override
   final String message;
   final StackTrace? trace;
 
-  const BuildException(this.message, {this.trace});
-
+  @override
   String get messageWithType => 'Build Exception: $message';
 }

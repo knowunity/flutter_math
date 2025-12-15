@@ -18,10 +18,6 @@ class StaticEncodeResult extends EncodeResult {
 }
 
 class NonStrictEncodeResult extends EncodeResult {
-  final String errorCode;
-  final String errorMsg;
-  final EncodeResult placeHolder;
-
   const NonStrictEncodeResult(
     this.errorCode,
     this.errorMsg, [
@@ -32,7 +28,10 @@ class NonStrictEncodeResult extends EncodeResult {
     this.errorCode,
     this.errorMsg, [
     String placeHolder = '',
-  ]) : this.placeHolder = StaticEncodeResult(placeHolder);
+  ]) : placeHolder = StaticEncodeResult(placeHolder);
+  final String errorCode;
+  final String errorMsg;
+  final EncodeResult placeHolder;
 
   @override
   String stringify(EncodeConf conf) {
@@ -43,18 +42,14 @@ class NonStrictEncodeResult extends EncodeResult {
 
 typedef EncoderFun<T extends GreenNode> = EncodeResult Function(T node);
 
-typedef StrictFun = Strict Function(String errorCode, String errorMsg,
-    [dynamic token]);
+typedef StrictFun =
+    Strict Function(String errorCode, String errorMsg, [dynamic token]);
 
 abstract class EncodeConf {
+  const EncodeConf({this.strict = Strict.warn, this.strictFun});
   final Strict strict;
 
   final StrictFun? strictFun;
-
-  const EncodeConf({
-    this.strict = Strict.warn,
-    this.strictFun,
-  });
 
   void reportNonstrict(String errorCode, String errorMsg, [dynamic token]) {
     final strict = this.strict != Strict.function
@@ -65,16 +60,20 @@ abstract class EncodeConf {
         return;
       case Strict.error:
         throw EncoderException(
-            "Nonstrict Tex encoding and strict mode is set to 'error': "
-            '$errorMsg [$errorCode]',
-            token);
+          "Nonstrict Tex encoding and strict mode is set to 'error': "
+          '$errorMsg [$errorCode]',
+          token,
+        );
       case Strict.warn:
-        warn("Nonstrict Tex encoding and strict mode is set to 'warn': "
-            '$errorMsg [$errorCode]');
-        break;
-      default:
-        warn('Nonstrict Tex encoding and strict mode is set to '
-            "unrecognized '$strict': $errorMsg [$errorCode]");
+        warn(
+          "Nonstrict Tex encoding and strict mode is set to 'warn': "
+          '$errorMsg [$errorCode]',
+        );
+      case Strict.function:
+        warn(
+          'Nonstrict Tex encoding and strict mode is set to '
+          "unrecognized '$strict': $errorMsg [$errorCode]",
+        );
     }
   }
 }

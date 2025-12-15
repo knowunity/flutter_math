@@ -40,7 +40,7 @@ mixin SelectionManagerMixin<T extends StatefulWidget> on State<T>
   }
 
   @override
-  void didUpdateWidget(covariant oldWidget) {
+  void didUpdateWidget(covariant T oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (focusNode != _oldFocusNode) {
       _oldFocusNode.removeListener(_handleFocusChange);
@@ -63,8 +63,11 @@ mixin SelectionManagerMixin<T extends StatefulWidget> on State<T>
 
   void _handleFocusChange() {
     if (!hasFocus) {
-      handleSelectionChanged(TextSelection.collapsed(offset: -1), null,
-          ExtraSelectionChangedCause.unfocus);
+      handleSelectionChanged(
+        const TextSelection.collapsed(offset: -1),
+        null,
+        ExtraSelectionChangedCause.unfocus,
+      );
     }
   }
 
@@ -73,17 +76,24 @@ mixin SelectionManagerMixin<T extends StatefulWidget> on State<T>
   void _onControllerChanged() {
     if (_oldAst != controller.ast || _oldSelection != controller.selection) {
       handleSelectionChanged(
-          controller.selection, null, ExtraSelectionChangedCause.exterior);
+        controller.selection,
+        null,
+        ExtraSelectionChangedCause.exterior,
+      );
     }
   }
 
   void onSelectionChanged(
-      TextSelection selection, SelectionChangedCause? cause);
+    TextSelection selection,
+    SelectionChangedCause? cause,
+  );
 
   @mustCallSuper
   void handleSelectionChanged(
-      TextSelection selection, SelectionChangedCause? cause,
-      [ExtraSelectionChangedCause? extraCause]) {
+    TextSelection selection,
+    SelectionChangedCause? cause, [
+    ExtraSelectionChangedCause? extraCause,
+  ]) {
     if (extraCause != ExtraSelectionChangedCause.unfocus &&
         extraCause != ExtraSelectionChangedCause.exterior &&
         !hasFocus) {
@@ -112,10 +122,7 @@ mixin SelectionManagerMixin<T extends StatefulWidget> on State<T>
     required Offset offset,
     required SelectionChangedCause cause,
   }) {
-    handleSelectionChanged(
-      getWordRangeAtPoint(offset),
-      cause,
-    );
+    handleSelectionChanged(getWordRangeAtPoint(offset), cause);
   }
 
   RenderEditableLine getRenderLineAtOffset(Offset globalOffset) {
@@ -125,14 +132,14 @@ mixin SelectionManagerMixin<T extends StatefulWidget> on State<T>
       rootOffset.dx.clamp(0.0, rootRenderBox.size.width),
       rootOffset.dy.clamp(0.0, rootRenderBox.size.height),
     );
-    return (controller.ast.greenRoot.key!.currentContext!.findRenderObject()
+    return (controller.ast.greenRoot.key!.currentContext!.findRenderObject()!
                 as RenderEditableLine)
             .hittestFindLowest<RenderEditableLine>(constrainedOffset) ??
-        controller.ast.greenRoot.key!.currentContext!.findRenderObject()
+        controller.ast.greenRoot.key!.currentContext!.findRenderObject()!
             as RenderEditableLine;
   }
 
-  RenderBox get rootRenderBox => context.findRenderObject() as RenderBox;
+  RenderBox get rootRenderBox => context.findRenderObject()! as RenderBox;
 
   int getPositionForOffset(Offset globalOffset) {
     final target = getRenderLineAtOffset(globalOffset);
@@ -142,13 +149,14 @@ mixin SelectionManagerMixin<T extends StatefulWidget> on State<T>
 
   Offset getLocalEndpointForPosition(int position) {
     final node = controller.ast.findNodeManagesPosition(position);
-    var caretIndex = node.caretPositions
-        .indexWhere((caretPosition) => caretPosition >= position);
+    var caretIndex = node.caretPositions.indexWhere(
+      (caretPosition) => caretPosition >= position,
+    );
     if (caretIndex == -1) {
       caretIndex = node.caretPositions.length - 1;
     }
     final renderLine =
-        node.key!.currentContext!.findRenderObject() as RenderEditableLine;
+        node.key!.currentContext!.findRenderObject()! as RenderEditableLine;
     final globalOffset = renderLine.getEndpointForCaretIndex(caretIndex);
 
     return rootRenderBox.globalToLocal(globalOffset);
@@ -187,12 +195,10 @@ mixin SelectionManagerMixin<T extends StatefulWidget> on State<T>
   }
 
   Rect getLocalEditingRegion() {
-    final root = controller.ast.greenRoot.key!.currentContext!
-        .findRenderObject() as RenderEditableLine;
-    return Rect.fromPoints(
-      Offset.zero,
-      root.size.bottomRight(Offset.zero),
-    );
+    final root =
+        controller.ast.greenRoot.key!.currentContext!.findRenderObject()!
+            as RenderEditableLine;
+    return Rect.fromPoints(Offset.zero, root.size.bottomRight(Offset.zero));
   }
 
   @override

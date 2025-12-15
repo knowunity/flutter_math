@@ -21,12 +21,15 @@ import 'selection_manager.dart';
 /// widget，we use an absurdly large font size and keep a select-all state.
 ///
 mixin WebSelectionControlsManagerMixin<T extends StatefulWidget>
-    on SelectionManagerMixin<T> implements TextInputClient {
+    on SelectionManagerMixin<T>
+    implements TextInputClient {
+  @override
   FocusNode get focusNode;
   late FocusNode _oldFocusNode;
 
   TextInputConnection? _textInputConnection;
 
+  @override
   bool get hasFocus => focusNode.hasFocus;
 
   late MathController _oldController;
@@ -78,7 +81,7 @@ mixin WebSelectionControlsManagerMixin<T extends StatefulWidget>
     if (!_hasInputConnection) {
       _textInputConnection = TextInput.attach(
         this,
-        TextInputConfiguration(
+        const TextInputConfiguration(
           inputType: TextInputType.multiline,
           readOnly: true,
           autocorrect: false,
@@ -110,14 +113,15 @@ mixin WebSelectionControlsManagerMixin<T extends StatefulWidget>
 
   void _updateSizeAndTransform() {
     if (_textInputConnection != null) {
-      final renderBox = this.context.findRenderObject();
+      final renderBox = context.findRenderObject();
       if (renderBox is RenderBox) {
         final size = renderBox.size;
         final transform = renderBox.getTransformTo(null);
         _textInputConnection?.setEditableSizeAndTransform(size, transform);
       }
-      SchedulerBinding.instance
-          .addPostFrameCallback((Duration _) => _updateSizeAndTransform());
+      SchedulerBinding.instance.addPostFrameCallback(
+        (_) => _updateSizeAndTransform(),
+      );
     }
   }
 

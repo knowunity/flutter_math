@@ -11,6 +11,29 @@ import '../types.dart';
 
 /// Space node. Also used for equation alignment.
 class SpaceNode extends LeafNode {
+  SpaceNode({
+    required this.height,
+    required this.width,
+    this.shift = Measurement.zero,
+    this.depth = Measurement.zero,
+    this.breakPenalty,
+    this.fill = false,
+    // this.background,
+    required this.mode,
+    this.alignerOrSpacer = false,
+  });
+
+  SpaceNode.alignerOrSpacer()
+    : height = Measurement.zero,
+      width = Measurement.zero,
+      shift = Measurement.zero,
+      depth = Measurement.zero,
+      breakPenalty = null,
+      fill = true,
+      // background = null,
+      mode = Mode.math,
+      alignerOrSpacer = true;
+
   /// Height.
   final Measurement height;
 
@@ -35,40 +58,18 @@ class SpaceNode extends LeafNode {
   /// Whether to fill with text color.
   final bool fill;
 
+  @override
   final Mode mode;
 
   final bool alignerOrSpacer;
-  SpaceNode({
-    required this.height,
-    required this.width,
-    this.shift = Measurement.zero,
-    this.depth = Measurement.zero,
-    this.breakPenalty,
-    this.fill = false,
-    // this.background,
-    required this.mode,
-    this.alignerOrSpacer = false,
-  });
-
-  SpaceNode.alignerOrSpacer()
-      : height = Measurement.zero,
-        width = Measurement.zero,
-        shift = Measurement.zero,
-        depth = Measurement.zero,
-        breakPenalty = null,
-        fill = true,
-        // background = null,
-        mode = Mode.math,
-        alignerOrSpacer = true;
 
   @override
   BuildResult buildWidget(
-      MathOptions options, List<BuildResult?> childBuildResults) {
-    if (alignerOrSpacer == true) {
-      return BuildResult(
-        options: options,
-        widget: Container(height: 0.0),
-      );
+    MathOptions options,
+    List<BuildResult?> childBuildResults,
+  ) {
+    if (alignerOrSpacer) {
+      return BuildResult(options: options, widget: Container(height: 0));
     }
 
     final height = this.height.toLpUnder(options);
@@ -84,7 +85,7 @@ class SpaceNode extends LeafNode {
         child: Container(
           color: fill ? options.color : null,
           height: topMost - bottomMost,
-          width: math.max(0.0, width),
+          width: math.max(0, width),
         ),
       ),
     );
@@ -110,7 +111,7 @@ class SpaceNode extends LeafNode {
       if (shift != Measurement.zero) 'shift': shift.toString(),
       // if (noBreak != false) 'noBreak': noBreak,
       if (breakPenalty != null) 'breakPenalty': breakPenalty,
-      if (fill != false) 'fill': fill,
-      if (alignerOrSpacer != false) 'alignerOrSpacer': alignerOrSpacer,
+      if (fill) 'fill': fill,
+      if (alignerOrSpacer) 'alignerOrSpacer': alignerOrSpacer,
     });
 }

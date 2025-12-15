@@ -38,21 +38,8 @@ import '../parse_error.dart';
 import '../parser.dart';
 
 const arrayEntries = {
-  [
-    'array',
-    'darray',
-  ]: EnvSpec(
-    numArgs: 1,
-    handler: _arrayHandler,
-  ),
-  [
-    'matrix',
-    'pmatrix',
-    'bmatrix',
-    'Bmatrix',
-    'vmatrix',
-    'Vmatrix',
-  ]: EnvSpec(
+  ['array', 'darray']: EnvSpec(numArgs: 1, handler: _arrayHandler),
+  ['matrix', 'pmatrix', 'bmatrix', 'Bmatrix', 'vmatrix', 'Vmatrix']: EnvSpec(
     numArgs: 0,
     handler: _matrixHandler,
   ),
@@ -60,11 +47,7 @@ const arrayEntries = {
   ['subarray']: EnvSpec(numArgs: 1, handler: _subArrayHandler),
 };
 
-enum ColSeparationType {
-  align,
-  alignat,
-  small,
-}
+enum ColSeparationType { align, alignat, small }
 
 List<MatrixSeparatorStyle> getHLines(TexParser parser) {
   // Return an array. The array length = number of hlines.
@@ -72,11 +55,13 @@ List<MatrixSeparatorStyle> getHLines(TexParser parser) {
   final hlineInfo = <MatrixSeparatorStyle>[];
   parser.consumeSpaces();
   var next = parser.fetch().text;
-  while (next == '\\hline' || next == '\\hdashline') {
+  while (next == r'\hline' || next == r'\hdashline') {
     parser.consume();
-    hlineInfo.add(next == '\\hdashline'
-        ? MatrixSeparatorStyle.dashed
-        : MatrixSeparatorStyle.solid);
+    hlineInfo.add(
+      next == r'\hdashline'
+          ? MatrixSeparatorStyle.dashed
+          : MatrixSeparatorStyle.solid,
+    );
     parser.consumeSpaces();
     next = parser.fetch().text;
   }
@@ -98,11 +83,11 @@ MatrixNode parseArray(
 }) {
   // Parse body of array with \\ temporarily mapped to \cr
   parser.macroExpander.beginGroup();
-  parser.macroExpander.macros.set('\\\\', MacroDefinition.fromString('\\cr'));
+  parser.macroExpander.macros.set(r'\\', MacroDefinition.fromString(r'\cr'));
 
   // Get current arraystretch if it's not set by the environment
   if (arrayStretch == null) {
-    final stretch = parser.macroExpander.expandMacroAsText('\\arraystretch');
+    final stretch = parser.macroExpander.expandMacroAsText(r'\arraystretch');
     if (stretch == null) {
       // Default \arraystretch from lttab.dtx
       arrayStretch = 1.0;
@@ -123,13 +108,13 @@ MatrixNode parseArray(
   final hLinesBeforeRow = <MatrixSeparatorStyle>[];
 
   // Test for \hline at the top of the array.
-  hLinesBeforeRow
-      .add(getHLines(parser).lastOrNull ?? MatrixSeparatorStyle.none);
+  hLinesBeforeRow.add(
+    getHLines(parser).lastOrNull ?? MatrixSeparatorStyle.none,
+  );
 
   while (true) {
     // Parse each cell in its own group (namespace)
-    final cellBody =
-        parser.parseExpression(breakOnInfix: false, breakOnTokenText: '\\cr');
+    final cellBody = parser.parseExpression(breakOnTokenText: r'\cr');
     parser.macroExpander.endGroup();
     parser.macroExpander.beginGroup();
 
@@ -144,7 +129,7 @@ MatrixNode parseArray(
     final next = parser.fetch().text;
     if (next == '&') {
       parser.consume();
-    } else if (next == '\\end') {
+    } else if (next == r'\end') {
       // Arrays terminate newlines with `\crcr` which consumes a `\cr` if
       // the last line is empty.
       // NOTE: Currently, `cell` is the last item added into `row`.
@@ -155,19 +140,22 @@ MatrixNode parseArray(
         hLinesBeforeRow.add(MatrixSeparatorStyle.none);
       }
       break;
-    } else if (next == '\\cr') {
+    } else if (next == r'\cr') {
       final cr = assertNodeType<CrNode>(parser.parseFunction(null, null, null));
       rowGaps.add(cr.size ?? Measurement.zero);
 
       // check for \hline(s) following the row separator
-      hLinesBeforeRow
-          .add(getHLines(parser).lastOrNull ?? MatrixSeparatorStyle.none);
+      hLinesBeforeRow.add(
+        getHLines(parser).lastOrNull ?? MatrixSeparatorStyle.none,
+      );
 
       row = [];
       body.add(row);
     } else {
       throw ParseException(
-          'Expected & or \\\\ or \\cr or \\end', parser.nextToken);
+        r'Expected & or \\ or \cr or \end',
+        parser.nextToken,
+      );
     }
   }
 
@@ -230,29 +218,31 @@ GreenNode _arrayHandler(TexParser parser, EnvContext context) {
       case 'l':
       case 'c':
       case 'r':
-        aligns.add(const {
-          'l': MatrixColumnAlign.left,
-          'c': MatrixColumnAlign.center,
-          'r': MatrixColumnAlign.right,
-        }[ca]!);
+        aligns.add(
+          const {
+            'l': MatrixColumnAlign.left,
+            'c': MatrixColumnAlign.center,
+            'r': MatrixColumnAlign.right,
+          }[ca]!,
+        );
         if (alignSpecified) {
           separators.add(MatrixSeparatorStyle.none);
         }
         alignSpecified = true;
         lastIsSeparator = false;
-        break;
       case '|':
       case ':':
         if (alignSpecified) {
-          separators.add(const {
-            '|': MatrixSeparatorStyle.solid,
-            ':': MatrixSeparatorStyle.dashed,
-          }[ca]!);
+          separators.add(
+            const {
+              '|': MatrixSeparatorStyle.solid,
+              ':': MatrixSeparatorStyle.dashed,
+            }[ca]!,
+          );
           // aligns.add(MatrixColumnAlign.center);
         }
         alignSpecified = false;
         lastIsSeparator = true;
-        break;
       default:
         throw ParseException('Unknown column alignment: $ca');
     }
@@ -278,18 +268,14 @@ GreenNode _matrixHandler(TexParser parser, EnvContext context) {
     'vmatrix': ['|', '|'],
     'Vmatrix': ['\u2223', '\u2223'],
   }[context.envName];
-  final res = parseArray(
-    parser,
-    hskipBeforeAndAfter: false,
-    style: _dCellStyle(context.envName),
-  );
+  final res = parseArray(parser, style: _dCellStyle(context.envName));
   return delimiters == null
       ? res
       : LeftRightNode(
           leftDelim: delimiters[0],
           rightDelim: delimiters[1],
           body: [
-            [res].wrapWithEquationRow()
+            [res].wrapWithEquationRow(),
           ],
         );
 }
@@ -325,7 +311,6 @@ GreenNode _subArrayHandler(TexParser parser, EnvContext context) {
   final res = parseArray(
     parser,
     colAligns: aligns,
-    hskipBeforeAndAfter: false,
     arrayStretch: 0.5,
     style: MathStyle.script,
   );

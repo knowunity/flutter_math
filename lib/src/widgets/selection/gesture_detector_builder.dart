@@ -10,9 +10,7 @@ abstract class MathSelectionGestureDetectorBuilderDelegate {
 }
 
 class MathSelectionGestureDetectorBuilder {
-  MathSelectionGestureDetectorBuilder({
-    required this.delegate,
-  });
+  MathSelectionGestureDetectorBuilder({required this.delegate});
   final SelectionOverlayManagerMixin delegate;
 
   /// Whether to show the selection toolbar.
@@ -35,7 +33,8 @@ class MathSelectionGestureDetectorBuilder {
     // shouldn't trigger the selection overlay.
     // For backwards-compatibility, we treat a null kind the same as touch.
     final kind = details.kind;
-    _shouldShowSelectionToolbar = kind == null ||
+    _shouldShowSelectionToolbar =
+        kind == null ||
         kind == PointerDeviceKind.touch ||
         kind == PointerDeviceKind.stylus;
   }
@@ -98,7 +97,9 @@ class MathSelectionGestureDetectorBuilder {
   void onSingleTapUp(TapDragUpDetails details) {
     if (delegate.selectionEnabled) {
       delegate.selectPositionAt(
-          from: lastTapDownPosition!, cause: SelectionChangedCause.tap);
+        from: lastTapDownPosition!,
+        cause: SelectionChangedCause.tap,
+      );
       // Should select word edge, but not supporting it now
       // renderEditable.selectWordEdge(cause: SelectionChangedCause.tap);
     }
@@ -148,7 +149,9 @@ class MathSelectionGestureDetectorBuilder {
   void onDoubleTapDown(TapDragDownDetails details) {
     if (delegate.selectionEnabled) {
       delegate.selectWordAt(
-          offset: details.globalPosition, cause: SelectionChangedCause.tap);
+        offset: details.globalPosition,
+        cause: SelectionChangedCause.tap,
+      );
       if (shouldShowSelectionToolbar) delegate.showToolbar();
     }
   }
@@ -179,23 +182,21 @@ class MathSelectionGestureDetectorBuilder {
     Key? key,
     HitTestBehavior? behavior,
     required Widget child,
-  }) =>
-      TextSelectionGestureDetector(
-        key: key,
-        onTapDown: onTapDown,
-        onForcePressStart:
-            delegate.forcePressEnabled ? onForcePressStart : null,
-        onForcePressEnd: delegate.forcePressEnabled ? onForcePressEnd : null,
-        onSingleTapUp: onSingleTapUp,
-        onSingleTapCancel: onSingleTapCancel,
-        onSingleLongTapStart: onSingleLongTapStart,
-        onSingleLongTapMoveUpdate: onSingleLongTapMoveUpdate,
-        onSingleLongTapEnd: onSingleLongTapEnd,
-        onDoubleTapDown: onDoubleTapDown,
-        onDragSelectionStart: onDragSelectionStart,
-        onDragSelectionUpdate: onDragSelectionUpdate,
-        onDragSelectionEnd: onDragSelectionEnd,
-        behavior: behavior,
-        child: child,
-      );
+  }) => TextSelectionGestureDetector(
+    key: key,
+    onTapDown: onTapDown,
+    onForcePressStart: delegate.forcePressEnabled ? onForcePressStart : null,
+    onForcePressEnd: delegate.forcePressEnabled ? onForcePressEnd : null,
+    onSingleTapUp: onSingleTapUp,
+    onSingleTapCancel: onSingleTapCancel,
+    onSingleLongTapStart: onSingleLongTapStart,
+    onSingleLongTapMoveUpdate: onSingleLongTapMoveUpdate,
+    onSingleLongTapEnd: onSingleLongTapEnd,
+    onDoubleTapDown: onDoubleTapDown,
+    onDragSelectionStart: onDragSelectionStart,
+    onDragSelectionUpdate: onDragSelectionUpdate,
+    onDragSelectionEnd: onDragSelectionEnd,
+    behavior: behavior,
+    child: child,
+  );
 }

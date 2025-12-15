@@ -6,37 +6,36 @@ import 'package:flutter/widgets.dart';
 
 import '../../ast/nodes/matrix.dart';
 import '../constants.dart';
-import '../utils/render_box_offset.dart';
 import '../utils/render_box_layout.dart';
+import '../utils/render_box_offset.dart';
 import 'line.dart';
 
 class EqnArrayParentData extends ContainerBoxParentData<RenderBox> {}
 
 class EqnArray extends MultiChildRenderObjectWidget {
+  const EqnArray({
+    super.key,
+    required this.ruleThickness,
+    required this.jotSize,
+    required this.arrayskip,
+    required this.hlines,
+    required this.rowSpacings,
+    required super.children,
+  });
   final double ruleThickness;
   final double jotSize;
   final double arrayskip;
   final List<MatrixSeparatorStyle> hlines;
   final List<double> rowSpacings;
 
-  EqnArray({
-    Key? key,
-    required this.ruleThickness,
-    required this.jotSize,
-    required this.arrayskip,
-    required this.hlines,
-    required this.rowSpacings,
-    required List<Widget> children,
-  }) : super(key: key, children: children);
-
   @override
   RenderObject createRenderObject(BuildContext context) => RenderEqnArray(
-        ruleThickness: ruleThickness,
-        jotSize: jotSize,
-        arrayskip: arrayskip,
-        hlines: hlines,
-        rowSpacings: rowSpacings,
-      );
+    ruleThickness: ruleThickness,
+    jotSize: jotSize,
+    arrayskip: arrayskip,
+    hlines: hlines,
+    rowSpacings: rowSpacings,
+  );
 }
 
 class RenderEqnArray extends RenderBox
@@ -51,11 +50,11 @@ class RenderEqnArray extends RenderBox
     required double arrayskip,
     required List<MatrixSeparatorStyle> hlines,
     required List<double> rowSpacings,
-  })  : _ruleThickness = ruleThickness,
-        _jotSize = jotSize,
-        _arrayskip = arrayskip,
-        _hlines = hlines,
-        _rowSpacings = rowSpacings {
+  }) : _ruleThickness = ruleThickness,
+       _jotSize = jotSize,
+       _arrayskip = arrayskip,
+       _hlines = hlines,
+       _rowSpacings = rowSpacings {
     addAll(children);
   }
 
@@ -113,7 +112,7 @@ class RenderEqnArray extends RenderBox
 
   List<double> hlinePos = [];
 
-  double width = 0.0;
+  double width = 0;
 
   @override
   Size computeDryLayout(BoxConstraints constraints) =>
@@ -124,10 +123,7 @@ class RenderEqnArray extends RenderBox
     size = _computeLayout(constraints, dry: false);
   }
 
-  Size _computeLayout(
-    BoxConstraints constraints, {
-    bool dry = true,
-  }) {
+  Size _computeLayout(BoxConstraints constraints, {bool dry = true}) {
     final nonAligningSizes = <Size>[];
     // First pass, calculate width for each column.
     var child = firstChild;
@@ -135,7 +131,7 @@ class RenderEqnArray extends RenderBox
     final colWidths = <double>[];
     final sizeMap = <RenderBox, Size>{};
     while (child != null) {
-      Size childSize = Size.zero;
+      var childSize = Size.zero;
       if (child is RenderLine) {
         child.alignColWidth = null;
         childSize = child.getLayoutSize(infiniteConstraint, dry: dry);
@@ -145,10 +141,7 @@ class RenderEqnArray extends RenderBox
             if (i >= colWidths.length) {
               colWidths.add(childColWidth[i]);
             } else {
-              colWidths[i] = math.max(
-                colWidths[i],
-                childColWidth[i],
-              );
+              colWidths[i] = math.max(colWidths[i], childColWidth[i]);
             }
           }
         } else {
@@ -156,13 +149,10 @@ class RenderEqnArray extends RenderBox
         }
       } else {
         childSize = child.getLayoutSize(infiniteConstraint, dry: dry);
-        colWidths[0] = math.max(
-          colWidths[0],
-          childSize.width,
-        );
+        colWidths[0] = math.max(colWidths[0], childSize.width);
       }
       sizeMap[child] = childSize;
-      child = (child.parentData as EqnArrayParentData).nextSibling;
+      child = (child.parentData! as EqnArrayParentData).nextSibling;
     }
 
     final nonAligningChildrenWidth =
@@ -179,16 +169,19 @@ class RenderEqnArray extends RenderBox
     index++;
     child = firstChild;
     while (child != null) {
-      final childParentData = child.parentData as EqnArrayParentData;
+      final childParentData = child.parentData! as EqnArrayParentData;
       var hPos = 0.0;
       final childSize = sizeMap[child] ?? Size.zero;
       if (child is RenderLine && child.alignColWidth != null) {
         child.alignColWidth = colWidths;
         // Hack: We use a different constraint to trigger another layout or
         // else it would be bypassed
-        child.layout(BoxConstraints(maxWidth: aligningChildrenWidth),
-            parentUsesSize: true);
-        hPos = (width - aligningChildrenWidth) / 2 +
+        child.layout(
+          BoxConstraints(maxWidth: aligningChildrenWidth),
+          parentUsesSize: true,
+        );
+        hPos =
+            (width - aligningChildrenWidth) / 2 +
             colWidths[0] -
             child.alignColWidth![0];
       } else {
@@ -199,12 +192,10 @@ class RenderEqnArray extends RenderBox
 
       vPos += math.max(layoutHeight, 0.7 * arrayskip);
       if (!dry) {
-        childParentData.offset = Offset(
-          hPos,
-          vPos - child.layoutHeight,
-        );
+        childParentData.offset = Offset(hPos, vPos - child.layoutHeight);
       }
-      vPos += math.max(layoutDepth, 0.3 * arrayskip) +
+      vPos +=
+          math.max(layoutDepth, 0.3 * arrayskip) +
           jotSize +
           rowSpacings[index - 1];
       if (!dry) {

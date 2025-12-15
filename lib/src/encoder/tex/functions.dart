@@ -60,10 +60,9 @@ const Map<Type, EncoderFun> encoderFunctions = {
 };
 
 EncodeResult _equationRowNodeEncoderFun(GreenNode node) =>
-    EquationRowTexEncodeResult((node as EquationRowNode)
-        .children
-        .map(encodeTex)
-        .toList(growable: false));
+    EquationRowTexEncodeResult(
+      (node as EquationRowNode).children.map(encodeTex).toList(growable: false),
+    );
 
 final optimizationEntries = [
   ..._fracOptimizationEntries,

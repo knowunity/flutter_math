@@ -5,19 +5,18 @@ import '../utils/render_box_layout.dart';
 import '../utils/render_box_offset.dart';
 
 class ResetDimension extends SingleChildRenderObjectWidget {
-  final double? height;
-  final double? depth;
-  final double? width;
-  final CrossAxisAlignment horizontalAlignment;
-
   const ResetDimension({
-    Key? key,
+    super.key,
     this.height,
     this.depth,
     this.width,
     this.horizontalAlignment = CrossAxisAlignment.center,
-    required Widget child,
-  }) : super(key: key, child: child);
+    required Widget super.child,
+  });
+  final double? height;
+  final double? depth;
+  final double? width;
+  final CrossAxisAlignment horizontalAlignment;
 
   @override
   RenderResetDimension createRenderObject(BuildContext context) =>
@@ -30,12 +29,13 @@ class ResetDimension extends SingleChildRenderObjectWidget {
 
   @override
   void updateRenderObject(
-          BuildContext context, RenderResetDimension renderObject) =>
-      renderObject
-        ..layoutHeight = height
-        ..layoutDepth = depth
-        ..layoutWidth = width
-        ..horizontalAlignment = horizontalAlignment;
+    BuildContext context,
+    RenderResetDimension renderObject,
+  ) => renderObject
+    ..layoutHeight = height
+    ..layoutDepth = depth
+    ..layoutWidth = width
+    ..horizontalAlignment = horizontalAlignment;
 }
 
 class RenderResetDimension extends RenderShiftedBox {
@@ -45,11 +45,11 @@ class RenderResetDimension extends RenderShiftedBox {
     double? layoutDepth,
     double? layoutWidth,
     CrossAxisAlignment horizontalAlignment = CrossAxisAlignment.center,
-  })  : _layoutHeight = layoutHeight,
-        _layoutDepth = layoutDepth,
-        _layoutWidth = layoutWidth,
-        _horizontalAlignment = horizontalAlignment,
-        super(child);
+  }) : _layoutHeight = layoutHeight,
+       _layoutDepth = layoutDepth,
+       _layoutWidth = layoutWidth,
+       _horizontalAlignment = horizontalAlignment,
+       super(child);
 
   double? get layoutHeight => _layoutHeight;
   double? _layoutHeight;
@@ -130,15 +130,13 @@ class RenderResetDimension extends RenderShiftedBox {
     size = _computeLayout(constraints, dry: false);
   }
 
-  Size _computeLayout(
-    BoxConstraints constraints, {
-    bool dry = true,
-  }) {
+  Size _computeLayout(BoxConstraints constraints, {bool dry = true}) {
     final child = this.child!;
     final childSize = child.getLayoutSize(constraints, dry: dry);
 
-    final childHeight =
-        dry ? 0.0 : child.getDistanceToBaseline(TextBaseline.alphabetic)!;
+    final childHeight = dry
+        ? 0.0
+        : child.getDistanceToBaseline(TextBaseline.alphabetic)!;
     final childDepth = childSize.height - childHeight;
     final childWidth = childSize.width;
 
@@ -154,11 +152,8 @@ class RenderResetDimension extends RenderShiftedBox {
         break;
       case CrossAxisAlignment.end:
         dx = width - childWidth;
-        break;
       case CrossAxisAlignment.center:
-      default:
         dx = (width - childWidth) / 2;
-        break;
     }
 
     if (!dry) {

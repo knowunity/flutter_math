@@ -10,17 +10,20 @@ import '../syntax_tree.dart';
 class CursorNode extends LeafNode {
   @override
   BuildResult buildWidget(
-      MathOptions options, List<BuildResult?> childBuildResults) {
+    MathOptions options,
+    List<BuildResult?> childBuildResults,
+  ) {
     final baselinePart = 1 - options.fontMetrics.axisHeight / 2;
     final height = options.fontSize * baselinePart * options.sizeMultiplier;
     final baselineDistance = height * baselinePart;
     final cursor = Container(height: height, width: 1.5, color: options.color);
     return BuildResult(
-        options: options,
-        widget: _BaselineDistance(
-          baselineDistance: baselineDistance,
-          child: cursor,
-        ));
+      options: options,
+      widget: _BaselineDistance(
+        baselineDistance: baselineDistance,
+        child: cursor,
+      ),
+    );
   }
 
   @override
@@ -42,11 +45,7 @@ class CursorNode extends LeafNode {
 ///
 /// Used to align [CursorNode] properly in a [RenderLine] in respect to symbols
 class _BaselineDistance extends SingleChildRenderObjectWidget {
-  const _BaselineDistance({
-    Key? key,
-    required this.baselineDistance,
-    Widget? child,
-  }) : super(key: key, child: child);
+  const _BaselineDistance({required this.baselineDistance, super.child});
 
   final double baselineDistance;
 

@@ -6,8 +6,8 @@ class MathController extends ChangeNotifier {
   MathController({
     required SyntaxTree ast,
     TextSelection selection = const TextSelection.collapsed(offset: -1),
-  })  : _ast = ast,
-        _selection = selection;
+  }) : _ast = ast,
+       _selection = selection;
 
   SyntaxTree _ast;
   SyntaxTree get ast => _ast;

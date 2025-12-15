@@ -24,8 +24,11 @@
 part of katex_base;
 
 const _ruleEntries = {
-  ['\\rule']:
-      FunctionSpec(numArgs: 2, numOptionalArgs: 1, handler: _ruleHandler),
+  [r'\rule']: FunctionSpec(
+    numArgs: 2,
+    numOptionalArgs: 1,
+    handler: _ruleHandler,
+  ),
 };
 GreenNode _ruleHandler(TexParser parser, FunctionContext context) {
   final shift = parser.parseArgSize(optional: true) ?? Measurement.zero;

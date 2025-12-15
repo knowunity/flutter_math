@@ -26,17 +26,17 @@ part of katex_base;
 const _textEntries = {
   [
     // Font families
-    '\\text', '\\textrm', '\\textsf', '\\texttt', '\\textnormal',
+    r'\text', r'\textrm', r'\textsf', r'\texttt', r'\textnormal',
     // Font weights
-    '\\textbf', '\\textmd',
+    r'\textbf', r'\textmd',
     // Font Shapes
-    '\\textit', '\\textup',
+    r'\textit', r'\textup',
   ]: FunctionSpec(
     numArgs: 1,
     greediness: 2,
     allowedInText: true,
     handler: _textHandler,
-  )
+  ),
 };
 GreenNode _textHandler(TexParser parser, FunctionContext context) {
   final body = parser.parseArgNode(mode: Mode.text, optional: false)!;

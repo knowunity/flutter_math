@@ -128,54 +128,39 @@ const texMathFontOptions = {
   //   fontFamily: 'Math',
   //   fontShape: FontStyle.italic,
   // ),
+  r'\mathit': FontOptions(fontShape: FontStyle.italic),
 
-  '\\mathit': FontOptions(
-    fontFamily: 'Main',
-    fontShape: FontStyle.italic,
-  ),
+  r'\mathrm': FontOptions(),
 
-  '\\mathrm': FontOptions(
-    fontFamily: 'Main',
-    fontShape: FontStyle.normal,
-  ),
+  r'\mathbf': FontOptions(fontWeight: FontWeight.bold),
 
-  '\\mathbf': FontOptions(
-    fontFamily: 'Main',
-    fontWeight: FontWeight.bold,
-  ),
-
-  '\\boldsymbol': FontOptions(
+  r'\boldsymbol': FontOptions(
     fontFamily: 'Math',
     fontWeight: FontWeight.bold,
     fontShape: FontStyle.italic,
-    fallback: [
-      FontOptions(
-        fontFamily: 'Main',
-        fontWeight: FontWeight.bold,
-      )
-    ],
+    fallback: [FontOptions(fontWeight: FontWeight.bold)],
   ),
 
-  '\\mathbb': FontOptions(fontFamily: 'AMS'),
+  r'\mathbb': FontOptions(fontFamily: 'AMS'),
 
-  '\\mathcal': FontOptions(fontFamily: 'Caligraphic'),
+  r'\mathcal': FontOptions(fontFamily: 'Caligraphic'),
 
-  '\\mathfrak': FontOptions(fontFamily: 'Fraktur'),
+  r'\mathfrak': FontOptions(fontFamily: 'Fraktur'),
 
-  '\\mathtt': FontOptions(fontFamily: 'Typewriter'),
+  r'\mathtt': FontOptions(fontFamily: 'Typewriter'),
 
-  '\\mathscr': FontOptions(fontFamily: 'Script'),
+  r'\mathscr': FontOptions(fontFamily: 'Script'),
 
-  '\\mathsf': FontOptions(fontFamily: 'SansSerif'),
+  r'\mathsf': FontOptions(fontFamily: 'SansSerif'),
 };
 
 const texTextFontOptions = {
-  '\\textrm': PartialFontOptions(fontFamily: 'Main'),
-  '\\textsf': PartialFontOptions(fontFamily: 'SansSerif'),
-  '\\texttt': PartialFontOptions(fontFamily: 'Typewriter'),
-  '\\textnormal': PartialFontOptions(fontFamily: 'Main'),
-  '\\textbf': PartialFontOptions(fontWeight: FontWeight.bold),
-  '\\textmd': PartialFontOptions(fontWeight: FontWeight.normal),
-  '\\textit': PartialFontOptions(fontShape: FontStyle.italic),
-  '\\textup': PartialFontOptions(fontShape: FontStyle.normal),
+  r'\textrm': PartialFontOptions(fontFamily: 'Main'),
+  r'\textsf': PartialFontOptions(fontFamily: 'SansSerif'),
+  r'\texttt': PartialFontOptions(fontFamily: 'Typewriter'),
+  r'\textnormal': PartialFontOptions(fontFamily: 'Main'),
+  r'\textbf': PartialFontOptions(fontWeight: FontWeight.bold),
+  r'\textmd': PartialFontOptions(fontWeight: FontWeight.normal),
+  r'\textit': PartialFontOptions(fontShape: FontStyle.italic),
+  r'\textup': PartialFontOptions(fontShape: FontStyle.normal),
 };

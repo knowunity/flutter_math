@@ -13,26 +13,25 @@ void main() {
     });
 
     test('node matcher', () {
-      final target = TexParser('\\frac{123}{abc}', TexParserSettings())
-          .parse()
-          .children
-          .first;
+      final target = TexParser(
+        '\\frac{123}{abc}',
+        TexParserSettings(),
+      ).parse().children.first;
       expect(isA<FracNode>().match(target), true);
       expect(isA<EquationRowNode>().match(target), false);
 
       expect(
-        isA(children: [
-          isA<EquationRowNode>(),
-          isA<EquationRowNode>(),
-          isA<EquationRowNode>(),
-        ]).match(target),
+        isA(
+          children: [
+            isA<EquationRowNode>(),
+            isA<EquationRowNode>(),
+            isA<EquationRowNode>(),
+          ],
+        ).match(target),
         false,
       );
       expect(
-        isA(children: [
-          isA<EquationRowNode>(),
-          isNull,
-        ]).match(target),
+        isA(children: [isA<EquationRowNode>(), isNull]).match(target),
         false,
       );
 
@@ -56,10 +55,7 @@ void main() {
       final completeMacher = isA<FracNode>(
         matchSelf: (node) => node.barSize == null,
         selfSpecificity: 1,
-        children: [
-          isA<EquationRowNode>(),
-          isA<EquationRowNode>(),
-        ],
+        children: [isA<EquationRowNode>(), isA<EquationRowNode>()],
         firstChild: isA<EquationRowNode>(),
         lastChild: isA<EquationRowNode>(),
         anyChild: isA<EquationRowNode>(),

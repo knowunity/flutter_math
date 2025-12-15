@@ -7,13 +7,12 @@ import '../../font/metrics/font_metrics.dart';
 import '../../utils/unicode_literal.dart';
 
 class DelimiterConf {
+  const DelimiterConf(this.font, this.style);
   final FontOptions font;
   final MathStyle style;
-
-  const DelimiterConf(this.font, this.style);
 }
 
-const mainRegular = FontOptions(fontFamily: 'Main');
+const mainRegular = FontOptions();
 const size1Regular = FontOptions(fontFamily: 'Size1');
 const size2Regular = FontOptions(fontFamily: 'Size2');
 const size3Regular = FontOptions(fontFamily: 'Size3');
@@ -52,11 +51,16 @@ double getHeightForDelim({
   required MathOptions options,
 }) {
   final char = symbolRenderConfigs[delim]?.math?.replaceChar ?? delim;
-  final metrics =
-      getCharacterMetrics(character: char, fontName: fontName, mode: Mode.math);
+  final metrics = getCharacterMetrics(
+    character: char,
+    fontName: fontName,
+    mode: Mode.math,
+  );
   if (metrics == null) {
-    throw StateError('Illegal delimiter char $delim'
-        '(${unicodeLiteral(delim)}) appeared in AST');
+    throw StateError(
+      'Illegal delimiter char $delim'
+      '(${unicodeLiteral(delim)}) appeared in AST',
+    );
   }
   final fullHeight = metrics.height + metrics.depth;
   final newOptions = options.havingStyle(style);

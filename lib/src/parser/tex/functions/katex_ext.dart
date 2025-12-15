@@ -9,6 +9,4 @@ import '../parser.dart';
 
 part 'katex_ext/not.dart';
 
-const katexExtFunctionEntries = {
-  ..._notEntries,
-};
+const katexExtFunctionEntries = {..._notEntries};

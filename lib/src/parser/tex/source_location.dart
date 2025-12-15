@@ -25,10 +25,10 @@ import 'lexer.dart';
 import 'token.dart';
 
 class SourceLocation {
+  SourceLocation(this.lexer, this.start, this.end);
   final LexerInterface lexer;
   final int start;
   final int end;
-  SourceLocation(this.lexer, this.start, this.end);
 
   static SourceLocation? range(Token first, [Token? second]) {
     if (second == null) {
@@ -39,7 +39,10 @@ class SourceLocation {
       return null;
     } else {
       return SourceLocation(
-          first.loc!.lexer, first.loc!.start, second.loc!.end);
+        first.loc!.lexer,
+        first.loc!.start,
+        second.loc!.end,
+      );
     }
   }
 }

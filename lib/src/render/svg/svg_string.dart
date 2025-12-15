@@ -14,6 +14,7 @@ String svgStringFromPath(
     'viewBox='
     '"${viewBox.left} ${viewBox.top} ${viewBox.width} ${viewBox.height}" '
     '>'
+    // ignore: deprecated_member_use
     '<path fill="rgb(${color.red},${color.green},${color.blue})" d="$path"></path>'
     '</svg>';
 
@@ -29,36 +30,57 @@ final _alignmentToString = {
   Alignment.bottomRight: 'xMaxYMax',
 };
 
-Widget svgWidgetFromPath(
-  String path,
-  Size viewPort,
-  Rect viewBox,
-  Color color, {
-  Alignment align = Alignment.topLeft,
-  BoxFit fit = BoxFit.fill,
-}) {
-  final alignment = _alignmentToString[align];
+class SvgWidgetFromPath extends StatelessWidget {
+  const SvgWidgetFromPath({
+    required this.path,
+    required this.viewPort,
+    required this.viewBox,
+    required this.color,
+    this.align = Alignment.topLeft,
+    this.fit = BoxFit.fill,
+    super.key,
+  });
 
-  assert(fit != BoxFit.none &&
-      fit != BoxFit.fitHeight &&
-      fit != BoxFit.fitWidth &&
-      fit != BoxFit.scaleDown);
-  final meetOrSlice = fit == BoxFit.contain ? 'meet' : 'slice';
+  final String path;
+  final Size viewPort;
+  final Rect viewBox;
+  final Color color;
+  final Alignment align;
+  final BoxFit fit;
 
-  final preserveAspectRatio =
-      fit == BoxFit.fill ? 'none' : '$alignment $meetOrSlice';
+  @override
+  Widget build(BuildContext context) {
+    final alignment = _alignmentToString[align];
 
-  final svgString = svgStringFromPath(path, viewPort, viewBox, color,
-      preserveAspectRatio: preserveAspectRatio);
-  return Container(
-    height: viewPort.height,
-    width: viewPort.width,
-    child: SvgPicture.string(
-      svgString,
-      width: viewPort.width,
+    assert(
+      fit != BoxFit.none &&
+          fit != BoxFit.fitHeight &&
+          fit != BoxFit.fitWidth &&
+          fit != BoxFit.scaleDown,
+    );
+    final meetOrSlice = fit == BoxFit.contain ? 'meet' : 'slice';
+
+    final preserveAspectRatio = fit == BoxFit.fill
+        ? 'none'
+        : '$alignment $meetOrSlice';
+
+    final svgString = svgStringFromPath(
+      path,
+      viewPort,
+      viewBox,
+      color,
+      preserveAspectRatio: preserveAspectRatio,
+    );
+    return SizedBox(
       height: viewPort.height,
-      fit: fit,
-      alignment: align,
-    ),
-  );
+      width: viewPort.width,
+      child: SvgPicture.string(
+        svgString,
+        width: viewPort.width,
+        height: viewPort.height,
+        fit: fit,
+        alignment: align,
+      ),
+    );
+  }
 }

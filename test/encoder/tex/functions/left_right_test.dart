@@ -12,14 +12,12 @@ void main() {
         leftDelim: '(',
         rightDelim: '}',
         body: [
-          EquationRowNode(children: [SymbolNode(symbol: 'a')])
+          EquationRowNode(children: [SymbolNode(symbol: 'a')]),
         ],
       );
       expect(node1.encodeTeX(), '\\left(a\\right\\}');
 
-      const testStrings = [
-        '\\left.a\\middle|b\\middle.c\\right)',
-      ];
+      const testStrings = ['\\left.a\\middle|b\\middle.c\\right)'];
       for (final testString in testStrings) {
         expect(recodeTex(testString), testString);
       }

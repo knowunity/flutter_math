@@ -3,19 +3,16 @@ import '../syntax_tree.dart';
 
 /// Node to denote all kinds of style changes.
 class StyleNode extends TransparentNode {
+  StyleNode({required this.children, required this.optionsDiff});
+  @override
   final List<GreenNode> children;
 
   /// The difference of [MathOptions].
   final OptionsDiff optionsDiff;
 
-  StyleNode({
-    required this.children,
-    required this.optionsDiff,
-  });
-
   @override
   List<MathOptions> computeChildOptions(MathOptions options) =>
-      List.filled(children.length, options.merge(optionsDiff), growable: false);
+      List.filled(children.length, options.merge(optionsDiff));
 
   @override
   bool shouldRebuildWidget(MathOptions oldOptions, MathOptions newOptions) =>
@@ -32,10 +29,7 @@ class StyleNode extends TransparentNode {
       'optionsDiff': optionsDiff.toString(),
     });
 
-  StyleNode copyWith({
-    List<GreenNode>? children,
-    OptionsDiff? optionsDiff,
-  }) =>
+  StyleNode copyWith({List<GreenNode>? children, OptionsDiff? optionsDiff}) =>
       StyleNode(
         children: children ?? this.children,
         optionsDiff: optionsDiff ?? this.optionsDiff,

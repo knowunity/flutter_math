@@ -55,7 +55,6 @@ const sigmasAndXis = {
   'delim1': [2.390, 1.700, 1.980], // sigma20
   'delim2': [1.010, 1.157, 1.420], // sigma21
   'axisHeight': [0.250, 0.250, 0.250], // sigma22
-
   // These font metrics are extracted from TeX by using tftopl on cmex10.tfm;
   // they correspond to the font parameters of the extension fonts (family 3).
   // See the TeXbook, page 441. In AMSTeX, the extension fonts scale; to
@@ -67,7 +66,6 @@ const sigmasAndXis = {
   'bigOpSpacing3': [0.2, 0.2, 0.2], // xi11
   'bigOpSpacing4': [0.6, 0.611, 0.611], // xi12; cmex7: 0.611
   'bigOpSpacing5': [0.1, 0.143, 0.143], // xi13; cmex7: 0.143
-
   // The \sqrt rule width is taken from the height of the surd character.
   // Since we use the same font at all sizes, this thickness doesn't scale.
   'sqrtRuleThickness': [0.04, 0.04, 0.04],
@@ -92,13 +90,16 @@ const sigmasAndXis = {
 };
 
 final textFontMetrics = FontMetrics.fromMap(
-    sigmasAndXis.map((key, value) => MapEntry(key, value[0])))!;
+  sigmasAndXis.map((key, value) => MapEntry(key, value[0])),
+)!;
 
 final scriptFontMetrics = FontMetrics.fromMap(
-    sigmasAndXis.map((key, value) => MapEntry(key, value[1])))!;
+  sigmasAndXis.map((key, value) => MapEntry(key, value[1])),
+)!;
 
 final scriptscriptFontMetrics = FontMetrics.fromMap(
-    sigmasAndXis.map((key, value) => MapEntry(key, value[2])))!;
+  sigmasAndXis.map((key, value) => MapEntry(key, value[2])),
+)!;
 
 const extraCharacterMap = {
   // Latin-1
@@ -179,11 +180,6 @@ const extraCharacterMap = {
 };
 
 class CharacterMetrics {
-  final double depth;
-  final double height;
-  final double italic;
-  final double skew;
-  final double width;
   const CharacterMetrics(
     this.depth,
     this.height,
@@ -191,12 +187,20 @@ class CharacterMetrics {
     this.skew,
     this.width,
   );
+  final double depth;
+  final double height;
+  final double italic;
+  final double skew;
+  final double width;
 }
 
-final Map<String, Map<int, CharacterMetrics>> metricsMap = fontMetricsData;
+const Map<String, Map<int, CharacterMetrics>> metricsMap = fontMetricsData;
 
-CharacterMetrics? getCharacterMetrics(
-    {required String character, required String fontName, required Mode mode}) {
+CharacterMetrics? getCharacterMetrics({
+  required String character,
+  required String fontName,
+  required Mode mode,
+}) {
   final metricsMapFont = metricsMap[fontName];
   if (metricsMapFont == null) {
     throw Exception('Font metrics not found for font: $fontName.');
@@ -241,7 +245,5 @@ FontMetrics getGlobalMetrics(MathSize size) {
     case MathSize.huge:
     case MathSize.HUGE:
       return textFontMetrics;
-    default:
-      throw ArgumentError(size);
   }
 }

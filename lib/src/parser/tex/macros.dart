@@ -36,18 +36,18 @@ import 'symbols.dart';
 import 'token.dart';
 
 class MacroDefinition {
-  final MacroExpansion Function(MacroContext context) expand;
   const MacroDefinition(this.expand, {this.unexpandable = false});
+
+  MacroDefinition.fromString(String output)
+    : this((context) => MacroExpansion.fromString(output, context));
+  MacroDefinition.fromCtxString(String Function(MacroContext) expand)
+    : this((context) => MacroExpansion.fromString(expand(context), context));
+  MacroDefinition.fromMacroExpansion(MacroExpansion output)
+    : this((_) => output, unexpandable: output.unexpandable);
+  final MacroExpansion Function(MacroContext context) expand;
   final bool unexpandable;
 
   bool get expandable => !unexpandable;
-
-  MacroDefinition.fromString(String output)
-      : this((context) => MacroExpansion.fromString(output, context));
-  MacroDefinition.fromCtxString(String Function(MacroContext) expand)
-      : this((context) => MacroExpansion.fromString(expand(context), context));
-  MacroDefinition.fromMacroExpansion(MacroExpansion output)
-      : this((_) => output, unexpandable: output.unexpandable);
 }
 
 class MacroExpansion {
@@ -56,13 +56,8 @@ class MacroExpansion {
     required this.numArgs,
     this.unexpandable = false,
   });
-  final List<Token> tokens;
-  final int numArgs;
 
-  final bool unexpandable;
-
-  static final _strippedRegex = RegExp(r'##', multiLine: true);
-  static MacroExpansion fromString(String expansion, MacroContext context) {
+  factory MacroExpansion.fromString(String expansion, MacroContext context) {
     var numArgs = 0;
     if (expansion.contains('#')) {
       final stripped = expansion.replaceAll(_strippedRegex, '');
@@ -79,6 +74,13 @@ class MacroExpansion {
     }
     return MacroExpansion(tokens: tokens.reversed.toList(), numArgs: numArgs);
   }
+
+  final List<Token> tokens;
+  final int numArgs;
+
+  final bool unexpandable;
+
+  static final _strippedRegex = RegExp('##', multiLine: true);
 }
 
 void defineMacro(String name, MacroDefinition body) {
@@ -110,22 +112,25 @@ const digitToNumber = {
   "F": 15,
 };
 
-// ignore: avoid_positional_boolean_parameters
 String newcommand(MacroContext context, bool existsOK, bool nonexistsOK) {
   var arg = context.consumeArgs(1)[0];
   if (arg.length != 1) {
-    throw ParseException("\\newcommand's first argument must be a macro name");
+    throw ParseException(r"\newcommand's first argument must be a macro name");
   }
   final name = arg[0].text;
 
   final exists = context.isDefined(name);
   if (exists && !existsOK) {
-    throw ParseException('\\newcommand{$name} attempting to redefine '
-        '$name; use \\renewcommand');
+    throw ParseException(
+      '\\newcommand{$name} attempting to redefine '
+      '$name; use \\renewcommand',
+    );
   }
   if (!exists && !nonexistsOK) {
-    throw ParseException('\\renewcommand{$name} when command $name '
-        'does not yet exist; use \\newcommand');
+    throw ParseException(
+      '\\renewcommand{$name} when command $name '
+      r'does not yet exist; use \newcommand',
+    );
   }
 
   var numArgs = 0;
@@ -147,11 +152,11 @@ String newcommand(MacroContext context, bool existsOK, bool nonexistsOK) {
 
   // Final arg is the expansion of the macro
   context.macros.set(
-      name,
-      MacroDefinition.fromMacroExpansion(MacroExpansion(
-        tokens: arg,
-        numArgs: numArgs,
-      )));
+    name,
+    MacroDefinition.fromMacroExpansion(
+      MacroExpansion(tokens: arg, numArgs: numArgs),
+    ),
+  );
   return '';
 }
 
@@ -159,59 +164,59 @@ final latexRaiseA =
     '${fontMetricsData['Main-Regular']!["T".codeUnitAt(0)]!.height - 0.7 * fontMetricsData['Main-Regular']!["A".codeUnitAt(0)]!.height}em';
 
 const dotsByToken = {
-  ',': '\\dotsc',
-  '\\not': '\\dotsb',
+  ',': r'\dotsc',
+  r'\not': r'\dotsb',
   // \keybin@ checks for the following:
-  '+': '\\dotsb',
-  '=': '\\dotsb',
-  '<': '\\dotsb',
-  '>': '\\dotsb',
-  '-': '\\dotsb',
-  '*': '\\dotsb',
-  ':': '\\dotsb',
+  '+': r'\dotsb',
+  '=': r'\dotsb',
+  '<': r'\dotsb',
+  '>': r'\dotsb',
+  '-': r'\dotsb',
+  '*': r'\dotsb',
+  ':': r'\dotsb',
   // Symbols whose definition starts with \DOTSB:
-  '\\DOTSB': '\\dotsb',
-  '\\coprod': '\\dotsb',
-  '\\bigvee': '\\dotsb',
-  '\\bigwedge': '\\dotsb',
-  '\\biguplus': '\\dotsb',
-  '\\bigcap': '\\dotsb',
-  '\\bigcup': '\\dotsb',
-  '\\prod': '\\dotsb',
-  '\\sum': '\\dotsb',
-  '\\bigotimes': '\\dotsb',
-  '\\bigoplus': '\\dotsb',
-  '\\bigodot': '\\dotsb',
-  '\\bigsqcup': '\\dotsb',
-  '\\And': '\\dotsb',
-  '\\longrightarrow': '\\dotsb',
-  '\\Longrightarrow': '\\dotsb',
-  '\\longleftarrow': '\\dotsb',
-  '\\Longleftarrow': '\\dotsb',
-  '\\longleftrightarrow': '\\dotsb',
-  '\\Longleftrightarrow': '\\dotsb',
-  '\\mapsto': '\\dotsb',
-  '\\longmapsto': '\\dotsb',
-  '\\hookrightarrow': '\\dotsb',
-  '\\doteq': '\\dotsb',
+  r'\DOTSB': r'\dotsb',
+  r'\coprod': r'\dotsb',
+  r'\bigvee': r'\dotsb',
+  r'\bigwedge': r'\dotsb',
+  r'\biguplus': r'\dotsb',
+  r'\bigcap': r'\dotsb',
+  r'\bigcup': r'\dotsb',
+  r'\prod': r'\dotsb',
+  r'\sum': r'\dotsb',
+  r'\bigotimes': r'\dotsb',
+  r'\bigoplus': r'\dotsb',
+  r'\bigodot': r'\dotsb',
+  r'\bigsqcup': r'\dotsb',
+  r'\And': r'\dotsb',
+  r'\longrightarrow': r'\dotsb',
+  r'\Longrightarrow': r'\dotsb',
+  r'\longleftarrow': r'\dotsb',
+  r'\Longleftarrow': r'\dotsb',
+  r'\longleftrightarrow': r'\dotsb',
+  r'\Longleftrightarrow': r'\dotsb',
+  r'\mapsto': r'\dotsb',
+  r'\longmapsto': r'\dotsb',
+  r'\hookrightarrow': r'\dotsb',
+  r'\doteq': r'\dotsb',
   // Symbols whose definition starts with \mathbin:
-  '\\mathbin': '\\dotsb',
+  r'\mathbin': r'\dotsb',
   // Symbols whose definition starts with \mathrel:
-  '\\mathrel': '\\dotsb',
-  '\\relbar': '\\dotsb',
-  '\\Relbar': '\\dotsb',
-  '\\xrightarrow': '\\dotsb',
-  '\\xleftarrow': '\\dotsb',
+  r'\mathrel': r'\dotsb',
+  r'\relbar': r'\dotsb',
+  r'\Relbar': r'\dotsb',
+  r'\xrightarrow': r'\dotsb',
+  r'\xleftarrow': r'\dotsb',
   // Symbols whose definition starts with \DOTSI:
-  '\\DOTSI': '\\dotsi',
-  '\\int': '\\dotsi',
-  '\\oint': '\\dotsi',
-  '\\iint': '\\dotsi',
-  '\\iiint': '\\dotsi',
-  '\\iiiint': '\\dotsi',
-  '\\idotsint': '\\dotsi',
+  r'\DOTSI': r'\dotsi',
+  r'\int': r'\dotsi',
+  r'\oint': r'\dotsi',
+  r'\iint': r'\dotsi',
+  r'\iiint': r'\dotsi',
+  r'\iiiint': r'\dotsi',
+  r'\idotsint': r'\dotsi',
   // Symbols whose definition starts with \DOTSX:
-  '\\DOTSX': '\\dotsx',
+  r'\DOTSX': r'\dotsx',
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -234,7 +239,7 @@ const dotsByToken = {
 /// defineMacro\([\s\n]*"([^"]*)", -> '$1':
 
 final Map<String, MacroDefinition> builtinMacros = {
-  '\\noexpand': MacroDefinition((context) {
+  r'\noexpand': MacroDefinition((context) {
     // The expansion is the token itself; but that token is interpreted
     // as if its meaning were ‘\relax’ if it is a control sequence that
     // would ordinarily be expanded by TeX’s expansion rules.
@@ -246,7 +251,7 @@ final Map<String, MacroDefinition> builtinMacros = {
     return MacroExpansion(tokens: [t], numArgs: 0);
   }),
 
-  '\\expandafter': MacroDefinition((context) {
+  r'\expandafter': MacroDefinition((context) {
     // TeX first reads the token that comes immediately after \expandafter,
     // without expanding it; let’s call this token t. Then TeX reads the
     // token that comes after t (and possibly more tokens, if that token
@@ -257,25 +262,25 @@ final Map<String, MacroDefinition> builtinMacros = {
     return MacroExpansion(tokens: [t], numArgs: 0);
   }),
 
-// LaTeX's \@firstoftwo{#1}{#2} expands to #1, skipping #2
-// TeX source: \long\def\@firstoftwo#1#2{#1}
-  '\\@firstoftwo': MacroDefinition((context) {
+  // LaTeX's \@firstoftwo{#1}{#2} expands to #1, skipping #2
+  // TeX source: \long\def\@firstoftwo#1#2{#1}
+  r'\@firstoftwo': MacroDefinition((context) {
     final args = context.consumeArgs(2);
     return MacroExpansion(tokens: args[0], numArgs: 0);
   }),
 
-// LaTeX's \@secondoftwo{#1}{#2} expands to #2, skipping #1
-// TeX source: \long\def\@secondoftwo#1#2{#2}
-  '\\@secondoftwo': MacroDefinition((context) {
+  // LaTeX's \@secondoftwo{#1}{#2} expands to #2, skipping #1
+  // TeX source: \long\def\@secondoftwo#1#2{#2}
+  r'\@secondoftwo': MacroDefinition((context) {
     final args = context.consumeArgs(2);
     return MacroExpansion(tokens: args[1], numArgs: 0);
   }),
 
-// LaTeX's \@ifnextchar{#1}{#2}{#3} looks ahead to the next (unexpanded)
-// symbol that isn't a space, consuming any spaces but not consuming the
-// first nonspace character.  If that nonspace character matches #1, then
-// the macro expands to #2; otherwise, it expands to #3.
-  '\\@ifnextchar': MacroDefinition((context) {
+  // LaTeX's \@ifnextchar{#1}{#2}{#3} looks ahead to the next (unexpanded)
+  // symbol that isn't a space, consuming any spaces but not consuming the
+  // first nonspace character.  If that nonspace character matches #1, then
+  // the macro expands to #2; otherwise, it expands to #3.
+  r'\@ifnextchar': MacroDefinition((context) {
     final args = context.consumeArgs(3); // symbol, if, else
     context.consumeSpaces();
     final nextToken = context.future();
@@ -286,14 +291,14 @@ final Map<String, MacroDefinition> builtinMacros = {
     }
   }),
 
-// LaTeX's \@ifstar{#1}{#2} looks ahead to the next (unexpanded) symbol.
-// If it is '*', then it consumes the symbol, and the macro expands to #1;
-// otherwise, the macro expands to #2 (without consuming the symbol).
-// TeX source: \def\@ifstar#1{\@ifnextchar *{\@firstoftwo{#1}}}
-  '\\@ifstar': MacroDefinition.fromString("\\@ifnextchar *{\\@firstoftwo{#1}}"),
+  // LaTeX's \@ifstar{#1}{#2} looks ahead to the next (unexpanded) symbol.
+  // If it is '*', then it consumes the symbol, and the macro expands to #1;
+  // otherwise, the macro expands to #2 (without consuming the symbol).
+  // TeX source: \def\@ifstar#1{\@ifnextchar *{\@firstoftwo{#1}}}
+  r'\@ifstar': MacroDefinition.fromString(r"\@ifnextchar *{\@firstoftwo{#1}}"),
 
-// LaTeX's \TextOrMath{#1}{#2} expands to #1 in text mode, #2 in math mode
-  '\\TextOrMath': MacroDefinition((context) {
+  // LaTeX's \TextOrMath{#1}{#2} expands to #1 in text mode, #2 in math mode
+  r'\TextOrMath': MacroDefinition((context) {
     final args = context.consumeArgs(2);
     if (context.mode == Mode.text) {
       return MacroExpansion(tokens: args[0], numArgs: 0);
@@ -302,16 +307,16 @@ final Map<String, MacroDefinition> builtinMacros = {
     }
   }),
 
-// TeX \char makes a literal character (catcode 12) using the following forms:
-// (see The TeXBook, p. 43)
-//   \char123  -- decimal
-//   \char'123 -- octal
-//   \char"123 -- hex
-//   \char`x   -- character that can be written (i.e. isn't active)
-//   \char`\x  -- character that cannot be written (e.g. %)
-// These all refer to characters from the font, so we turn them into special
-// calls to a function \@char dealt with in the Parser.
-  '\\char': MacroDefinition.fromCtxString((context) {
+  // TeX \char makes a literal character (catcode 12) using the following forms:
+  // (see The TeXBook, p. 43)
+  //   \char123  -- decimal
+  //   \char'123 -- octal
+  //   \char"123 -- hex
+  //   \char`x   -- character that can be written (i.e. isn't active)
+  //   \char`\x  -- character that cannot be written (e.g. %)
+  // These all refer to characters from the font, so we turn them into special
+  // calls to a function \@char dealt with in the Parser.
+  r'\char': MacroDefinition.fromCtxString((context) {
     var token = context.popToken();
     int? base;
     int? number;
@@ -323,10 +328,10 @@ final Map<String, MacroDefinition> builtinMacros = {
       token = context.popToken();
     } else if (token.text == "`") {
       token = context.popToken();
-      if (token.text[0] == "\\") {
+      if (token.text[0] == r"\") {
         number = token.text.codeUnitAt(1);
       } else if (token.text == "EOF") {
-        throw ParseException("\\char` missing argument");
+        throw ParseException(r"\char` missing argument");
       } else {
         number = token.text.codeUnitAt(0);
       }
@@ -350,73 +355,77 @@ final Map<String, MacroDefinition> builtinMacros = {
     return '\\@char{$number}';
   }),
 
-// \newcommand{\macro}[args]{definition}
-// \renewcommand{\macro}[args]{definition}
-// TODO: Optional arguments: \newcommand{\macro}[args][default]{definition}
+  // \newcommand{\macro}[args]{definition}
+  // \renewcommand{\macro}[args]{definition}
+  // TODO: Optional arguments: \newcommand{\macro}[args][default]{definition}
+  r'\newcommand': MacroDefinition.fromCtxString(
+    (context) => newcommand(context, false, true),
+  ),
+  r'\renewcommand': MacroDefinition.fromCtxString(
+    (context) => newcommand(context, true, false),
+  ),
+  r'\providecommand': MacroDefinition.fromCtxString(
+    (context) => newcommand(context, true, true),
+  ),
 
-  '\\newcommand': MacroDefinition.fromCtxString(
-      (context) => newcommand(context, false, true)),
-  '\\renewcommand': MacroDefinition.fromCtxString(
-      (context) => newcommand(context, true, false)),
-  '\\providecommand': MacroDefinition.fromCtxString(
-      (context) => newcommand(context, true, true)),
-
-// terminal (console) tools
-  '\\message': MacroDefinition.fromCtxString((context) {
+  // terminal (console) tools
+  r'\message': MacroDefinition.fromCtxString((context) {
     final arg = context.consumeArgs(1)[0];
-    info(arg.reversed.map((token) => token.text).join(""));
+    info(arg.reversed.map((token) => token.text).join());
     return '';
   }),
-  '\\errmessage': MacroDefinition.fromCtxString((context) {
+  r'\errmessage': MacroDefinition.fromCtxString((context) {
     final arg = context.consumeArgs(1)[0];
-    error(arg.reversed.map((token) => token.text).join(""));
+    error(arg.reversed.map((token) => token.text).join());
     return '';
   }),
-  '\\show': MacroDefinition.fromCtxString((context) {
+  r'\show': MacroDefinition.fromCtxString((context) {
     final tok = context.popToken();
     final name = tok.text;
-    info('$tok, ${context.macros.get(name)}, ${functions[name]},'
-        '${texSymbolCommandConfigs[Mode.math]![name]}, ${texSymbolCommandConfigs[Mode.text]![name]}');
+    info(
+      '$tok, ${context.macros.get(name)}, ${functions[name]},'
+      '${texSymbolCommandConfigs[Mode.math]![name]}, ${texSymbolCommandConfigs[Mode.text]![name]}',
+    );
     return '';
   }),
 
-//////////////////////////////////////////////////////////////////////
-// Grouping
-// \let\bgroup={ \let\egroup=}
-  '\\bgroup': MacroDefinition.fromString("{"),
-  '\\egroup': MacroDefinition.fromString("}"),
+  //////////////////////////////////////////////////////////////////////
+  // Grouping
+  // \let\bgroup={ \let\egroup=}
+  r'\bgroup': MacroDefinition.fromString("{"),
+  r'\egroup': MacroDefinition.fromString("}"),
 
-// Symbols from latex.ltx:
-// \def\lq{`}
-// \def\rq{'}
-// \def \aa {\r a}
-// \def \AA {\r A}
-  '\\lq': MacroDefinition.fromString("`"),
-  '\\rq': MacroDefinition.fromString("'"),
+  // Symbols from latex.ltx:
+  // \def\lq{`}
+  // \def\rq{'}
+  // \def \aa {\r a}
+  // \def \AA {\r A}
+  r'\lq': MacroDefinition.fromString("`"),
+  r'\rq': MacroDefinition.fromString("'"),
   // '\\aa': MacroDefinition.fromString("\\r a"),
   // '\\AA': MacroDefinition.fromString("\\r A"),
 
-// TODO these should be migrated into renderconfigs
-// Characters omitted from Unicode range 1D400–1D7FF
-  '\u212C': MacroDefinition.fromString("\\mathscr{B}"), // script
-  '\u2130': MacroDefinition.fromString("\\mathscr{E}"),
-  '\u2131': MacroDefinition.fromString("\\mathscr{F}"),
-  '\u210B': MacroDefinition.fromString("\\mathscr{H}"),
-  '\u2110': MacroDefinition.fromString("\\mathscr{I}"),
-  '\u2112': MacroDefinition.fromString("\\mathscr{L}"),
-  '\u2133': MacroDefinition.fromString("\\mathscr{M}"),
-  '\u211B': MacroDefinition.fromString("\\mathscr{R}"),
-  '\u212D': MacroDefinition.fromString("\\mathfrak{C}"), // Fraktur
-  '\u210C': MacroDefinition.fromString("\\mathfrak{H}"),
-  '\u2128': MacroDefinition.fromString("\\mathfrak{Z}"),
+  // TODO these should be migrated into renderconfigs
+  // Characters omitted from Unicode range 1D400–1D7FF
+  '\u212C': MacroDefinition.fromString(r"\mathscr{B}"), // script
+  '\u2130': MacroDefinition.fromString(r"\mathscr{E}"),
+  '\u2131': MacroDefinition.fromString(r"\mathscr{F}"),
+  '\u210B': MacroDefinition.fromString(r"\mathscr{H}"),
+  '\u2110': MacroDefinition.fromString(r"\mathscr{I}"),
+  '\u2112': MacroDefinition.fromString(r"\mathscr{L}"),
+  '\u2133': MacroDefinition.fromString(r"\mathscr{M}"),
+  '\u211B': MacroDefinition.fromString(r"\mathscr{R}"),
+  '\u212D': MacroDefinition.fromString(r"\mathfrak{C}"), // Fraktur
+  '\u210C': MacroDefinition.fromString(r"\mathfrak{H}"),
+  '\u2128': MacroDefinition.fromString(r"\mathfrak{Z}"),
 
-// Define \Bbbk with a macro that works in both HTML and MathML.
-  '\\Bbbk': MacroDefinition.fromString("\\Bbb{k}"),
+  // Define \Bbbk with a macro that works in both HTML and MathML.
+  r'\Bbbk': MacroDefinition.fromString(r"\Bbb{k}"),
 
-// Unicode middle dot
-// The KaTeX fonts do not contain U+00B7. Instead, \cdotp displays
-// the dot at U+22C5 and gives it punct spacing.
-  '\u00b7': MacroDefinition.fromString("\\cdotp"),
+  // Unicode middle dot
+  // The KaTeX fonts do not contain U+00B7. Instead, \cdotp displays
+  // the dot at U+22C5 and gives it punct spacing.
+  '\u00b7': MacroDefinition.fromString(r"\cdotp"),
 
   // wont support
   // \llap and \rlap render their contents in text mode
@@ -424,449 +433,459 @@ final Map<String, MacroDefinition> builtinMacros = {
   // '\\rlap': MacroDefinition.fromString("\\mathrlap{\\textrm{#1}}"),
   // '\\clap': MacroDefinition.fromString("\\mathclap{\\textrm{#1}}"),
 
-// \not is defined by base/fontmath.ltx via
-// \DeclareMathSymbol{\not}{\mathrel}{symbols}{"36}
-// It's thus treated like a \mathrel, but defined by a symbol that has zero
-// width but extends to the right.  We use \rlap to get that spacing.
-// For MathML we write U+0338 here. buildMathML.js will then do the overlay.
-// TODO fold 'not' with applicable operators
+  // \not is defined by base/fontmath.ltx via
+  // \DeclareMathSymbol{\not}{\mathrel}{symbols}{"36}
+  // It's thus treated like a \mathrel, but defined by a symbol that has zero
+  // width but extends to the right.  We use \rlap to get that spacing.
+  // For MathML we write U+0338 here. buildMathML.js will then do the overlay.
+  // TODO fold 'not' with applicable operators
   // defineMacro(
   //     "\\not",
   //     MacroDefinition.fromString(
   //         '\\html@mathml{\\mathrel{\\mathrlap\\@not}}{\\char")338}'));
 
-// Negated symbols from base/fontmath.ltx:
-// \def\neq{\not=} \let\ne=\neq
-// \DeclareRobustCommand
-//   \notin{\mathrel{\m@th\mathpalette\c@ncel\in}}
-// \def\c@ncel#1#2{\m@th\ooalign{$\hfil#1\mkern1mu/\hfil$\crcr$#1#2$}}
-  '\\ne': MacroDefinition.fromString("\\neq"),
-  '\u2260': MacroDefinition.fromString("\\neq"),
-  '\u2209': MacroDefinition.fromString("\\notin"),
+  // Negated symbols from base/fontmath.ltx:
+  // \def\neq{\not=} \let\ne=\neq
+  // \DeclareRobustCommand
+  //   \notin{\mathrel{\m@th\mathpalette\c@ncel\in}}
+  // \def\c@ncel#1#2{\m@th\ooalign{$\hfil#1\mkern1mu/\hfil$\crcr$#1#2$}}
+  r'\ne': MacroDefinition.fromString(r"\neq"),
+  '\u2260': MacroDefinition.fromString(r"\neq"),
+  '\u2209': MacroDefinition.fromString(r"\notin"),
 
-// Unicode stacked relations are migrated to complex symbols
+  // Unicode stacked relations are migrated to complex symbols
 
-// Misc Unicode
-  '\u27C2': MacroDefinition.fromString("\\perp"),
-  '\u203C': MacroDefinition.fromString("\\mathclose{!\\mkern-0.8mu!}"),
-  '\u220C': MacroDefinition.fromString("\\notni"),
-  '\u231C': MacroDefinition.fromString("\\ulcorner"),
-  '\u231D': MacroDefinition.fromString("\\urcorner"),
-  '\u231E': MacroDefinition.fromString("\\llcorner"),
-  '\u231F': MacroDefinition.fromString("\\lrcorner"),
-  '\u00A9': MacroDefinition.fromString("\\copyright"),
-  '\u00AE': MacroDefinition.fromString("\\textregistered"),
-  '\uFE0F': MacroDefinition.fromString("\\textregistered"),
+  // Misc Unicode
+  '\u27C2': MacroDefinition.fromString(r"\perp"),
+  '\u203C': MacroDefinition.fromString(r"\mathclose{!\mkern-0.8mu!}"),
+  '\u220C': MacroDefinition.fromString(r"\notni"),
+  '\u231C': MacroDefinition.fromString(r"\ulcorner"),
+  '\u231D': MacroDefinition.fromString(r"\urcorner"),
+  '\u231E': MacroDefinition.fromString(r"\llcorner"),
+  '\u231F': MacroDefinition.fromString(r"\lrcorner"),
+  '\u00A9': MacroDefinition.fromString(r"\copyright"),
+  '\u00AE': MacroDefinition.fromString(r"\textregistered"),
+  '\uFE0F': MacroDefinition.fromString(r"\textregistered"),
 
-// The KaTeX fonts have corners at codepoints that don't match Unicode.
-// For MathML purposes, use the Unicode code point.
-// TODO strip useless @
-  '\\ulcorner': MacroDefinition.fromString("\\@ulcorner"),
-  '\\urcorner': MacroDefinition.fromString("\\@urcorner"),
-  '\\llcorner': MacroDefinition.fromString("\\@llcorner"),
-  '\\lrcorner': MacroDefinition.fromString("\\@lrcorner"),
+  // The KaTeX fonts have corners at codepoints that don't match Unicode.
+  // For MathML purposes, use the Unicode code point.
+  // TODO strip useless @
+  r'\ulcorner': MacroDefinition.fromString(r"\@ulcorner"),
+  r'\urcorner': MacroDefinition.fromString(r"\@urcorner"),
+  r'\llcorner': MacroDefinition.fromString(r"\@llcorner"),
+  r'\lrcorner': MacroDefinition.fromString(r"\@lrcorner"),
 
-//////////////////////////////////////////////////////////////////////
-// LaTeX_2ε
+  //////////////////////////////////////////////////////////////////////
+  // LaTeX_2ε
 
-// \vdots{\vbox{\baselineskip4\p@  \lineskiplimit\z@
-// \kern6\p@\hbox{.}\hbox{.}\hbox{.}}}
-// We'll call \varvdots, which gets a glyph from symbols.js.
-// The zero-width rule gets us an equivalent to the vertical 6pt kern.
-// TODO should we accept \vdots's kern ?
-  '\\vdots':
-      MacroDefinition.fromString("\\mathord{\\varvdots\\rule{0pt}{15pt}}"),
-  '\u22ee': MacroDefinition.fromString("\\vdots"),
+  // \vdots{\vbox{\baselineskip4\p@  \lineskiplimit\z@
+  // \kern6\p@\hbox{.}\hbox{.}\hbox{.}}}
+  // We'll call \varvdots, which gets a glyph from symbols.js.
+  // The zero-width rule gets us an equivalent to the vertical 6pt kern.
+  // TODO should we accept \vdots's kern ?
+  r'\vdots': MacroDefinition.fromString(r"\mathord{\varvdots\rule{0pt}{15pt}}"),
+  '\u22ee': MacroDefinition.fromString(r"\vdots"),
 
-//////////////////////////////////////////////////////////////////////
-// amsmath.sty
-// http://mirrors.concertpass.com/tex-archive/macros/latex/required/amsmath/amsmath.pdf
+  //////////////////////////////////////////////////////////////////////
+  // amsmath.sty
+  // http://mirrors.concertpass.com/tex-archive/macros/latex/required/amsmath/amsmath.pdf
 
-// Italic Greek capital letters.  AMS defines these with \DeclareMathSymbol,
-// but they are equivalent to \mathit{\Letter}.
-// TODO make them as overrided fonts
-  '\\varGamma': MacroDefinition.fromString("\\mathit{\\Gamma}"),
-  '\\varDelta': MacroDefinition.fromString("\\mathit{\\Delta}"),
-  '\\varTheta': MacroDefinition.fromString("\\mathit{\\Theta}"),
-  '\\varLambda': MacroDefinition.fromString("\\mathit{\\Lambda}"),
-  '\\varXi': MacroDefinition.fromString("\\mathit{\\Xi}"),
-  '\\varPi': MacroDefinition.fromString("\\mathit{\\Pi}"),
-  '\\varSigma': MacroDefinition.fromString("\\mathit{\\Sigma}"),
-  '\\varUpsilon': MacroDefinition.fromString("\\mathit{\\Upsilon}"),
-  '\\varPhi': MacroDefinition.fromString("\\mathit{\\Phi}"),
-  '\\varPsi': MacroDefinition.fromString("\\mathit{\\Psi}"),
-  '\\varOmega': MacroDefinition.fromString("\\mathit{\\Omega}"),
+  // Italic Greek capital letters.  AMS defines these with \DeclareMathSymbol,
+  // but they are equivalent to \mathit{\Letter}.
+  // TODO make them as overrided fonts
+  r'\varGamma': MacroDefinition.fromString(r"\mathit{\Gamma}"),
+  r'\varDelta': MacroDefinition.fromString(r"\mathit{\Delta}"),
+  r'\varTheta': MacroDefinition.fromString(r"\mathit{\Theta}"),
+  r'\varLambda': MacroDefinition.fromString(r"\mathit{\Lambda}"),
+  r'\varXi': MacroDefinition.fromString(r"\mathit{\Xi}"),
+  r'\varPi': MacroDefinition.fromString(r"\mathit{\Pi}"),
+  r'\varSigma': MacroDefinition.fromString(r"\mathit{\Sigma}"),
+  r'\varUpsilon': MacroDefinition.fromString(r"\mathit{\Upsilon}"),
+  r'\varPhi': MacroDefinition.fromString(r"\mathit{\Phi}"),
+  r'\varPsi': MacroDefinition.fromString(r"\mathit{\Psi}"),
+  r'\varOmega': MacroDefinition.fromString(r"\mathit{\Omega}"),
 
-//\newcommand{\substack}[1]{\subarray{c}#1\endsubarray}
-  '\\substack':
-      MacroDefinition.fromString("\\begin{subarray}{c}#1\\end{subarray}"),
+  //\newcommand{\substack}[1]{\subarray{c}#1\endsubarray}
+  r'\substack': MacroDefinition.fromString(
+    r"\begin{subarray}{c}#1\end{subarray}",
+  ),
 
-// \renewcommand{\colon}{\nobreak\mskip2mu\mathpunct{}\nonscript
-// \mkern-\thinmuskip{:}\mskip6muplus1mu\relax}
+  // \renewcommand{\colon}{\nobreak\mskip2mu\mathpunct{}\nonscript
+  // \mkern-\thinmuskip{:}\mskip6muplus1mu\relax}
 
-// \newcommand{\boxed}[1]{\fbox{\m@th$\displaystyle#1$}}
-// TODO fbox
-  '\\boxed': MacroDefinition.fromString("\\fbox{\$\\displaystyle{#1}\$}"),
+  // \newcommand{\boxed}[1]{\fbox{\m@th$\displaystyle#1$}}
+  // TODO fbox
+  r'\boxed': MacroDefinition.fromString(r"\fbox{$\displaystyle{#1}$}"),
 
-// \def\iff{\DOTSB\;\Longleftrightarrow\;}
-// \def\implies{\DOTSB\;\Longrightarrow\;}
-// \def\impliedby{\DOTSB\;\Longleftarrow\;}
-  '\\iff': MacroDefinition.fromString("\\DOTSB\\;\\Longleftrightarrow\\;"),
-  '\\implies': MacroDefinition.fromString("\\DOTSB\\;\\Longrightarrow\\;"),
-  '\\impliedby': MacroDefinition.fromString("\\DOTSB\\;\\Longleftarrow\\;"),
+  // \def\iff{\DOTSB\;\Longleftrightarrow\;}
+  // \def\implies{\DOTSB\;\Longrightarrow\;}
+  // \def\impliedby{\DOTSB\;\Longleftarrow\;}
+  r'\iff': MacroDefinition.fromString(r"\DOTSB\;\Longleftrightarrow\;"),
+  r'\implies': MacroDefinition.fromString(r"\DOTSB\;\Longrightarrow\;"),
+  r'\impliedby': MacroDefinition.fromString(r"\DOTSB\;\Longleftarrow\;"),
 
-// AMSMath's automatic \dots, based on \mdots@@ macro.
-
-  '\\dots': MacroDefinition.fromCtxString((context) {
+  // AMSMath's automatic \dots, based on \mdots@@ macro.
+  r'\dots': MacroDefinition.fromCtxString((context) {
     // TODO: If used in text mode, should expand to \textellipsis.
     // However, in KaTeX, \textellipsis and \ldots behave the same
     // (in text mode), and it's unlikely we'd see any of the math commands
     // that affect the behavior of \dots when in text mode.  So fine for now
     // (until we support \ifmmode ... \else ... \fi).
-    var thedots = '\\dotso';
+    var thedots = r'\dotso';
     final next = context.expandAfterFuture().text;
     if (dotsByToken.containsKey(next)) {
       thedots = dotsByToken[next]!;
     } else if (
-        // next != null &&
-        next.length >= 4 && next.substring(0, 4) == '\\not') {
-      thedots = '\\dotsb';
+    // next != null &&
+    next.length >= 4 && next.substring(0, 4) == r'\not') {
+      thedots = r'\dotsb';
     } else if (texSymbolCommandConfigs[Mode.math]!.containsKey(next)) {
       final command = texSymbolCommandConfigs[Mode.math]![next]!;
       if (command.type == AtomType.bin || command.type == AtomType.rel) {
-        thedots = '\\dotsb';
+        thedots = r'\dotsb';
       }
     }
     return thedots;
   }),
 
-  '\\dotso': MacroDefinition.fromString("\\ldots"),
+  r'\dotso': MacroDefinition.fromString(r"\ldots"),
 
-  '\\dotsc': MacroDefinition.fromString("\\ldots"),
+  r'\dotsc': MacroDefinition.fromString(r"\ldots"),
 
-  '\\cdots': MacroDefinition.fromString("\\@cdots"),
+  r'\cdots': MacroDefinition.fromString(r"\@cdots"),
 
-  '\\dotsb': MacroDefinition.fromString("\\cdots"),
-  '\\dotsm': MacroDefinition.fromString("\\cdots"),
-  '\\dotsi': MacroDefinition.fromString("\\!\\cdots"),
-// amsmath doesn't actually define \dotsx, but \dots followed by a macro
-// starting with \DOTSX implies \dotso, and then \extra@ detects this case
-// and forces the added '\,'.
-  '\\dotsx': MacroDefinition.fromString("\\ldots\\,"),
+  r'\dotsb': MacroDefinition.fromString(r"\cdots"),
+  r'\dotsm': MacroDefinition.fromString(r"\cdots"),
+  r'\dotsi': MacroDefinition.fromString(r"\!\cdots"),
+  // amsmath doesn't actually define \dotsx, but \dots followed by a macro
+  // starting with \DOTSX implies \dotso, and then \extra@ detects this case
+  // and forces the added '\,'.
+  r'\dotsx': MacroDefinition.fromString(r"\ldots\,"),
 
-// \let\DOTSI\relax
-// \let\DOTSB\relax
-// \let\DOTSX\relax
-  '\\DOTSI': MacroDefinition.fromString("\\relax"),
-  '\\DOTSB': MacroDefinition.fromString("\\relax"),
-  '\\DOTSX': MacroDefinition.fromString("\\relax"),
+  // \let\DOTSI\relax
+  // \let\DOTSB\relax
+  // \let\DOTSX\relax
+  r'\DOTSI': MacroDefinition.fromString(r"\relax"),
+  r'\DOTSB': MacroDefinition.fromString(r"\relax"),
+  r'\DOTSX': MacroDefinition.fromString(r"\relax"),
 
-// Spacing, based on amsmath.sty's override of LaTeX defaults
-// \DeclareRobustCommand{\tmspace}[3]{%
-//   \ifmmode\mskip#1#2\else\kern#1#3\fi\relax}
-  '\\tmspace': MacroDefinition.fromString(
-      "\\TextOrMath{\\kern#1#3}{\\mskip#1#2}\\relax"),
-// \renewcommand{\,}{\tmspace+\thinmuskip{.1667em}}
-// TODO: math mode should use \thinmuskip
-  '\\,': MacroDefinition.fromString("\\tmspace+{3mu}{.1667em}"),
-// \let\thinspace\,
-  '\\thinspace': MacroDefinition.fromString("\\,"),
-// \def\>{\mskip\medmuskip}
-// \renewcommand{\:}{\tmspace+\medmuskip{.2222em}}
-// TODO: \> and math mode of \: should use \medmuskip = 4mu plus 2mu minus 4mu
-  '\\>': MacroDefinition.fromString("\\mskip{4mu}"),
-  '\\:': MacroDefinition.fromString("\\tmspace+{4mu}{.2222em}"),
-// \let\medspace\:
-  '\\medspace': MacroDefinition.fromString("\\:"),
-// \renewcommand{\;}{\tmspace+\thickmuskip{.2777em}}
-// TODO: math mode should use \thickmuskip = 5mu plus 5mu
-  '\\;': MacroDefinition.fromString("\\tmspace+{5mu}{.2777em}"),
-// \let\thickspace\;
-  '\\thickspace': MacroDefinition.fromString("\\;"),
-// \renewcommand{\!}{\tmspace-\thinmuskip{.1667em}}
-// TODO: math mode should use \thinmuskip
-  '\\!': MacroDefinition.fromString("\\tmspace-{3mu}{.1667em}"),
-// \let\negthinspace\!
-  '\\negthinspace': MacroDefinition.fromString("\\!"),
-// \newcommand{\negmedspace}{\tmspace-\medmuskip{.2222em}}
-// TODO: math mode should use \medmuskip
-  '\\negmedspace': MacroDefinition.fromString("\\tmspace-{4mu}{.2222em}"),
-// \newcommand{\negthickspace}{\tmspace-\thickmuskip{.2777em}}
-// TODO: math mode should use \thickmuskip
-  '\\negthickspace': MacroDefinition.fromString("\\tmspace-{5mu}{.277em}"),
-// \def\enspace{\kern.5em }
-  '\\enspace': MacroDefinition.fromString("\\kern.5em "),
-// \def\enskip{\hskip.5em\relax}
-  '\\enskip': MacroDefinition.fromString("\\hskip.5em\\relax"),
-// \def\quad{\hskip1em\relax}
-  '\\quad': MacroDefinition.fromString("\\hskip1em\\relax"),
-// \def\qquad{\hskip2em\relax}
-  '\\qquad': MacroDefinition.fromString("\\hskip2em\\relax"),
+  // Spacing, based on amsmath.sty's override of LaTeX defaults
+  // \DeclareRobustCommand{\tmspace}[3]{%
+  //   \ifmmode\mskip#1#2\else\kern#1#3\fi\relax}
+  r'\tmspace': MacroDefinition.fromString(
+    r"\TextOrMath{\kern#1#3}{\mskip#1#2}\relax",
+  ),
+  // \renewcommand{\,}{\tmspace+\thinmuskip{.1667em}}
+  // TODO: math mode should use \thinmuskip
+  r'\,': MacroDefinition.fromString(r"\tmspace+{3mu}{.1667em}"),
+  // \let\thinspace\,
+  r'\thinspace': MacroDefinition.fromString(r"\,"),
+  // \def\>{\mskip\medmuskip}
+  // \renewcommand{\:}{\tmspace+\medmuskip{.2222em}}
+  // TODO: \> and math mode of \: should use \medmuskip = 4mu plus 2mu minus 4mu
+  r'\>': MacroDefinition.fromString(r"\mskip{4mu}"),
+  r'\:': MacroDefinition.fromString(r"\tmspace+{4mu}{.2222em}"),
+  // \let\medspace\:
+  r'\medspace': MacroDefinition.fromString(r"\:"),
+  // \renewcommand{\;}{\tmspace+\thickmuskip{.2777em}}
+  // TODO: math mode should use \thickmuskip = 5mu plus 5mu
+  r'\;': MacroDefinition.fromString(r"\tmspace+{5mu}{.2777em}"),
+  // \let\thickspace\;
+  r'\thickspace': MacroDefinition.fromString(r"\;"),
+  // \renewcommand{\!}{\tmspace-\thinmuskip{.1667em}}
+  // TODO: math mode should use \thinmuskip
+  r'\!': MacroDefinition.fromString(r"\tmspace-{3mu}{.1667em}"),
+  // \let\negthinspace\!
+  r'\negthinspace': MacroDefinition.fromString(r"\!"),
+  // \newcommand{\negmedspace}{\tmspace-\medmuskip{.2222em}}
+  // TODO: math mode should use \medmuskip
+  r'\negmedspace': MacroDefinition.fromString(r"\tmspace-{4mu}{.2222em}"),
+  // \newcommand{\negthickspace}{\tmspace-\thickmuskip{.2777em}}
+  // TODO: math mode should use \thickmuskip
+  r'\negthickspace': MacroDefinition.fromString(r"\tmspace-{5mu}{.277em}"),
+  // \def\enspace{\kern.5em }
+  r'\enspace': MacroDefinition.fromString(r"\kern.5em "),
+  // \def\enskip{\hskip.5em\relax}
+  r'\enskip': MacroDefinition.fromString(r"\hskip.5em\relax"),
+  // \def\quad{\hskip1em\relax}
+  r'\quad': MacroDefinition.fromString(r"\hskip1em\relax"),
+  // \def\qquad{\hskip2em\relax}
+  r'\qquad': MacroDefinition.fromString(r"\hskip2em\relax"),
 
-// \tag@in@display form of \tag
-// TODO tag
-  '\\tag': MacroDefinition.fromString("\\@ifstar\\tag@literal\\tag@paren"),
-  '\\tag@paren': MacroDefinition.fromString("\\tag@literal{({#1})}"),
-  '\\tag@literal': MacroDefinition.fromCtxString((context) {
-    if (context.macros.get("\\df@tag") != null) {
-      throw ParseException("Multiple \\tag");
+  // \tag@in@display form of \tag
+  // TODO tag
+  r'\tag': MacroDefinition.fromString(r"\@ifstar\tag@literal\tag@paren"),
+  r'\tag@paren': MacroDefinition.fromString(r"\tag@literal{({#1})}"),
+  r'\tag@literal': MacroDefinition.fromCtxString((context) {
+    if (context.macros.get(r"\df@tag") != null) {
+      throw ParseException(r"Multiple \tag");
     }
-    return "\\gdef\\df@tag{\\text{#1}}";
+    return r"\gdef\df@tag{\text{#1}}";
   }),
 
-// \renewcommand{\bmod}{\nonscript\mskip-\medmuskip\mkern5mu\mathbin
-//   {\operator@font mod}\penalty900
-//   \mkern5mu\nonscript\mskip-\medmuskip}
-// \newcommand{\pod}[1]{\allowbreak
-//   \if@display\mkern18mu\else\mkern8mu\fi(#1)}
-// \renewcommand{\pmod}[1]{\pod{{\operator@font mod}\mkern6mu#1}}
-// \newcommand{\mod}[1]{\allowbreak\if@display\mkern18mu
-//   \else\mkern12mu\fi{\operator@font mod}\,\,#1}
-// TODO: math mode should use \medmuskip = 4mu plus 2mu minus 4mu
-  '\\bmod': MacroDefinition.fromString("\\mskip5mu"
-      "\\mathbin{\\rm mod}"
-      "\\mskip5mu"),
-// TODO what should we do about \pod ?
-  '\\pod': MacroDefinition.fromString("\\allowbreak"
-      "\\mkern8mu(#1)"),
-  '\\pmod': MacroDefinition.fromString("\\pod{{\\rm mod}\\mkern6mu#1}"),
-  '\\mod': MacroDefinition.fromString("\\allowbreak"
-      "\\mkern18mu{\\rm mod}\\,\\,#1"),
+  // \renewcommand{\bmod}{\nonscript\mskip-\medmuskip\mkern5mu\mathbin
+  //   {\operator@font mod}\penalty900
+  //   \mkern5mu\nonscript\mskip-\medmuskip}
+  // \newcommand{\pod}[1]{\allowbreak
+  //   \if@display\mkern18mu\else\mkern8mu\fi(#1)}
+  // \renewcommand{\pmod}[1]{\pod{{\operator@font mod}\mkern6mu#1}}
+  // \newcommand{\mod}[1]{\allowbreak\if@display\mkern18mu
+  //   \else\mkern12mu\fi{\operator@font mod}\,\,#1}
+  // TODO: math mode should use \medmuskip = 4mu plus 2mu minus 4mu
+  r'\bmod': MacroDefinition.fromString(
+    r"\mskip5mu"
+    r"\mathbin{\rm mod}"
+    r"\mskip5mu",
+  ),
+  // TODO what should we do about \pod ?
+  r'\pod': MacroDefinition.fromString(
+    r"\allowbreak"
+    r"\mkern8mu(#1)",
+  ),
+  r'\pmod': MacroDefinition.fromString(r"\pod{{\rm mod}\mkern6mu#1}"),
+  r'\mod': MacroDefinition.fromString(
+    r"\allowbreak"
+    r"\mkern18mu{\rm mod}\,\,#1",
+  ),
 
-//////////////////////////////////////////////////////////////////////
-// LaTeX source2e
+  //////////////////////////////////////////////////////////////////////
+  // LaTeX source2e
 
-// \\ defaults to \newline, but changes to \cr within array environment
-  '\\\\': MacroDefinition.fromString("\\newline"),
+  // \\ defaults to \newline, but changes to \cr within array environment
+  r'\\': MacroDefinition.fromString(r"\newline"),
 
-// \def\TeX{T\kern-.1667em\lower.5ex\hbox{E}\kern-.125emX\@}
-// TODO: Doesn't normally work in math mode because \@ fails.  KaTeX doesn't
-// support \@ yet, so that's omitted, and we add \text so that the result
-// doesn't look funny in math mode.
+  // \def\TeX{T\kern-.1667em\lower.5ex\hbox{E}\kern-.125emX\@}
+  // TODO: Doesn't normally work in math mode because \@ fails.  KaTeX doesn't
+  // support \@ yet, so that's omitted, and we add \text so that the result
+  // doesn't look funny in math mode.
+  r'\TeX': MacroDefinition.fromString(
+    r"\textrm{"
+    r"T\kern-.1667em\raisebox{-.5ex}{E}\kern-.125emX"
+    "}",
+  ),
 
-  '\\TeX': MacroDefinition.fromString("\\textrm{"
-      "T\\kern-.1667em\\raisebox{-.5ex}{E}\\kern-.125emX"
-      "}"),
+  // \DeclareRobustCommand{\LaTeX}{L\kern-.36em%
+  //         {\sbox\z@ T%
+  //          \vbox to\ht\z@{\hbox{\check@mathfonts
+  //                               \fontsize\sf@size\z@
+  //                               \math@fontsfalse\selectfont
+  //                               A}%
+  //                         \vss}%
+  //         }%
+  //         \kern-.15em%
+  //         \TeX}
+  // This code aligns the top of the A with the T (from the perspective of TeX's
+  // boxes, though visually the A appears to extend above slightly).
+  // We compute the corresponding \raisebox when A is rendered in \normalsize
+  // \scriptstyle, which has a scale factor of 0.7 (see Options.js).
+  r'\LaTeX': MacroDefinition.fromString(
+    r"\textrm{"
+    'L\\kern-.36em\\raisebox{$latexRaiseA}{\\scriptstyle A}'
+    r"\kern-.15em\TeX}",
+  ),
 
-// \DeclareRobustCommand{\LaTeX}{L\kern-.36em%
-//         {\sbox\z@ T%
-//          \vbox to\ht\z@{\hbox{\check@mathfonts
-//                               \fontsize\sf@size\z@
-//                               \math@fontsfalse\selectfont
-//                               A}%
-//                         \vss}%
-//         }%
-//         \kern-.15em%
-//         \TeX}
-// This code aligns the top of the A with the T (from the perspective of TeX's
-// boxes, though visually the A appears to extend above slightly).
-// We compute the corresponding \raisebox when A is rendered in \normalsize
-// \scriptstyle, which has a scale factor of 0.7 (see Options.js).
+  // KaTeX logo based on tweaking LaTeX logo
+  r'\KaTeX': MacroDefinition.fromString(
+    r"\textrm{"
+    'K\\kern-.17em\\raisebox{$latexRaiseA}{\\scriptstyle A}'
+    r"\kern-.15em\TeX}",
+  ),
 
-  '\\LaTeX': MacroDefinition.fromString("\\textrm{"
-      'L\\kern-.36em\\raisebox{$latexRaiseA}{\\scriptstyle A}'
-      "\\kern-.15em\\TeX}"),
+  // \DeclareRobustCommand\hspace{\@ifstar\@hspacer\@hspace}
+  // \def\@hspace#1{\hskip  #1\relax}
+  // \def\@hspacer#1{\vrule \@width\z@\nobreak
+  //                 \hskip #1\hskip \z@skip}
+  r'\hspace': MacroDefinition.fromString(r"\hskip #1\relax"),
 
-// KaTeX logo based on tweaking LaTeX logo
-  '\\KaTeX': MacroDefinition.fromString("\\textrm{"
-      'K\\kern-.17em\\raisebox{$latexRaiseA}{\\scriptstyle A}'
-      "\\kern-.15em\\TeX}"),
+  //////////////////////////////////////////////////////////////////////
+  // mathtools.sty migrated to extra_symbols
+  // TODO: make as overrided type & font
 
-// \DeclareRobustCommand\hspace{\@ifstar\@hspacer\@hspace}
-// \def\@hspace#1{\hskip  #1\relax}
-// \def\@hspacer#1{\vrule \@width\z@\nobreak
-//                 \hskip #1\hskip \z@skip}
-  '\\hspace': MacroDefinition.fromString("\\hskip #1\\relax"),
+  //\providecommand\ordinarycolon{:}
+  r'\ordinarycolon': MacroDefinition.fromString(":"),
+  //\def\vcentcolon{\mathrel{\mathop\ordinarycolon}}
+  //TODO(edemaine): Not yet centered. Fix via \raisebox or #726
+  r'\vcentcolon': MacroDefinition.fromString(
+    r"\mathrel{\mathop\ordinarycolon}",
+  ),
 
-//////////////////////////////////////////////////////////////////////
-// mathtools.sty migrated to extra_symbols
-// TODO: make as overrided type & font
-
-//\providecommand\ordinarycolon{:}
-  '\\ordinarycolon': MacroDefinition.fromString(":"),
-//\def\vcentcolon{\mathrel{\mathop\ordinarycolon}}
-//TODO(edemaine): Not yet centered. Fix via \raisebox or #726
-  '\\vcentcolon':
-      MacroDefinition.fromString("\\mathrel{\\mathop\\ordinarycolon}"),
-
-// Some Unicode characters are implemented with macros to mathtools functions.
-  '\u2237': MacroDefinition.fromString("\\dblcolon"), // ::
-  '\u2239': MacroDefinition.fromString("\\eqcolon"), // -:
-  '\u2254': MacroDefinition.fromString("\\coloneqq"), // :=
-  '\u2255': MacroDefinition.fromString("\\eqqcolon"), // =:
+  // Some Unicode characters are implemented with macros to mathtools functions.
+  '\u2237': MacroDefinition.fromString(r"\dblcolon"), // ::
+  '\u2239': MacroDefinition.fromString(r"\eqcolon"), // -:
+  '\u2254': MacroDefinition.fromString(r"\coloneqq"), // :=
+  '\u2255': MacroDefinition.fromString(r"\eqqcolon"), // =:
   // '\u2A74': MacroDefinition.fromString("\\Coloneqq"), // ::=
 
-//////////////////////////////////////////////////////////////////////
-// colonequals.sty
+  //////////////////////////////////////////////////////////////////////
+  // colonequals.sty
 
-// Alternate names for mathtools's macros:
-  '\\ratio': MacroDefinition.fromString("\\vcentcolon"),
-  '\\coloncolon': MacroDefinition.fromString("\\dblcolon"),
-  '\\colonequals': MacroDefinition.fromString("\\coloneqq"),
-  '\\equalscolon': MacroDefinition.fromString("\\eqqcolon"),
-  '\\minuscolon': MacroDefinition.fromString("\\eqcolon"),
+  // Alternate names for mathtools's macros:
+  r'\ratio': MacroDefinition.fromString(r"\vcentcolon"),
+  r'\coloncolon': MacroDefinition.fromString(r"\dblcolon"),
+  r'\colonequals': MacroDefinition.fromString(r"\coloneqq"),
+  r'\equalscolon': MacroDefinition.fromString(r"\eqqcolon"),
+  r'\minuscolon': MacroDefinition.fromString(r"\eqcolon"),
 
-// Present in newtxmath, pxfonts and txfonts
-  '\\limsup': MacroDefinition.fromString("\\DOTSB\\operatorname*{lim\\,sup}"),
-  '\\liminf': MacroDefinition.fromString("\\DOTSB\\operatorname*{lim\\,inf}"),
+  // Present in newtxmath, pxfonts and txfonts
+  r'\limsup': MacroDefinition.fromString(r"\DOTSB\operatorname*{lim\,sup}"),
+  r'\liminf': MacroDefinition.fromString(r"\DOTSB\operatorname*{lim\,inf}"),
 
-//////////////////////////////////////////////////////////////////////
-// MathML alternates for KaTeX glyphs in the Unicode private area
+  //////////////////////////////////////////////////////////////////////
+  // MathML alternates for KaTeX glyphs in the Unicode private area
 
-//////////////////////////////////////////////////////////////////////
-// stmaryrd and semantic migrated to extra symbols
+  //////////////////////////////////////////////////////////////////////
+  // stmaryrd and semantic migrated to extra symbols
 
-// The stmaryrd and semantic packages render the next four items by calling a
-// glyph. Those glyphs do not exist in the KaTeX fonts. Hence the macros.
+  // The stmaryrd and semantic packages render the next four items by calling a
+  // glyph. Those glyphs do not exist in the KaTeX fonts. Hence the macros.
 
-//////////////////////////////////////////////////////////////////////
-// texvc.sty
+  //////////////////////////////////////////////////////////////////////
+  // texvc.sty
 
-// The texvc package contains macros available in mediawiki pages.
-// We omit the functions deprecated at
-// https://en.wikipedia.org/wiki/Help:Displaying_a_formula#Deprecated_syntax
+  // The texvc package contains macros available in mediawiki pages.
+  // We omit the functions deprecated at
+  // https://en.wikipedia.org/wiki/Help:Displaying_a_formula#Deprecated_syntax
 
-// We also omit texvc's \O, which conflicts with \text{\O}
-// TODO: make as override font
-  '\\darr': MacroDefinition.fromString("\\downarrow"),
-  '\\dArr': MacroDefinition.fromString("\\Downarrow"),
-  '\\Darr': MacroDefinition.fromString("\\Downarrow"),
-  '\\lang': MacroDefinition.fromString("\\langle"),
-  '\\rang': MacroDefinition.fromString("\\rangle"),
-  '\\uarr': MacroDefinition.fromString("\\uparrow"),
-  '\\uArr': MacroDefinition.fromString("\\Uparrow"),
-  '\\Uarr': MacroDefinition.fromString("\\Uparrow"),
-  '\\N': MacroDefinition.fromString("\\mathbb{N}"),
-  '\\R': MacroDefinition.fromString("\\mathbb{R}"),
-  '\\Z': MacroDefinition.fromString("\\mathbb{Z}"),
-  '\\alef': MacroDefinition.fromString("\\aleph"),
-  '\\alefsym': MacroDefinition.fromString("\\aleph"),
-  '\\Alpha': MacroDefinition.fromString("\\mathrm{A}"),
-  '\\Beta': MacroDefinition.fromString("\\mathrm{B}"),
-  '\\bull': MacroDefinition.fromString("\\bullet"),
-  '\\Chi': MacroDefinition.fromString("\\mathrm{X}"),
-  '\\clubs': MacroDefinition.fromString("\\clubsuit"),
-  '\\cnums': MacroDefinition.fromString("\\mathbb{C}"),
-  '\\Complex': MacroDefinition.fromString("\\mathbb{C}"),
-  '\\Dagger': MacroDefinition.fromString("\\ddagger"),
-  '\\diamonds': MacroDefinition.fromString("\\diamondsuit"),
-  '\\empty': MacroDefinition.fromString("\\emptyset"),
-  '\\Epsilon': MacroDefinition.fromString("\\mathrm{E}"),
-  '\\Eta': MacroDefinition.fromString("\\mathrm{H}"),
-  '\\exist': MacroDefinition.fromString("\\exists"),
-  '\\harr': MacroDefinition.fromString("\\leftrightarrow"),
-  '\\hArr': MacroDefinition.fromString("\\Leftrightarrow"),
-  '\\Harr': MacroDefinition.fromString("\\Leftrightarrow"),
-  '\\hearts': MacroDefinition.fromString("\\heartsuit"),
-  '\\image': MacroDefinition.fromString("\\Im"),
-  '\\infin': MacroDefinition.fromString("\\infty"),
-  '\\Iota': MacroDefinition.fromString("\\mathrm{I}"),
-  '\\isin': MacroDefinition.fromString("\\in"),
-  '\\Kappa': MacroDefinition.fromString("\\mathrm{K}"),
-  '\\larr': MacroDefinition.fromString("\\leftarrow"),
-  '\\lArr': MacroDefinition.fromString("\\Leftarrow"),
-  '\\Larr': MacroDefinition.fromString("\\Leftarrow"),
-  '\\lrarr': MacroDefinition.fromString("\\leftrightarrow"),
-  '\\lrArr': MacroDefinition.fromString("\\Leftrightarrow"),
-  '\\Lrarr': MacroDefinition.fromString("\\Leftrightarrow"),
-  '\\Mu': MacroDefinition.fromString("\\mathrm{M}"),
-  '\\natnums': MacroDefinition.fromString("\\mathbb{N}"),
-  '\\Nu': MacroDefinition.fromString("\\mathrm{N}"),
-  '\\Omicron': MacroDefinition.fromString("\\mathrm{O}"),
-  '\\plusmn': MacroDefinition.fromString("\\pm"),
-  '\\rarr': MacroDefinition.fromString("\\rightarrow"),
-  '\\rArr': MacroDefinition.fromString("\\Rightarrow"),
-  '\\Rarr': MacroDefinition.fromString("\\Rightarrow"),
-  '\\real': MacroDefinition.fromString("\\Re"),
-  '\\reals': MacroDefinition.fromString("\\mathbb{R}"),
-  '\\Reals': MacroDefinition.fromString("\\mathbb{R}"),
-  '\\Rho': MacroDefinition.fromString("\\mathrm{P}"),
-  '\\sdot': MacroDefinition.fromString("\\cdot"),
-  '\\sect': MacroDefinition.fromString("\\S"),
-  '\\spades': MacroDefinition.fromString("\\spadesuit"),
-  '\\sub': MacroDefinition.fromString("\\subset"),
-  '\\sube': MacroDefinition.fromString("\\subseteq"),
-  '\\supe': MacroDefinition.fromString("\\supseteq"),
-  '\\Tau': MacroDefinition.fromString("\\mathrm{T}"),
-  '\\thetasym': MacroDefinition.fromString("\\vartheta"),
-// TODO: '\\varcoppa': MacroDefinition.fromString("\\\mbox{\\coppa}"),
-  '\\weierp': MacroDefinition.fromString("\\wp"),
-  '\\Zeta': MacroDefinition.fromString("\\mathrm{Z}"),
+  // We also omit texvc's \O, which conflicts with \text{\O}
+  // TODO: make as override font
+  r'\darr': MacroDefinition.fromString(r"\downarrow"),
+  r'\dArr': MacroDefinition.fromString(r"\Downarrow"),
+  r'\Darr': MacroDefinition.fromString(r"\Downarrow"),
+  r'\lang': MacroDefinition.fromString(r"\langle"),
+  r'\rang': MacroDefinition.fromString(r"\rangle"),
+  r'\uarr': MacroDefinition.fromString(r"\uparrow"),
+  r'\uArr': MacroDefinition.fromString(r"\Uparrow"),
+  r'\Uarr': MacroDefinition.fromString(r"\Uparrow"),
+  r'\N': MacroDefinition.fromString(r"\mathbb{N}"),
+  r'\R': MacroDefinition.fromString(r"\mathbb{R}"),
+  r'\Z': MacroDefinition.fromString(r"\mathbb{Z}"),
+  r'\alef': MacroDefinition.fromString(r"\aleph"),
+  r'\alefsym': MacroDefinition.fromString(r"\aleph"),
+  r'\Alpha': MacroDefinition.fromString(r"\mathrm{A}"),
+  r'\Beta': MacroDefinition.fromString(r"\mathrm{B}"),
+  r'\bull': MacroDefinition.fromString(r"\bullet"),
+  r'\Chi': MacroDefinition.fromString(r"\mathrm{X}"),
+  r'\clubs': MacroDefinition.fromString(r"\clubsuit"),
+  r'\cnums': MacroDefinition.fromString(r"\mathbb{C}"),
+  r'\Complex': MacroDefinition.fromString(r"\mathbb{C}"),
+  r'\Dagger': MacroDefinition.fromString(r"\ddagger"),
+  r'\diamonds': MacroDefinition.fromString(r"\diamondsuit"),
+  r'\empty': MacroDefinition.fromString(r"\emptyset"),
+  r'\Epsilon': MacroDefinition.fromString(r"\mathrm{E}"),
+  r'\Eta': MacroDefinition.fromString(r"\mathrm{H}"),
+  r'\exist': MacroDefinition.fromString(r"\exists"),
+  r'\harr': MacroDefinition.fromString(r"\leftrightarrow"),
+  r'\hArr': MacroDefinition.fromString(r"\Leftrightarrow"),
+  r'\Harr': MacroDefinition.fromString(r"\Leftrightarrow"),
+  r'\hearts': MacroDefinition.fromString(r"\heartsuit"),
+  r'\image': MacroDefinition.fromString(r"\Im"),
+  r'\infin': MacroDefinition.fromString(r"\infty"),
+  r'\Iota': MacroDefinition.fromString(r"\mathrm{I}"),
+  r'\isin': MacroDefinition.fromString(r"\in"),
+  r'\Kappa': MacroDefinition.fromString(r"\mathrm{K}"),
+  r'\larr': MacroDefinition.fromString(r"\leftarrow"),
+  r'\lArr': MacroDefinition.fromString(r"\Leftarrow"),
+  r'\Larr': MacroDefinition.fromString(r"\Leftarrow"),
+  r'\lrarr': MacroDefinition.fromString(r"\leftrightarrow"),
+  r'\lrArr': MacroDefinition.fromString(r"\Leftrightarrow"),
+  r'\Lrarr': MacroDefinition.fromString(r"\Leftrightarrow"),
+  r'\Mu': MacroDefinition.fromString(r"\mathrm{M}"),
+  r'\natnums': MacroDefinition.fromString(r"\mathbb{N}"),
+  r'\Nu': MacroDefinition.fromString(r"\mathrm{N}"),
+  r'\Omicron': MacroDefinition.fromString(r"\mathrm{O}"),
+  r'\plusmn': MacroDefinition.fromString(r"\pm"),
+  r'\rarr': MacroDefinition.fromString(r"\rightarrow"),
+  r'\rArr': MacroDefinition.fromString(r"\Rightarrow"),
+  r'\Rarr': MacroDefinition.fromString(r"\Rightarrow"),
+  r'\real': MacroDefinition.fromString(r"\Re"),
+  r'\reals': MacroDefinition.fromString(r"\mathbb{R}"),
+  r'\Reals': MacroDefinition.fromString(r"\mathbb{R}"),
+  r'\Rho': MacroDefinition.fromString(r"\mathrm{P}"),
+  r'\sdot': MacroDefinition.fromString(r"\cdot"),
+  r'\sect': MacroDefinition.fromString(r"\S"),
+  r'\spades': MacroDefinition.fromString(r"\spadesuit"),
+  r'\sub': MacroDefinition.fromString(r"\subset"),
+  r'\sube': MacroDefinition.fromString(r"\subseteq"),
+  r'\supe': MacroDefinition.fromString(r"\supseteq"),
+  r'\Tau': MacroDefinition.fromString(r"\mathrm{T}"),
+  r'\thetasym': MacroDefinition.fromString(r"\vartheta"),
+  // TODO: '\\varcoppa': MacroDefinition.fromString("\\\mbox{\\coppa}"),
+  r'\weierp': MacroDefinition.fromString(r"\wp"),
+  r'\Zeta': MacroDefinition.fromString(r"\mathrm{Z}"),
 
-//////////////////////////////////////////////////////////////////////
-// statmath.sty
-// https://ctan.math.illinois.edu/macros/latex/contrib/statmath/statmath.pdf
+  //////////////////////////////////////////////////////////////////////
+  // statmath.sty
+  // https://ctan.math.illinois.edu/macros/latex/contrib/statmath/statmath.pdf
+  r'\argmin': MacroDefinition.fromString(r"\DOTSB\operatorname*{arg\,min}"),
+  r'\argmax': MacroDefinition.fromString(r"\DOTSB\operatorname*{arg\,max}"),
+  r'\plim': MacroDefinition.fromString(r"\DOTSB\operatorname*{plim}\limits"),
 
-  '\\argmin': MacroDefinition.fromString("\\DOTSB\\operatorname*{arg\\,min}"),
-  '\\argmax': MacroDefinition.fromString("\\DOTSB\\operatorname*{arg\\,max}"),
-  '\\plim': MacroDefinition.fromString("\\DOTSB\\operatorname*{plim}\\limits"),
   // "\\DOTSB\\mathop{\\operatorname{plim}}\\limits"),
 
-//////////////////////////////////////////////////////////////////////
-// braket.sty
-// http://ctan.math.washington.edu/tex-archive/macros/latex/contrib/braket/braket.pdf
+  //////////////////////////////////////////////////////////////////////
+  // braket.sty
+  // http://ctan.math.washington.edu/tex-archive/macros/latex/contrib/braket/braket.pdf
+  r'\bra': MacroDefinition.fromString(r"\mathinner{\langle{#1}|}"),
+  r'\ket': MacroDefinition.fromString(r"\mathinner{|{#1}\rangle}"),
+  r'\braket': MacroDefinition.fromString(r"\mathinner{\langle{#1}\rangle}"),
+  r'\Bra': MacroDefinition.fromString(r"\left\langle#1\right|"),
+  r'\Ket': MacroDefinition.fromString(r"\left|#1\right\rangle"),
 
-  '\\bra': MacroDefinition.fromString("\\mathinner{\\langle{#1}|}"),
-  '\\ket': MacroDefinition.fromString("\\mathinner{|{#1}\\rangle}"),
-  '\\braket': MacroDefinition.fromString("\\mathinner{\\langle{#1}\\rangle}"),
-  '\\Bra': MacroDefinition.fromString("\\left\\langle#1\\right|"),
-  '\\Ket': MacroDefinition.fromString("\\left|#1\\right\\rangle"),
-
-// Custom Khan Academy colors, should be moved to an optional package
-  '\\blue': MacroDefinition.fromString("\\textcolor{##6495ed}{#1}"),
-  '\\orange': MacroDefinition.fromString("\\textcolor{##ffa500}{#1}"),
-  '\\pink': MacroDefinition.fromString("\\textcolor{##ff00af}{#1}"),
-  '\\red': MacroDefinition.fromString("\\textcolor{##df0030}{#1}"),
-  '\\green': MacroDefinition.fromString("\\textcolor{##28ae7b}{#1}"),
-  '\\gray': MacroDefinition.fromString("\\textcolor{gray}{#1}"),
-  '\\purple': MacroDefinition.fromString("\\textcolor{##9d38bd}{#1}"),
-  '\\blueA': MacroDefinition.fromString("\\textcolor{##ccfaff}{#1}"),
-  '\\blueB': MacroDefinition.fromString("\\textcolor{##80f6ff}{#1}"),
-  '\\blueC': MacroDefinition.fromString("\\textcolor{##63d9ea}{#1}"),
-  '\\blueD': MacroDefinition.fromString("\\textcolor{##11accd}{#1}"),
-  '\\blueE': MacroDefinition.fromString("\\textcolor{##0c7f99}{#1}"),
-  '\\tealA': MacroDefinition.fromString("\\textcolor{##94fff5}{#1}"),
-  '\\tealB': MacroDefinition.fromString("\\textcolor{##26edd5}{#1}"),
-  '\\tealC': MacroDefinition.fromString("\\textcolor{##01d1c1}{#1}"),
-  '\\tealD': MacroDefinition.fromString("\\textcolor{##01a995}{#1}"),
-  '\\tealE': MacroDefinition.fromString("\\textcolor{##208170}{#1}"),
-  '\\greenA': MacroDefinition.fromString("\\textcolor{##b6ffb0}{#1}"),
-  '\\greenB': MacroDefinition.fromString("\\textcolor{##8af281}{#1}"),
-  '\\greenC': MacroDefinition.fromString("\\textcolor{##74cf70}{#1}"),
-  '\\greenD': MacroDefinition.fromString("\\textcolor{##1fab54}{#1}"),
-  '\\greenE': MacroDefinition.fromString("\\textcolor{##0d923f}{#1}"),
-  '\\goldA': MacroDefinition.fromString("\\textcolor{##ffd0a9}{#1}"),
-  '\\goldB': MacroDefinition.fromString("\\textcolor{##ffbb71}{#1}"),
-  '\\goldC': MacroDefinition.fromString("\\textcolor{##ff9c39}{#1}"),
-  '\\goldD': MacroDefinition.fromString("\\textcolor{##e07d10}{#1}"),
-  '\\goldE': MacroDefinition.fromString("\\textcolor{##a75a05}{#1}"),
-  '\\redA': MacroDefinition.fromString("\\textcolor{##fca9a9}{#1}"),
-  '\\redB': MacroDefinition.fromString("\\textcolor{##ff8482}{#1}"),
-  '\\redC': MacroDefinition.fromString("\\textcolor{##f9685d}{#1}"),
-  '\\redD': MacroDefinition.fromString("\\textcolor{##e84d39}{#1}"),
-  '\\redE': MacroDefinition.fromString("\\textcolor{##bc2612}{#1}"),
-  '\\maroonA': MacroDefinition.fromString("\\textcolor{##ffbde0}{#1}"),
-  '\\maroonB': MacroDefinition.fromString("\\textcolor{##ff92c6}{#1}"),
-  '\\maroonC': MacroDefinition.fromString("\\textcolor{##ed5fa6}{#1}"),
-  '\\maroonD': MacroDefinition.fromString("\\textcolor{##ca337c}{#1}"),
-  '\\maroonE': MacroDefinition.fromString("\\textcolor{##9e034e}{#1}"),
-  '\\purpleA': MacroDefinition.fromString("\\textcolor{##ddd7ff}{#1}"),
-  '\\purpleB': MacroDefinition.fromString("\\textcolor{##c6b9fc}{#1}"),
-  '\\purpleC': MacroDefinition.fromString("\\textcolor{##aa87ff}{#1}"),
-  '\\purpleD': MacroDefinition.fromString("\\textcolor{##7854ab}{#1}"),
-  '\\purpleE': MacroDefinition.fromString("\\textcolor{##543b78}{#1}"),
-  '\\mintA': MacroDefinition.fromString("\\textcolor{##f5f9e8}{#1}"),
-  '\\mintB': MacroDefinition.fromString("\\textcolor{##edf2df}{#1}"),
-  '\\mintC': MacroDefinition.fromString("\\textcolor{##e0e5cc}{#1}"),
-  '\\grayA': MacroDefinition.fromString("\\textcolor{##f6f7f7}{#1}"),
-  '\\grayB': MacroDefinition.fromString("\\textcolor{##f0f1f2}{#1}"),
-  '\\grayC': MacroDefinition.fromString("\\textcolor{##e3e5e6}{#1}"),
-  '\\grayD': MacroDefinition.fromString("\\textcolor{##d6d8da}{#1}"),
-  '\\grayE': MacroDefinition.fromString("\\textcolor{##babec2}{#1}"),
-  '\\grayF': MacroDefinition.fromString("\\textcolor{##888d93}{#1}"),
-  '\\grayG': MacroDefinition.fromString("\\textcolor{##626569}{#1}"),
-  '\\grayH': MacroDefinition.fromString("\\textcolor{##3b3e40}{#1}"),
-  '\\grayI': MacroDefinition.fromString("\\textcolor{##21242c}{#1}"),
-  '\\kaBlue': MacroDefinition.fromString("\\textcolor{##314453}{#1}"),
-  '\\kaGreen': MacroDefinition.fromString("\\textcolor{##71B307}{#1}"),
+  // Custom Khan Academy colors, should be moved to an optional package
+  r'\blue': MacroDefinition.fromString(r"\textcolor{##6495ed}{#1}"),
+  r'\orange': MacroDefinition.fromString(r"\textcolor{##ffa500}{#1}"),
+  r'\pink': MacroDefinition.fromString(r"\textcolor{##ff00af}{#1}"),
+  r'\red': MacroDefinition.fromString(r"\textcolor{##df0030}{#1}"),
+  r'\green': MacroDefinition.fromString(r"\textcolor{##28ae7b}{#1}"),
+  r'\gray': MacroDefinition.fromString(r"\textcolor{gray}{#1}"),
+  r'\purple': MacroDefinition.fromString(r"\textcolor{##9d38bd}{#1}"),
+  r'\blueA': MacroDefinition.fromString(r"\textcolor{##ccfaff}{#1}"),
+  r'\blueB': MacroDefinition.fromString(r"\textcolor{##80f6ff}{#1}"),
+  r'\blueC': MacroDefinition.fromString(r"\textcolor{##63d9ea}{#1}"),
+  r'\blueD': MacroDefinition.fromString(r"\textcolor{##11accd}{#1}"),
+  r'\blueE': MacroDefinition.fromString(r"\textcolor{##0c7f99}{#1}"),
+  r'\tealA': MacroDefinition.fromString(r"\textcolor{##94fff5}{#1}"),
+  r'\tealB': MacroDefinition.fromString(r"\textcolor{##26edd5}{#1}"),
+  r'\tealC': MacroDefinition.fromString(r"\textcolor{##01d1c1}{#1}"),
+  r'\tealD': MacroDefinition.fromString(r"\textcolor{##01a995}{#1}"),
+  r'\tealE': MacroDefinition.fromString(r"\textcolor{##208170}{#1}"),
+  r'\greenA': MacroDefinition.fromString(r"\textcolor{##b6ffb0}{#1}"),
+  r'\greenB': MacroDefinition.fromString(r"\textcolor{##8af281}{#1}"),
+  r'\greenC': MacroDefinition.fromString(r"\textcolor{##74cf70}{#1}"),
+  r'\greenD': MacroDefinition.fromString(r"\textcolor{##1fab54}{#1}"),
+  r'\greenE': MacroDefinition.fromString(r"\textcolor{##0d923f}{#1}"),
+  r'\goldA': MacroDefinition.fromString(r"\textcolor{##ffd0a9}{#1}"),
+  r'\goldB': MacroDefinition.fromString(r"\textcolor{##ffbb71}{#1}"),
+  r'\goldC': MacroDefinition.fromString(r"\textcolor{##ff9c39}{#1}"),
+  r'\goldD': MacroDefinition.fromString(r"\textcolor{##e07d10}{#1}"),
+  r'\goldE': MacroDefinition.fromString(r"\textcolor{##a75a05}{#1}"),
+  r'\redA': MacroDefinition.fromString(r"\textcolor{##fca9a9}{#1}"),
+  r'\redB': MacroDefinition.fromString(r"\textcolor{##ff8482}{#1}"),
+  r'\redC': MacroDefinition.fromString(r"\textcolor{##f9685d}{#1}"),
+  r'\redD': MacroDefinition.fromString(r"\textcolor{##e84d39}{#1}"),
+  r'\redE': MacroDefinition.fromString(r"\textcolor{##bc2612}{#1}"),
+  r'\maroonA': MacroDefinition.fromString(r"\textcolor{##ffbde0}{#1}"),
+  r'\maroonB': MacroDefinition.fromString(r"\textcolor{##ff92c6}{#1}"),
+  r'\maroonC': MacroDefinition.fromString(r"\textcolor{##ed5fa6}{#1}"),
+  r'\maroonD': MacroDefinition.fromString(r"\textcolor{##ca337c}{#1}"),
+  r'\maroonE': MacroDefinition.fromString(r"\textcolor{##9e034e}{#1}"),
+  r'\purpleA': MacroDefinition.fromString(r"\textcolor{##ddd7ff}{#1}"),
+  r'\purpleB': MacroDefinition.fromString(r"\textcolor{##c6b9fc}{#1}"),
+  r'\purpleC': MacroDefinition.fromString(r"\textcolor{##aa87ff}{#1}"),
+  r'\purpleD': MacroDefinition.fromString(r"\textcolor{##7854ab}{#1}"),
+  r'\purpleE': MacroDefinition.fromString(r"\textcolor{##543b78}{#1}"),
+  r'\mintA': MacroDefinition.fromString(r"\textcolor{##f5f9e8}{#1}"),
+  r'\mintB': MacroDefinition.fromString(r"\textcolor{##edf2df}{#1}"),
+  r'\mintC': MacroDefinition.fromString(r"\textcolor{##e0e5cc}{#1}"),
+  r'\grayA': MacroDefinition.fromString(r"\textcolor{##f6f7f7}{#1}"),
+  r'\grayB': MacroDefinition.fromString(r"\textcolor{##f0f1f2}{#1}"),
+  r'\grayC': MacroDefinition.fromString(r"\textcolor{##e3e5e6}{#1}"),
+  r'\grayD': MacroDefinition.fromString(r"\textcolor{##d6d8da}{#1}"),
+  r'\grayE': MacroDefinition.fromString(r"\textcolor{##babec2}{#1}"),
+  r'\grayF': MacroDefinition.fromString(r"\textcolor{##888d93}{#1}"),
+  r'\grayG': MacroDefinition.fromString(r"\textcolor{##626569}{#1}"),
+  r'\grayH': MacroDefinition.fromString(r"\textcolor{##3b3e40}{#1}"),
+  r'\grayI': MacroDefinition.fromString(r"\textcolor{##21242c}{#1}"),
+  r'\kaBlue': MacroDefinition.fromString(r"\textcolor{##314453}{#1}"),
+  r'\kaGreen': MacroDefinition.fromString(r"\textcolor{##71B307}{#1}"),
 };

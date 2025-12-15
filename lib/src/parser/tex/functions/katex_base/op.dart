@@ -25,20 +25,20 @@ part of katex_base;
 
 const _opEntries = {
   [
-    '\\coprod',
-    '\\bigvee',
-    '\\bigwedge',
-    '\\biguplus',
-    '\\bigcap',
-    '\\bigcup',
-    '\\intop',
-    '\\prod',
-    '\\sum',
-    '\\bigotimes',
-    '\\bigoplus',
-    '\\bigodot',
-    '\\bigsqcup',
-    '\\smallint',
+    r'\coprod',
+    r'\bigvee',
+    r'\bigwedge',
+    r'\biguplus',
+    r'\bigcap',
+    r'\bigcup',
+    r'\intop',
+    r'\prod',
+    r'\sum',
+    r'\bigotimes',
+    r'\bigoplus',
+    r'\bigodot',
+    r'\bigsqcup',
+    r'\smallint',
     '\u220F',
     '\u2210',
     '\u2211',
@@ -59,21 +59,15 @@ const _opEntries = {
   //   numArgs: 1,
   //   handler: _mathopHandler,
   // ),
-  mathFunctions: FunctionSpec(
-    numArgs: 0,
-    handler: _mathFunctionHandler,
-  ),
-  mathLimits: FunctionSpec(
-    numArgs: 0,
-    handler: _mathLimitsHandler,
-  ),
+  mathFunctions: FunctionSpec(numArgs: 0, handler: _mathFunctionHandler),
+  mathLimits: FunctionSpec(numArgs: 0, handler: _mathLimitsHandler),
   [
-    '\\int',
-    '\\iint',
-    '\\iiint',
-    '\\oint',
-    '\\oiint',
-    '\\oiiint',
+    r'\int',
+    r'\iint',
+    r'\iiint',
+    r'\oint',
+    r'\oiint',
+    r'\oiiint',
     '\u222b',
     '\u222c',
     '\u222d',
@@ -100,7 +94,7 @@ NaryOperatorNode _parseNaryOperator(
     upperLimit: scriptsResult.superscript,
     naryand: arg ?? EquationRowNode.empty(),
     limits: scriptsResult.limits,
-    allowLargeOp: command == '\\smallint' ? false : true,
+    allowLargeOp: command != r'\smallint',
   );
 }
 
@@ -108,11 +102,15 @@ NaryOperatorNode _parseNaryOperator(
 ///Math functions' default limits behavior is fixed on creation and will NOT
 ///change form according to style.
 FunctionNode _parseMathFunction(
-    GreenNode funcNameBase, TexParser parser, FunctionContext context,
-    {bool defaultLimits = false}) {
+  GreenNode funcNameBase,
+  TexParser parser,
+  FunctionContext context, {
+  bool defaultLimits = false,
+}) {
   final scriptsResult = parser.parseScripts(allowLimits: true);
   EquationRowNode arg;
-  arg = parser
+  arg =
+      parser
           .parseAtom(context.breakOnTokenText)
           // .parseArgNode(mode: Mode.math, optional: false)
           ?.wrapWithEquationRow() ??
@@ -120,10 +118,7 @@ FunctionNode _parseMathFunction(
   final limits = scriptsResult.limits ?? defaultLimits;
   final base = funcNameBase.wrapWithEquationRow();
   if (scriptsResult.subscript == null && scriptsResult.superscript == null) {
-    return FunctionNode(
-      functionName: base,
-      argument: arg,
-    );
+    return FunctionNode(functionName: base, argument: arg);
   }
   if (limits) {
     var functionName = base;
@@ -156,18 +151,18 @@ FunctionNode _parseMathFunction(
 }
 
 const singleCharBigOps = {
-  '\u220F': '\\prod',
-  '\u2210': '\\coprod',
-  '\u2211': '\\sum',
-  '\u22c0': '\\bigwedge',
-  '\u22c1': '\\bigvee',
-  '\u22c2': '\\bigcap',
-  '\u22c3': '\\bigcup',
-  '\u2a00': '\\bigodot',
-  '\u2a01': '\\bigoplus',
-  '\u2a02': '\\bigotimes',
-  '\u2a04': '\\biguplus',
-  '\u2a06': '\\bigsqcup',
+  '\u220F': r'\prod',
+  '\u2210': r'\coprod',
+  '\u2211': r'\sum',
+  '\u22c0': r'\bigwedge',
+  '\u22c1': r'\bigvee',
+  '\u22c2': r'\bigcap',
+  '\u22c3': r'\bigcup',
+  '\u2a00': r'\bigodot',
+  '\u2a01': r'\bigoplus',
+  '\u2a02': r'\bigotimes',
+  '\u2a04': r'\biguplus',
+  '\u2a06': r'\bigsqcup',
 };
 
 GreenNode _bigOpHandler(TexParser parser, FunctionContext context) {
@@ -183,74 +178,73 @@ GreenNode _bigOpHandler(TexParser parser, FunctionContext context) {
 // }
 
 const mathFunctions = [
-  '\\arcsin',
-  '\\arccos',
-  '\\arctan',
-  '\\arctg',
-  '\\arcctg',
-  '\\arg',
-  '\\ch',
-  '\\cos',
-  '\\cosec',
-  '\\cosh',
-  '\\cot',
-  '\\cotg',
-  '\\coth',
-  '\\csc',
-  '\\ctg',
-  '\\cth',
-  '\\deg',
-  '\\dim',
-  '\\exp',
-  '\\hom',
-  '\\ker',
-  '\\lg',
-  '\\ln',
-  '\\log',
-  '\\sec',
-  '\\sin',
-  '\\sinh',
-  '\\sh',
-  '\\tan',
-  '\\tanh',
-  '\\tg',
-  '\\th',
+  r'\arcsin',
+  r'\arccos',
+  r'\arctan',
+  r'\arctg',
+  r'\arcctg',
+  r'\arg',
+  r'\ch',
+  r'\cos',
+  r'\cosec',
+  r'\cosh',
+  r'\cot',
+  r'\cotg',
+  r'\coth',
+  r'\csc',
+  r'\ctg',
+  r'\cth',
+  r'\deg',
+  r'\dim',
+  r'\exp',
+  r'\hom',
+  r'\ker',
+  r'\lg',
+  r'\ln',
+  r'\log',
+  r'\sec',
+  r'\sin',
+  r'\sinh',
+  r'\sh',
+  r'\tan',
+  r'\tanh',
+  r'\tg',
+  r'\th',
 ];
 
 GreenNode _mathFunctionHandler(TexParser parser, FunctionContext context) =>
     _parseMathFunction(
-      stringToNode(context.funcName.substring(1), Mode.text),
+      stringToNode(context.funcName.substring(1)),
       parser,
       context,
-      defaultLimits: false,
     );
 
 const mathLimits = [
-  '\\det',
-  '\\gcd',
-  '\\inf',
-  '\\lim',
-  '\\max',
-  '\\min',
-  '\\Pr',
-  '\\sup',
+  r'\det',
+  r'\gcd',
+  r'\inf',
+  r'\lim',
+  r'\max',
+  r'\min',
+  r'\Pr',
+  r'\sup',
 ];
 
 GreenNode _mathLimitsHandler(TexParser parser, FunctionContext context) =>
     _parseMathFunction(
-      stringToNode(context.funcName.substring(1), Mode.text),
+      stringToNode(context.funcName.substring(1)),
       parser,
       context,
       defaultLimits: true,
     );
 
 const singleCharIntegrals = {
-  '\u222b': '\\int',
-  '\u222c': '\\iint',
-  '\u222d': '\\iiint',
-  '\u222e': '\\oint',
-  '\u222f': '\\oiint',
-  '\u2230': '\\oiiint',
+  '\u222b': r'\int',
+  '\u222c': r'\iint',
+  '\u222d': r'\iiint',
+  '\u222e': r'\oint',
+  '\u222f': r'\oiint',
+  '\u2230': r'\oiiint',
 };
 GreenNode _integralHandler(TexParser parser, FunctionContext context) {
   final fName = context.funcName.length == 1

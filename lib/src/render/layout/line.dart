@@ -1,13 +1,15 @@
 //ignore_for_file: lines_longer_than_80_chars
+
 import 'dart:math' as math;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import '../constants.dart';
-import '../utils/render_box_offset.dart';
 import '../utils/render_box_layout.dart';
+import '../utils/render_box_offset.dart';
 
 class LineParentData extends ContainerBoxParentData<RenderBox> {
   // The first canBreakBefore has no effect
@@ -15,7 +17,7 @@ class LineParentData extends ContainerBoxParentData<RenderBox> {
 
   BoxConstraints Function(double height, double depth)? customCrossSize;
 
-  double trailingMargin = 0.0;
+  double trailingMargin = 0;
 
   bool alignerOrSpacer = false;
 
@@ -25,24 +27,23 @@ class LineParentData extends ContainerBoxParentData<RenderBox> {
 }
 
 class LineElement extends ParentDataWidget<LineParentData> {
+  const LineElement({
+    super.key,
+    this.canBreakBefore = false,
+    this.customCrossSize,
+    this.trailingMargin = 0.0,
+    this.alignerOrSpacer = false,
+    required super.child,
+  });
   final bool canBreakBefore;
   final BoxConstraints Function(double height, double depth)? customCrossSize;
   final double trailingMargin;
   final bool alignerOrSpacer;
 
-  const LineElement({
-    Key? key,
-    this.canBreakBefore = false,
-    this.customCrossSize,
-    this.trailingMargin = 0.0,
-    this.alignerOrSpacer = false,
-    required Widget child,
-  }) : super(key: key, child: child);
-
   @override
   void applyParentData(RenderObject renderObject) {
     assert(renderObject.parentData is LineParentData);
-    final parentData = renderObject.parentData as LineParentData;
+    final parentData = renderObject.parentData! as LineParentData;
     var needsLayout = false;
 
     if (parentData.canBreakBefore != canBreakBefore) {
@@ -74,13 +75,28 @@ class LineElement extends ParentDataWidget<LineParentData> {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(FlagProperty('canBreakBefore',
-        value: canBreakBefore, ifTrue: 'allow breaking before'));
-    properties.add(FlagProperty('customSize',
-        value: customCrossSize != null, ifTrue: 'using relative size'));
+    properties.add(
+      FlagProperty(
+        'canBreakBefore',
+        value: canBreakBefore,
+        ifTrue: 'allow breaking before',
+      ),
+    );
+    properties.add(
+      FlagProperty(
+        'customSize',
+        value: customCrossSize != null,
+        ifTrue: 'using relative size',
+      ),
+    );
     properties.add(DoubleProperty('trailingMargin', trailingMargin));
-    properties.add(FlagProperty('alignerOrSpacer',
-        value: alignerOrSpacer, ifTrue: 'is a alignment symbol'));
+    properties.add(
+      FlagProperty(
+        'alignerOrSpacer',
+        value: alignerOrSpacer,
+        ifTrue: 'is a alignment symbol',
+      ),
+    );
   }
 
   @override
@@ -89,15 +105,15 @@ class LineElement extends ParentDataWidget<LineParentData> {
 
 /// Line provides abilities for line breaks, delim-sizing and background color indicator.
 class Line extends MultiChildRenderObjectWidget {
-  Line({
-    Key? key,
+  const Line({
+    super.key,
     this.crossAxisAlignment = CrossAxisAlignment.baseline,
     this.minDepth = 0.0,
     this.minHeight = 0.0,
     this.textBaseline = TextBaseline.alphabetic,
     this.textDirection,
-    List<Widget> children = const [],
-  }) : super(key: key, children: children);
+    super.children,
+  });
 
   final CrossAxisAlignment crossAxisAlignment;
 
@@ -117,12 +133,12 @@ class Line extends MultiChildRenderObjectWidget {
 
   @override
   RenderLine createRenderObject(BuildContext context) => RenderLine(
-        crossAxisAlignment: crossAxisAlignment,
-        minDepth: minDepth,
-        minHeight: minHeight,
-        textBaseline: textBaseline,
-        textDirection: getEffectiveTextDirection(context),
-      );
+    crossAxisAlignment: crossAxisAlignment,
+    minDepth: minDepth,
+    minHeight: minHeight,
+    textBaseline: textBaseline,
+    textDirection: getEffectiveTextDirection(context),
+  );
 
   @override
   void updateRenderObject(BuildContext context, RenderLine renderObject) =>
@@ -136,12 +152,26 @@ class Line extends MultiChildRenderObjectWidget {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(EnumProperty<TextBaseline>('textBaseline', textBaseline,
-        defaultValue: null));
-    properties.add(EnumProperty<CrossAxisAlignment>(
-        'crossAxisAlignment', crossAxisAlignment));
-    properties.add(EnumProperty<TextDirection>('textDirection', textDirection,
-        defaultValue: null));
+    properties.add(
+      EnumProperty<TextBaseline>(
+        'textBaseline',
+        textBaseline,
+        defaultValue: null,
+      ),
+    );
+    properties.add(
+      EnumProperty<CrossAxisAlignment>(
+        'crossAxisAlignment',
+        crossAxisAlignment,
+      ),
+    );
+    properties.add(
+      EnumProperty<TextDirection>(
+        'textDirection',
+        textDirection,
+        defaultValue: null,
+      ),
+    );
   }
 }
 
@@ -158,11 +188,11 @@ class RenderLine extends RenderBox
     double minHeight = 0,
     TextBaseline textBaseline = TextBaseline.alphabetic,
     TextDirection? textDirection = TextDirection.ltr,
-  })  : _crossAxisAlignment = crossAxisAlignment,
-        _minDepth = minDepth,
-        _minHeight = minHeight,
-        _textBaseline = textBaseline,
-        _textDirection = textDirection {
+  }) : _crossAxisAlignment = crossAxisAlignment,
+       _minDepth = minDepth,
+       _minHeight = minHeight,
+       _textBaseline = textBaseline,
+       _textDirection = textDirection {
     addAll(children);
   }
 
@@ -212,8 +242,10 @@ class RenderLine extends RenderBox
   }
 
   bool get _debugHasNecessaryDirections {
-    assert(textDirection != null,
-        'Horizontal $runtimeType has a null textDirection, so the alignment cannot be resolved.');
+    assert(
+      textDirection != null,
+      'Horizontal $runtimeType has a null textDirection, so the alignment cannot be resolved.',
+    );
     return true;
   }
 
@@ -230,9 +262,9 @@ class RenderLine extends RenderBox
   double _getIntrinsicSize({
     required Axis sizingDirection,
     required double
-        extent, // the extent in the direction that isn't the sizing direction
+    extent, // the extent in the direction that isn't the sizing direction
     required double Function(RenderBox child, double extent)
-        childSize, // a method to find the size in the sizing direction
+    childSize, // a method to find the size in the sizing direction
   }) {
     if (sizingDirection == Axis.horizontal) {
       // INTRINSIC MAIN SIZE
@@ -242,7 +274,7 @@ class RenderLine extends RenderBox
       var child = firstChild;
       while (child != null) {
         inflexibleSpace += childSize(child, extent);
-        final childParentData = child.parentData as LineParentData;
+        final childParentData = child.parentData! as LineParentData;
         child = childParentData.nextSibling;
       }
       return inflexibleSpace;
@@ -257,7 +289,7 @@ class RenderLine extends RenderBox
         final childMainSize = child.getMaxIntrinsicWidth(double.infinity);
         final crossSize = childSize(child, childMainSize);
         maxCrossSize = math.max(maxCrossSize, crossSize);
-        final childParentData = child.parentData as LineParentData;
+        final childParentData = child.parentData! as LineParentData;
         child = childParentData.nextSibling;
       }
       return maxCrossSize;
@@ -266,39 +298,35 @@ class RenderLine extends RenderBox
 
   @override
   double computeMinIntrinsicWidth(double height) => _getIntrinsicSize(
-        sizingDirection: Axis.horizontal,
-        extent: height,
-        childSize: (RenderBox child, double extent) =>
-            child.getMinIntrinsicWidth(extent),
-      );
+    sizingDirection: Axis.horizontal,
+    extent: height,
+    childSize: (child, extent) => child.getMinIntrinsicWidth(extent),
+  );
 
   @override
   double computeMaxIntrinsicWidth(double height) => _getIntrinsicSize(
-        sizingDirection: Axis.horizontal,
-        extent: height,
-        childSize: (RenderBox child, double extent) =>
-            child.getMaxIntrinsicWidth(extent),
-      );
+    sizingDirection: Axis.horizontal,
+    extent: height,
+    childSize: (child, extent) => child.getMaxIntrinsicWidth(extent),
+  );
 
   @override
   double computeMinIntrinsicHeight(double width) => _getIntrinsicSize(
-        sizingDirection: Axis.vertical,
-        extent: width,
-        childSize: (RenderBox child, double extent) =>
-            child.getMinIntrinsicHeight(extent),
-      );
+    sizingDirection: Axis.vertical,
+    extent: width,
+    childSize: (child, extent) => child.getMinIntrinsicHeight(extent),
+  );
 
   @override
   double computeMaxIntrinsicHeight(double width) => _getIntrinsicSize(
-        sizingDirection: Axis.vertical,
-        extent: width,
-        childSize: (RenderBox child, double extent) =>
-            child.getMaxIntrinsicHeight(extent),
-      );
+    sizingDirection: Axis.vertical,
+    extent: width,
+    childSize: (child, extent) => child.getMaxIntrinsicHeight(extent),
+  );
 
-  double maxHeightAboveBaseline = 0.0;
+  double maxHeightAboveBaseline = 0;
 
-  double maxHeightAboveEndBaseline = 0.0;
+  double maxHeightAboveEndBaseline = 0;
 
   @override
   double computeDistanceToActualBaseline(TextBaseline baseline) {
@@ -320,10 +348,7 @@ class RenderLine extends RenderBox
     size = _computeLayout(constraints, dry: false);
   }
 
-  Size _computeLayout(
-    BoxConstraints constraints, {
-    bool dry = true,
-  }) {
+  Size _computeLayout(BoxConstraints constraints, {bool dry = true}) {
     assert(_debugHasNecessaryDirections);
 
     // First pass, layout fixed-sized children to calculate height and depth
@@ -334,7 +359,7 @@ class RenderLine extends RenderBox
     final alignerAndSpacers = <RenderBox>[];
     final sizeMap = <RenderBox, Size>{};
     while (child != null) {
-      final childParentData = child.parentData as LineParentData;
+      final childParentData = child.parentData! as LineParentData;
       if (childParentData.customCrossSize != null) {
         relativeChildren.add(child);
       } else if (childParentData.alignerOrSpacer) {
@@ -344,8 +369,10 @@ class RenderLine extends RenderBox
         sizeMap[child] = childSize;
         final distance = dry ? 0.0 : child.getDistanceToBaseline(textBaseline)!;
         maxHeightAboveBaseline = math.max(maxHeightAboveBaseline, distance);
-        maxDepthBelowBaseline =
-            math.max(maxDepthBelowBaseline, childSize.height - distance);
+        maxDepthBelowBaseline = math.max(
+          maxDepthBelowBaseline,
+          childSize.height - distance,
+        );
       }
       assert(child.parentData == childParentData);
       child = childParentData.nextSibling;
@@ -353,16 +380,20 @@ class RenderLine extends RenderBox
 
     // Second pass, layout custom-sized children
     for (final child in relativeChildren) {
-      final childParentData = child.parentData as LineParentData;
+      final childParentData = child.parentData! as LineParentData;
       assert(childParentData.customCrossSize != null);
       final childConstraints = childParentData.customCrossSize!(
-          maxHeightAboveBaseline, maxDepthBelowBaseline);
+        maxHeightAboveBaseline,
+        maxDepthBelowBaseline,
+      );
       final childSize = child.getLayoutSize(childConstraints, dry: dry);
       sizeMap[child] = childSize;
       final distance = dry ? 0.0 : child.getDistanceToBaseline(textBaseline)!;
       maxHeightAboveBaseline = math.max(maxHeightAboveBaseline, distance);
-      maxDepthBelowBaseline =
-          math.max(maxDepthBelowBaseline, childSize.height - distance);
+      maxDepthBelowBaseline = math.max(
+        maxDepthBelowBaseline,
+        childSize.height - distance,
+      );
     }
 
     // Apply mininmum size constraint
@@ -378,20 +409,22 @@ class RenderLine extends RenderBox
     var mainPos = 0.0;
     var lastColPosition = mainPos;
     final colWidths = <double>[];
-    var caretOffsets = [mainPos];
+    final caretOffsets = [mainPos];
     while (child != null) {
-      final childParentData = child.parentData as LineParentData;
+      final childParentData = child.parentData! as LineParentData;
       var childSize = sizeMap[child] ?? Size.zero;
       if (childParentData.alignerOrSpacer) {
-        final childConstraints = BoxConstraints.tightFor(width: 0.0);
+        const childConstraints = BoxConstraints.tightFor(width: 0);
         childSize = child.getLayoutSize(childConstraints, dry: dry);
 
         colWidths.add(mainPos - lastColPosition);
         lastColPosition = mainPos;
       }
       if (!dry) {
-        childParentData.offset =
-            Offset(mainPos, maxHeightAboveBaseline - child.layoutHeight);
+        childParentData.offset = Offset(
+          mainPos,
+          maxHeightAboveBaseline - child.layoutHeight,
+        );
       }
       mainPos += childSize.width + childParentData.trailingMargin;
 
@@ -401,11 +434,12 @@ class RenderLine extends RenderBox
     colWidths.add(mainPos - lastColPosition);
 
     var size = constraints.constrain(
-        Size(mainPos, maxHeightAboveBaseline + maxDepthBelowBaseline));
+      Size(mainPos, maxHeightAboveBaseline + maxDepthBelowBaseline),
+    );
 
     if (!dry) {
       this.caretOffsets = caretOffsets;
-      this._overflow = mainPos - size.width;
+      _overflow = mainPos - size.width;
       this.maxHeightAboveBaseline = maxHeightAboveBaseline;
     } else {
       return size;
@@ -445,12 +479,15 @@ class RenderLine extends RenderBox
     var index = 0;
     for (final alignerOrSpacer in alignerAndSpacers) {
       if (aligner) {
-        alignerOrSpacer.layout(BoxConstraints.tightFor(width: 0.0),
-            parentUsesSize: true);
+        alignerOrSpacer.layout(
+          const BoxConstraints.tightFor(width: 0),
+          parentUsesSize: true,
+        );
       } else {
         alignerOrSpacer.layout(
           BoxConstraints.tightFor(
-            width: alignColWidth[index] +
+            width:
+                alignColWidth[index] +
                 (index + 1 < alignColWidth.length - 1
                     ? alignColWidth[index + 1]
                     : 0) -
@@ -471,9 +508,11 @@ class RenderLine extends RenderBox
       ..clear()
       ..add(mainPos);
     while (child != null) {
-      final childParentData = child.parentData as LineParentData;
-      childParentData.offset =
-          Offset(mainPos, maxHeightAboveBaseline - child.layoutHeight);
+      final childParentData = child.parentData! as LineParentData;
+      childParentData.offset = Offset(
+        mainPos,
+        maxHeightAboveBaseline - child.layoutHeight,
+      );
       mainPos += child.size.width + childParentData.trailingMargin;
 
       this.caretOffsets.add(mainPos);
@@ -481,8 +520,9 @@ class RenderLine extends RenderBox
     }
 
     size = constraints.constrain(
-        Size(mainPos, maxHeightAboveBaseline + maxDepthBelowBaseline));
-    this._overflow = mainPos - size.width;
+      Size(mainPos, maxHeightAboveBaseline + maxDepthBelowBaseline),
+    );
+    _overflow = mainPos - size.width;
 
     return size;
   }
@@ -521,7 +561,11 @@ class RenderLine extends RenderBox
     if (size.isEmpty) return;
 
     context.pushClipRect(
-        needsCompositing, offset, Offset.zero & size, defaultPaint);
+      needsCompositing,
+      offset,
+      Offset.zero & size,
+      defaultPaint,
+    );
     assert(() {
       // Only set this if it's null to save work. It gets reset to null if the
       // _direction changes.
@@ -549,11 +593,15 @@ class RenderLine extends RenderBox
       // rect is never used for drawing, just for determining the overflow
       // location and amount.
       Rect overflowChildRect;
-      overflowChildRect = Rect.fromLTWH(0.0, 0.0, size.width + _overflow!, 0.0);
+      overflowChildRect = Rect.fromLTWH(0, 0, size.width + _overflow!, 0);
 
       paintOverflowIndicator(
-          context, offset, Offset.zero & size, overflowChildRect,
-          overflowHints: debugOverflowHints);
+        context,
+        offset,
+        Offset.zero & size,
+        overflowChildRect,
+        overflowHints: debugOverflowHints,
+      );
       return true;
     }());
   }
@@ -572,12 +620,26 @@ class RenderLine extends RenderBox
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(EnumProperty<CrossAxisAlignment>(
-        'crossAxisAlignment', crossAxisAlignment));
-    properties.add(EnumProperty<TextDirection>('textDirection', textDirection,
-        defaultValue: null));
-    properties.add(EnumProperty<TextBaseline>('textBaseline', textBaseline,
-        defaultValue: null));
+    properties.add(
+      EnumProperty<CrossAxisAlignment>(
+        'crossAxisAlignment',
+        crossAxisAlignment,
+      ),
+    );
+    properties.add(
+      EnumProperty<TextDirection>(
+        'textDirection',
+        textDirection,
+        defaultValue: null,
+      ),
+    );
+    properties.add(
+      EnumProperty<TextBaseline>(
+        'textBaseline',
+        textBaseline,
+        defaultValue: null,
+      ),
+    );
     // properties.add(DoubleProperty('baselineOffset', baselineOffset));
   }
 }

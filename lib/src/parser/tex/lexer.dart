@@ -27,23 +27,26 @@ import 'source_location.dart';
 import 'token.dart';
 
 const spaceRegexString = '[ \r\n\t]';
-const controlWordRegexString = '\\\\[a-zA-Z@]+';
+const controlWordRegexString = r'\\[a-zA-Z@]+';
 const controlSymbolRegexString = '\\\\[^\uD800-\uDFFF]';
 const controlWordWhitespaceRegexString =
     '$controlWordRegexString$spaceRegexString*';
-final controlWordWhitespaceRegex =
-    RegExp('^($controlWordRegexString)$spaceRegexString*\$');
+final controlWordWhitespaceRegex = RegExp(
+  '^($controlWordRegexString)$spaceRegexString*\$',
+);
 const combiningDiacriticalMarkString = '[\u0300-\u036f]';
-final combiningDiacriticalMarksEndRegex =
-    RegExp('$combiningDiacriticalMarkString+\$');
-const tokenRegexString = '($spaceRegexString+)|' // white space
+final combiningDiacriticalMarksEndRegex = RegExp(
+  '$combiningDiacriticalMarkString+\$',
+);
+const tokenRegexString =
+    '($spaceRegexString+)|' // white space
     '([!-\\[\\]-\u2027\u202A-\uD7FF\uF900-\uFFFF]' // single codepoint
     '$combiningDiacriticalMarkString*' // ...plus accents
     '|[\uD800-\uDBFF][\uDC00-\uDFFF]' // surrogate pair
     '$combiningDiacriticalMarkString*' // ...plus accents
-    '|\\\\verb\\*([^]).*?\\3' // \verb*
-    '|\\\\verb([^*a-zA-Z]).*?\\4' // \verb unstarred
-    '|\\\\operatorname\\*' // \operatorname*
+    r'|\\verb\*([^]).*?\3' // \verb*
+    r'|\\verb([^*a-zA-Z]).*?\4' // \verb unstarred
+    r'|\\operatorname\*' // \operatorname*
     '|$controlWordWhitespaceRegexString' // \macroName + spaces
     '|$controlSymbolRegexString)'; // \\, \', etc.
 
@@ -53,9 +56,10 @@ abstract class LexerInterface {
 }
 
 class Lexer implements LexerInterface {
-  static final tokenRegex = RegExp(tokenRegexString, multiLine: true);
   Lexer(this.input, this.settings) : it = tokenRegex.allMatches(input).iterator;
+  static final tokenRegex = RegExp(tokenRegexString, multiLine: true);
 
+  @override
   final String input;
   final TexParserSettings settings;
   final Map<String, int> catCodes = {'%': 14};
@@ -64,19 +68,23 @@ class Lexer implements LexerInterface {
   final Iterator<RegExpMatch> it;
 
   Token lex() {
-    if (this.pos == input.length) {
+    if (pos == input.length) {
       return Token('EOF', SourceLocation(this, pos, pos));
     }
     final hasMatch = it.moveNext();
     if (!hasMatch) {
-      throw ParseException('Unexpected character: \'${input[pos]}\'',
-          Token(input[pos], SourceLocation(this, pos, pos + 1)));
+      throw ParseException(
+        "Unexpected character: '${input[pos]}'",
+        Token(input[pos], SourceLocation(this, pos, pos + 1)),
+      );
     }
 
     final match = it.current;
     if (match.start != pos) {
-      throw ParseException('Unexpected character: \'${input[pos]}\'',
-          Token(input[pos], SourceLocation(this, pos, pos + 1)));
+      throw ParseException(
+        "Unexpected character: '${input[pos]}'",
+        Token(input[pos], SourceLocation(this, pos, pos + 1)),
+      );
     }
     pos = match.end;
 
@@ -89,10 +97,11 @@ class Lexer implements LexerInterface {
         while (it.moveNext()) {
           pos = it.current.end;
         }
-        this.settings.reportNonstrict(
-            'commentAtEnd',
-            '% comment has no terminating newline; LaTeX would '
-                'fail because of commenting the end of math mode (e.g. \$)');
+        settings.reportNonstrict(
+          'commentAtEnd',
+          '% comment has no terminating newline; LaTeX would '
+              r'fail because of commenting the end of math mode (e.g. $)',
+        );
       } else {
         while (it.current.end < nlIndex + 1) {
           final canMoveNext = it.moveNext();
@@ -103,7 +112,7 @@ class Lexer implements LexerInterface {
           }
         }
       }
-      return this.lex();
+      return lex();
     }
     final controlMatch = controlWordWhitespaceRegex.firstMatch(text);
     if (controlMatch != null) {

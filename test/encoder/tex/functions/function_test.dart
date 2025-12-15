@@ -5,9 +5,7 @@ import '../recode.dart';
 void main() {
   group('FunctionNode encoding', () {
     test('general encoding', () {
-      const testStrings = [
-        '\\operatorname{abc}{def}',
-      ];
+      const testStrings = ['\\operatorname{abc}{def}'];
       for (final testString in testStrings) {
         expect(recodeTex(testString), testString);
       }

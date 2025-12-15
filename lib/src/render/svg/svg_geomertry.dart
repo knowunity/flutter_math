@@ -105,19 +105,14 @@ String sqrtPath(String size, double extraViniculum, double viewBoxHeight) {
   switch (size) {
     case 'sqrtMain':
       path = sqrtMain(extraViniculum, hLinePad);
-      break;
     case 'sqrtSize1':
       path = sqrtSize1(extraViniculum, hLinePad);
-      break;
     case 'sqrtSize2':
       path = sqrtSize2(extraViniculum, hLinePad);
-      break;
     case 'sqrtSize3':
       path = sqrtSize3(extraViniculum, hLinePad);
-      break;
     case 'sqrtSize4':
       path = sqrtSize4(extraViniculum, hLinePad);
-      break;
     case 'sqrtTall':
       path = sqrtTall(extraViniculum, hLinePad, viewBoxHeight);
   }

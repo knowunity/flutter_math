@@ -2,11 +2,11 @@
 library tex;
 
 export 'src/ast/syntax_tree.dart'
-    show SyntaxTree, SyntaxNode, GreenNode, EquationRowNode;
+    show EquationRowNode, GreenNode, SyntaxNode, SyntaxTree;
 export 'src/encoder/tex/encoder.dart'
-    show TexEncoder, TexEncoderExt, ListTexEncoderExt;
+    show ListTexEncoderExt, TexEncoder, TexEncoderExt;
 export 'src/parser/tex/colors.dart';
 export 'src/parser/tex/macros.dart'
-    show MacroDefinition, defineMacro, MacroExpansion;
+    show MacroDefinition, MacroExpansion, defineMacro;
 export 'src/parser/tex/parser.dart' show TexParser;
 export 'src/parser/tex/settings.dart';

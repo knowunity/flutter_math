@@ -17,7 +17,6 @@ extension SyntaxTreeTexStyleBreakExt on SyntaxTree {
     final eqRowBreakResult = greenRoot.texBreak(
       relPenalty: relPenalty,
       binOpPenalty: binOpPenalty,
-      enforceNoBreak: true,
     );
     return BreakResult(
       parts: eqRowBreakResult.parts
@@ -78,28 +77,21 @@ extension EquationRowNodeTexStyleBreakExt on EquationRowNode {
     var pos = 1;
     for (var i = 0; i < breakIndices.length; i++) {
       final breakEnd = caretPositions[breakIndices[i] + 1];
-      res.add(this.clipChildrenBetween(pos, breakEnd).wrapWithEquationRow());
+      res.add(clipChildrenBetween(pos, breakEnd).wrapWithEquationRow());
       pos = breakEnd;
     }
     if (pos != caretPositions.last) {
-      res.add(this
-          .clipChildrenBetween(pos, caretPositions.last)
-          .wrapWithEquationRow());
+      res.add(
+        clipChildrenBetween(pos, caretPositions.last).wrapWithEquationRow(),
+      );
       penalties.add(10000);
     }
-    return BreakResult<EquationRowNode>(
-      parts: res,
-      penalties: penalties,
-    );
+    return BreakResult<EquationRowNode>(parts: res, penalties: penalties);
   }
 }
 
 class BreakResult<T> {
+  const BreakResult({required this.parts, required this.penalties});
   final List<T> parts;
   final List<int> penalties;
-
-  const BreakResult({
-    required this.parts,
-    required this.penalties,
-  });
 }

@@ -24,13 +24,13 @@
 part of katex_base;
 
 const _colorEntries = {
-  ['\\textcolor']: FunctionSpec(
+  [r'\textcolor']: FunctionSpec(
     numArgs: 2,
     allowedInText: true,
     greediness: 3,
     handler: _textcolorHandler,
   ),
-  ['\\color']: FunctionSpec(
+  [r'\color']: FunctionSpec(
     numArgs: 1,
     allowedInText: true,
     greediness: 3,
@@ -50,7 +50,9 @@ GreenNode _colorHandler(TexParser parser, FunctionContext context) {
   final color = parser.parseArgColor(optional: false);
 
   final body = parser.parseExpression(
-      breakOnInfix: true, breakOnTokenText: context.breakOnTokenText);
+    breakOnInfix: true,
+    breakOnTokenText: context.breakOnTokenText,
+  );
   return StyleNode(
     optionsDiff: OptionsDiff(color: color),
     children: body,

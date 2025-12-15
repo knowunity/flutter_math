@@ -26,25 +26,34 @@ part of katex_base;
 const _fontEntries = {
   [
     // styles, except \boldsymbol defined below
-    '\\mathrm', '\\mathit', '\\mathbf', //'\\mathnormal',
-
+    r'\mathrm', r'\mathit', r'\mathbf', //'\\mathnormal',
     // families
-    '\\mathbb', '\\mathcal', '\\mathfrak', '\\mathscr', '\\mathsf',
-    '\\mathtt',
+    r'\mathbb', r'\mathcal', r'\mathfrak', r'\mathscr', r'\mathsf',
+    r'\mathtt',
 
     // aliases, except \bm defined below
-    '\\Bbb', '\\bold', '\\frak',
-  ]: FunctionSpec(numArgs: 1, greediness: 2, handler: _fontHandler),
-  ['\\boldsymbol', '\\bm']:
-      FunctionSpec(numArgs: 1, greediness: 2, handler: _boldSymbolHandler),
-  ['\\rm', '\\sf', '\\tt', '\\bf', '\\it', '\\cal']:
-      FunctionSpec(numArgs: 0, allowedInText: true, handler: _textFontHandler),
+    r'\Bbb', r'\bold', r'\frak',
+  ]: FunctionSpec(
+    numArgs: 1,
+    greediness: 2,
+    handler: _fontHandler,
+  ),
+  [r'\boldsymbol', r'\bm']: FunctionSpec(
+    numArgs: 1,
+    greediness: 2,
+    handler: _boldSymbolHandler,
+  ),
+  [r'\rm', r'\sf', r'\tt', r'\bf', r'\it', r'\cal']: FunctionSpec(
+    numArgs: 0,
+    allowedInText: true,
+    handler: _textFontHandler,
+  ),
 };
 const fontAliases = {
-  '\\Bbb': '\\mathbb',
-  '\\bold': '\\mathbf',
-  '\\frak': '\\mathfrak',
-  '\\bm': '\\boldsymbol',
+  r'\Bbb': r'\mathbb',
+  r'\bold': r'\mathbf',
+  r'\frak': r'\mathfrak',
+  r'\bm': r'\boldsymbol',
 };
 
 GreenNode _fontHandler(TexParser parser, FunctionContext context) {
@@ -54,9 +63,7 @@ GreenNode _fontHandler(TexParser parser, FunctionContext context) {
       : context.funcName;
   return StyleNode(
     children: body.expandEquationRow(),
-    optionsDiff: OptionsDiff(
-      mathFontOptions: texMathFontOptions[func],
-    ),
+    optionsDiff: OptionsDiff(mathFontOptions: texMathFontOptions[func]),
   );
 }
 
@@ -68,20 +75,20 @@ GreenNode _boldSymbolHandler(TexParser parser, FunctionContext context) {
   return StyleNode(
     children: body.expandEquationRow(),
     optionsDiff: OptionsDiff(
-      mathFontOptions: texMathFontOptions['\\boldsymbol'],
+      mathFontOptions: texMathFontOptions[r'\boldsymbol'],
     ),
   );
 }
 
 GreenNode _textFontHandler(TexParser parser, FunctionContext context) {
   final body = parser.parseExpression(
-      breakOnInfix: true, breakOnTokenText: context.breakOnTokenText);
+    breakOnInfix: true,
+    breakOnTokenText: context.breakOnTokenText,
+  );
   final style = '\\math${context.funcName.substring(1)}';
 
   return StyleNode(
     children: body,
-    optionsDiff: OptionsDiff(
-      mathFontOptions: texMathFontOptions[style],
-    ),
+    optionsDiff: OptionsDiff(mathFontOptions: texMathFontOptions[style]),
   );
 }
