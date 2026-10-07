@@ -8,6 +8,7 @@ import 'package:provider/provider.dart';
 import 'package:tuple/tuple.dart';
 
 import '../render/layout/line.dart';
+import '../render/symbols/text_run_grouping.dart';
 import '../render/layout/line_editable.dart';
 import '../utils/iterable_extensions.dart';
 import '../utils/num_extension.dart';
@@ -573,10 +574,18 @@ class EquationRowNode extends ParentableNode<GreenNode>
       growable: false,
     );
 
+    final viewLineChildren = groupTextRuns(
+      nodes: flattenedChildList,
+      childOptions: childSpacingConfs
+          .map((conf) => conf.options)
+          .toList(growable: false),
+      lineChildren: lineChildren,
+    );
+
     final widget = Consumer<FlutterMathMode>(
       builder: (context, mode, child) {
         if (mode == FlutterMathMode.view) {
-          return Line(key: _key, children: lineChildren);
+          return Line(key: _key, children: viewLineChildren);
         }
         // Each EquationRow will filter out unrelated selection changes (changes
         // happen entirely outside the range of this EquationRow)
